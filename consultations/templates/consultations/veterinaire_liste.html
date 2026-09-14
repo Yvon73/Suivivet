@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des vétérinaires{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Liste des vétérinaires</h1>
+
+    <a href="{% url 'consultations:veterinaire_create' %}" class="btn btn-success mb-3">
+        <i class="bi bi-plus"></i> Ajouter un vétérinaire
+    </a>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover" id="veterinairesTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Téléphone</th>
+                    <th>Email</th>
+                    <th>Consultations</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for veterinaire in veterinaires %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'consultations:veterinaire_detail' veterinaire.pk %}">{{ veterinaire.nom }}</a>
+                        </td>
+                        <td>{{ veterinaire.prenom }}</td>
+                        <td>{{ veterinaire.telephone|default:"-" }}</td>
+                        <td>{{ veterinaire.email|default:"-" }}</td>
+                        <td>{{ veterinaire.consultations.count }}</td>
+                        <td>
+                            <a href="{% url 'consultations:veterinaire_update' veterinaire.pk %}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </a>
+                            <a href="{% url 'consultations:veterinaire_delete' veterinaire.pk %}" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun vétérinaire enregistré.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        $(document).ready(function() {
+            $('#veterinairesTable').DataTable({
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json' },
+                responsive: true,
+            });
+        });
+    </script>
+{% endblock %}

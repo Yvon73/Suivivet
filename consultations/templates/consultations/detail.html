@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultation - {{ consultation.animal.nom }}{% endblock %}
+
+{% block content %}
+    <h1>Consultation pour {{ consultation.animal.nom }}</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <p>
+                <strong>Animal :</strong>
+                <a href="{% url 'animaux:animal_detail' consultation.animal.pk %}">{{ consultation.animal.nom }}</a>
+            </p>
+            <p><strong>Date :</strong> {{ consultation.date|date:"d/m/Y H:i" }}</p>
+            <p>
+                <strong>Vétérinaire :</strong>
+                <a href="{% url 'consultations:veterinaire_detail' consultation.veterinaire.pk %}">{{ consultation.veterinaire }}</a>
+            </p>
+            <p><strong>Motif :</strong> {{ consultation.motif }}</p>
+            <p><strong>Compte rendu :</strong> {{ consultation.compte_rendu|default:"—" }}</p>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'consultations:consultation_update' consultation.pk %}" class="btn btn-warning">Modifier</a>
+        <a href="{% url 'consultations:consultation_delete' consultation.pk %}" class="btn btn-danger">Supprimer</a>
+        <a href="{% url 'consultations:consultation_list' %}" class="btn btn-secondary">Retour à la liste</a>
+    </div>
+{% endblock %}

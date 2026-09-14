@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des consultations{% endblock %}
+
+{% block content %}
+    <h1>Liste des consultations</h1>
+    <a href="{% url 'consultations:consultation_create' %}" class="btn btn-primary mb-3">
+        <i class="bi bi-plus"></i> Ajouter une consultation
+    </a>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Animal</th>
+                    <th>Date</th>
+                    <th>Motif</th>
+                    <th>Vétérinaire</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consultation in consultations %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'animaux:animal_detail' consultation.animal.pk %}">{{ consultation.animal.nom }}</a>
+                        </td>
+                        <td>{{ consultation.date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ consultation.motif }}</td>
+                        <td>{{ consultation.veterinaire }}</td>
+                        <td>
+                            <a href="{% url 'consultations:consultation_detail' consultation.pk %}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{% url 'consultations:consultation_update' consultation.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                            <a href="{% url 'consultations:consultation_delete' consultation.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Aucune consultation enregistrée.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+{% endblock %}
+
+        {% block extra_js %}
+    {{ block.super }}
+    <script>
+    $(document).ready(function() {
+        $('#animauxTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json',
+            },
+            responsive: true,
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'csv',
+                    text: '<i class="bi bi-file-earmark-csv"></i> CSV',
+                    className: 'btn btn-sm btn-outline-secondary',
+                    title: 'Liste des animaux',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer"></i> Imprimer',
+                    className: 'btn btn-sm btn-outline-secondary',
+                    title: 'Liste des animaux',
+                },
+            ],
+        });
+    });
+    </script>
+    {% endblock %}

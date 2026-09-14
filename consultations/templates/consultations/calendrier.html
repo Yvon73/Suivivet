@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendrier des Consultations{% endblock %}
+
+{% block extra_css %}
+<style>
+    #calendar {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .fc-event {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1>Calendrier des Consultations</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Légende</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+                <div>
+                    <span class="legende-evenement fc-event-consultation">Consultation</span>
+                </div>
+                <div>
+                    <span class="legende-evenement fc-event-rappel-consultation">⚠️ Rappel consultation (2 jours avant)</span>
+                </div>
+                <div>
+                    <span class="legende-evenement fc-event-rappel-vaccin">💉 Rappel vaccin</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-shield-plus"></i> Calendrier des vaccins obligatoires</h5>
+            <a href="{% url 'vaccins:vaccin_list' %}" class="btn btn-sm btn-light">Voir le catalogue complet</a>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Référentiel des intervalles de rappel recommandés pour les principaux vaccins.</p>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>Vaccin</th>
+                            <th>Catégorie</th>
+                            <th>Intervalle de rappel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vaccin in vaccins_reference %}
+                            <tr>
+                                <td>{{ vaccin.nom }}</td>
+                                <td>
+                                    {% if vaccin.categorie == 'OBLIGATOIRE' %}
+                                        <span class="badge bg-danger">{{ vaccin.get_categorie_display }}</span>
+                                    {% elif vaccin.categorie == 'ESSENTIEL' %}
+                                        <span class="badge bg-warning text-dark">{{ vaccin.get_categorie_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ vaccin.get_categorie_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ vaccin.rappel_interval|default:"-" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">Aucun vaccin enregistré.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Prochains rappels de vaccins</h5>
+        </div>
+        <div class="card-body">
+            {% if prochains_rappels_vaccins %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Animal</th>
+                                <th>Vaccin</th>
+                                <th>Date de rappel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for suivi in prochains_rappels_vaccins %}
+                                <tr>
+                                    <td><a href="{% url 'animaux:animal_detail' suivi.animal.pk %}">{{ suivi.animal.nom }}</a></td>
+                                    <td>{{ suivi.vaccin.nom }}</td>
+                                    <td>{{ suivi.date_prochaine_dose|date:"d/m/Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i> Aucun rappel de vaccin programmé (renseigne une « date de la prochaine dose » lors de l'ajout d'un suivi vaccin).
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        locale: 'fr',
+        events: '{% url "consultations:calendrier_json" %}',
+        eventClick: function(info) {
+            if (info.event.url) {
+                window.open(info.event.url, '_blank');
+            }
+        },
+        height: 'auto',
+    });
+    calendar.render();
+
+    // Le clic sur un événement ouvre son détail dans un nouvel onglet (pour ne
+    // pas perdre la position dans le calendrier). Si une consultation est
+    // modifiée ou supprimée depuis cet onglet, le calendrier d'origine n'est
+    // pas averti : son événement reste affiché tel quel et pointer dessus
+    // renverrait une 404 (ou des infos périmées). On recharge donc les
+    // événements à chaque retour sur cet onglet.
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            calendar.refetchEvents();
+        }
+    });
+});
+</script>
+{% endblock %}
