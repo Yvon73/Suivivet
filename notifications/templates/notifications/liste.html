@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes notifications{% endblock %}
+
+{% block content %}
+    <h1>Mes notifications</h1>
+
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <a href="{% url 'notifications:marquer_toutes_lues' %}" class="btn btn-outline-primary">
+                <i class="bi bi-check-all"></i> Tout marquer comme lu
+            </a>
+        </div>
+    </div>
+
+    <div class="list-group">
+        {% for notification in notifications %}
+            <div class="list-group-item {% if not notification.lue %}active{% endif %}">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">
+                        <a href="{% if notification.lien %}{{ notification.lien }}{% else %}{% url 'notifications:notification_list' %}{% endif %}">
+                            {{ notification.titre }}
+                        </a>
+                        {% if not notification.lue %}
+                            <span class="badge bg-danger ms-2">Nouveau</span>
+                        {% endif %}
+                    </h5>
+                    <small>{{ notification.date_creation|timesince }} ago</small>
+                </div>
+                <p class="mb-1">{{ notification.message }}</p>
+                <small>{{ notification.get_type_display }}</small>
+                <div class="mt-2">
+                    <a href="{% url 'notifications:marquer_lue' notification.pk %}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-check"></i> Marquer comme lu
+                    </a>
+                    <a href="{% url 'notifications:supprimer_notification' notification.pk %}" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">Aucune notification.</div>
+        {% endfor %}
+    </div>
+{% endblock %}
