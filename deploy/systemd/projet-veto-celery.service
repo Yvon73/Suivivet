@@ -9,6 +9,8 @@ Type=simple
 User=web2
 Group=client0
 WorkingDirectory=/opt/projet_veto
+Environment=HOME=/opt/projet_veto
+Environment=MPLCONFIGDIR=/opt/projet_veto/.cache/matplotlib
 # Charge Projet_veto/.env lui-meme (django-environ), comme le service gunicorn.
 ExecStart=/opt/projet_veto/.venv/bin/celery -A Projet_veto worker -l info
 Restart=on-failure

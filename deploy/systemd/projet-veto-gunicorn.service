@@ -14,6 +14,11 @@ UMask=0007
 WorkingDirectory=/opt/projet_veto
 RuntimeDirectory=projet-veto
 RuntimeDirectoryMode=0750
+# $HOME par defaut (celui du user ISPConfig) n'est pas inscriptible par ce
+# meme user : gunicorn/matplotlib y echouent sans consequence grave, mais
+# autant pointer vers un repertoire que web2 possede reellement.
+Environment=HOME=/opt/projet_veto
+Environment=MPLCONFIGDIR=/opt/projet_veto/.cache/matplotlib
 # Charge Projet_veto/.env lui-meme (django-environ) : pas besoin
 # d'EnvironmentFile ici, tant que ce fichier existe a cet emplacement.
 ExecStart=/opt/projet_veto/.venv/bin/gunicorn \
