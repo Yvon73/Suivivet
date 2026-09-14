@@ -5,8 +5,11 @@ Wants=postgresql.service redis-server.service
 
 [Service]
 Type=simple
-User=projetveto
-Group=www-data
+# web2/client0 : utilisateur/groupe du site ISPConfig suivivet.fr (Apache y
+# execute les requetes de ce vhost sous mpm_itk avec ce meme UID/GID, d'ou
+# l'acces direct au socket sans bidouille de permissions).
+User=web2
+Group=client0
 UMask=0007
 WorkingDirectory=/opt/projet_veto
 RuntimeDirectory=projet-veto

@@ -5,8 +5,9 @@ Wants=redis-server.service postgresql.service
 
 [Service]
 Type=simple
-User=projetveto
-Group=projetveto
+# Meme utilisateur que le service gunicorn (site ISPConfig suivivet.fr).
+User=web2
+Group=client0
 WorkingDirectory=/opt/projet_veto
 # Charge Projet_veto/.env lui-meme (django-environ), comme le service gunicorn.
 ExecStart=/opt/projet_veto/.venv/bin/celery -A Projet_veto worker -l info
