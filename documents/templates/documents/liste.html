@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des documents{% endblock %}
+
+{% block content %}
+    <h1>Liste des documents</h1>
+    <a href="{% url 'documents:document_create' %}" class="btn btn-primary mb-3">
+        <i class="bi bi-plus"></i> Ajouter un document
+    </a>
+
+    <div class="table-responsive">
+        <table class="table table-striped" id="documentsTable">
+            <thead>
+                <tr>
+                    <th>Animal</th>
+                    <th>Titre</th>
+                    <th>Type</th>
+                    <th>Date d'ajout</th>
+                    <th>Fichier</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'animaux:animal_detail' document.animal.pk %}">{{ document.animal.nom }}</a>
+                        </td>
+                        <td>{{ document.titre }}</td>
+                        <td>{{ document.type_document|default:"-" }}</td>
+                        <td>{{ document.date_ajout|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if document.fichier %}
+                                <a href="{{ document.fichier.url }}" target="_blank" class="btn btn-sm btn-info">
+                                    <i class="bi bi-file-earmark"></i> Voir
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'documents:document_detail' document.pk %}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{% url 'documents:document_update' document.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                            <a href="{% url 'documents:document_delete' document.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun document enregistré.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+
+    {% block extra_js %}
+    {{ block.super }}
+    <script>
+    $(document).ready(function() {
+        $('#documentsTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json',
+            },
+            responsive: true,
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'csv',
+                    text: '<i class="bi bi-file-earmark-csv"></i> CSV',
+                    className: 'btn btn-sm btn-outline-secondary',
+                    title: 'Liste des documents',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer"></i> Imprimer',
+                    className: 'btn btn-sm btn-outline-secondary',
+                    title: 'Liste des documents',
+                },
+            ],
+        });
+    });
+    </script>
+    {% endblock %}
