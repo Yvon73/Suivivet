@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Facture - {{ facture.titre }}{% endblock %}
+
+{% block content %}
+    <h1>{{ facture.titre }}</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <p><strong>N° de facture :</strong> {{ facture.numero|default:"—" }}</p>
+            <p>
+                <strong>Animal :</strong>
+                {% if facture.animal %}
+                    <a href="{% url 'animaux:animal_detail' facture.animal.pk %}">{{ facture.animal.nom }}</a>
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+            <p><strong>Type de dépense :</strong> {{ facture.get_type_depense_display }}</p>
+            <p><strong>Date :</strong> {{ facture.date|date:"d/m/Y" }}</p>
+            <p><strong>Montant :</strong> {{ facture.montant }} €</p>
+            <p><strong>Description :</strong> {{ facture.description|default:"—" }}</p>
+            <p>
+                <strong>Fichier :</strong>
+                {% if facture.fichier %}
+                    <a href="{{ facture.fichier.url }}" target="_blank">
+                        <i class="bi bi-file-earmark-pdf"></i> Voir le fichier
+                    </a>
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if lignes %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="bi bi-list-check"></i> Ventilation de la facture
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Désignation</th>
+                            <th>Quantité</th>
+                            <th>Prix unitaire (€)</th>
+                            <th>Prix total (€)</th>
+                            <th>Animal concerné</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ligne in lignes %}
+                            <tr>
+                                <td>{{ ligne.designation|default:"—" }}</td>
+                                <td>{{ ligne.quantite }}</td>
+                                <td>{{ ligne.prix_unitaire }}</td>
+                                <td>{{ ligne.prix_total }}</td>
+                                <td>
+                                    {% if ligne.pour_tous_les_animaux %}
+                                        <span class="badge bg-info">Tous les animaux</span>
+                                    {% elif ligne.animal %}
+                                        <a href="{% url 'animaux:animal_detail' ligne.animal.pk %}">{{ ligne.animal.nom }}</a>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="mt-3">
+        <a href="{% url 'factures:facture_update' facture.pk %}" class="btn btn-warning">Modifier</a>
+        <a href="{% url 'factures:facture_delete' facture.pk %}" class="btn btn-danger">Supprimer</a>
+        <a href="{% url 'factures:facture_list' %}" class="btn btn-secondary">Retour à la liste</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,489 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}
+        Modifier la facture
+    {% else %}
+        Ajouter une facture
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">
+        <i class="bi bi-receipt"></i>
+        {% if object %}
+            Modifier la facture
+        {% else %}
+            Ajouter une facture
+        {% endif %}
+    </h1>
+
+    <form method="post" enctype="multipart/form-data" novalidate id="factureForm">
+        {% csrf_token %}
+        <input type="hidden" name="ventiler" id="id_ventiler" value="{% if verrouillee or formset.is_bound %}1{% else %}0{% endif %}">
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-info-circle"></i> Informations générales</span>
+                {% if verrouillee %}
+                    <span class="badge bg-secondary">
+                        <i class="bi bi-lock"></i> Facture ventilée : champs figés
+                    </span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.numero.id_for_label }}" class="form-label">{{ form.numero.label }}</label>
+                        {{ form.numero }}
+                        {% for error in form.numero.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.animal.id_for_label }}" class="form-label">{{ form.animal.label }}</label>
+                        {{ form.animal }}
+                        {% for error in form.animal.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        <small class="text-muted">« Tous les animaux » : dépense partagée à parts égales. Choisis un animal précis, ou ventile la facture ci-dessous si plusieurs animaux sont concernés.</small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.type_depense.id_for_label }}" class="form-label">{{ form.type_depense.label }}</label>
+                        {{ form.type_depense }}
+                        {% for error in form.type_depense.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <label for="{{ form.titre.id_for_label }}" class="form-label">{{ form.titre.label }}</label>
+                        {{ form.titre }}
+                        {% for error in form.titre.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.montant.id_for_label }}" class="form-label">{{ form.montant.label }}</label>
+                        {{ form.montant }}
+                        <small class="text-muted" id="montantAuto" style="display:none;">Calculé automatiquement à partir des lignes.</small>
+                        {% for error in form.montant.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.date.id_for_label }}" class="form-label">{{ form.date.label }}</label>
+                        {{ form.date }}
+                        {% for error in form.date.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.fichier.id_for_label }}" class="form-label">{{ form.fichier.label }}</label>
+                        {{ form.fichier }}
+                        {% for error in form.fichier.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-12 mb-0">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% for error in form.description.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% if not verrouillee %}
+                <div class="card-footer">
+                    <button type="button" class="btn btn-outline-primary" id="boutonVentiler" {% if formset.is_bound %}style="display:none;"{% endif %}>
+                        <i class="bi bi-list-check"></i> Ventiler la facture
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="card mt-3" id="carteVentilation" {% if not verrouillee and not formset.is_bound %}style="display:none;"{% endif %}>
+            <div class="card-header">
+                <i class="bi bi-list-check"></i> Ventilation de la facture
+            </div>
+            <div class="card-body">
+                {{ formset.management_form }}
+                {% if formset.non_form_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in formset.non_form_errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" id="tableLignes">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 220px;">Désignation</th>
+                                <th style="width: 110px;">Quantité</th>
+                                <th style="width: 190px;">Prix unitaire (€)</th>
+                                <th style="width: 110px;">Prix total (€)</th>
+                                <th style="min-width: 180px;">Animal concerné</th>
+                                <th style="width: 60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpsLignes">
+                            {% for ligne_form in formset %}
+                                <tr class="ligne-row">
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            {{ ligne_form.designation }}
+                                            {% if not ligne_form.instance.pk %}
+                                                <button type="button" class="btn btn-outline-secondary bouton-ajouter-designation" title="Ajouter une désignation absente de la liste">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                        {% for error in ligne_form.designation.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </td>
+                                    <td>
+                                        {{ ligne_form.quantite }}
+                                        {% for error in ligne_form.quantite.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </td>
+                                    <td>
+                                        {{ ligne_form.prix_unitaire }}
+                                        <small class="text-muted dernier-prix-info d-block"></small>
+                                        {% for error in ligne_form.prix_unitaire.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                    </td>
+                                    <td>
+                                        <span class="ligne-prix-total">{{ ligne_form.instance.prix_total|default:"0.00" }}</span>
+                                    </td>
+                                    <td>
+                                        {{ ligne_form.cible }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if ligne_form.instance.pk %}
+                                            <div class="form-check">
+                                                {{ ligne_form.DELETE }}
+                                                <label class="form-check-label small" for="{{ ligne_form.DELETE.id_for_label }}">Suppr.</label>
+                                            </div>
+                                        {% else %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger bouton-retirer-ligne">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        {% endif %}
+                                        {% for hidden in ligne_form.hidden_fields %}{{ hidden }}{% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="boutonAjouterLigne">
+                    <i class="bi bi-plus-lg"></i> Ajouter une ligne
+                </button>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-footer d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check"></i> Enregistrer
+                </button>
+                <a href="{% url 'factures:facture_list' %}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Formulaire vide (gabarit) pour l'ajout dynamique de lignes -->
+    <table class="d-none">
+        <tbody id="gabaritLigneVide">
+            <tr class="ligne-row">
+                <td>
+                    <div class="input-group input-group-sm">
+                        {{ formset.empty_form.designation }}
+                        <button type="button" class="btn btn-outline-secondary bouton-ajouter-designation" title="Ajouter une désignation absente de la liste">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                </td>
+                <td>{{ formset.empty_form.quantite }}</td>
+                <td>
+                    {{ formset.empty_form.prix_unitaire }}
+                    <small class="text-muted dernier-prix-info d-block"></small>
+                </td>
+                <td><span class="ligne-prix-total">0.00</span></td>
+                <td>{{ formset.empty_form.cible }}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger bouton-retirer-ligne">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Modale « Ajouter une désignation » -->
+    <div class="modal fade" id="modalNouvelleDesignation" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Ajouter une désignation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nouvelleDesignationErreurs" class="alert alert-danger d-none"></div>
+                    <label for="nouvelleDesignationNom" class="form-label">Désignation</label>
+                    <input type="text" id="nouvelleDesignationNom" class="form-control" maxlength="200" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="nouvelleDesignationValider">Ajouter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+    var champVentiler = document.getElementById('id_ventiler');
+    var boutonVentiler = document.getElementById('boutonVentiler');
+    var carteVentilation = document.getElementById('carteVentilation');
+    var champMontant = document.getElementById('{{ form.montant.id_for_label }}');
+    var indicationMontantAuto = document.getElementById('montantAuto');
+    var corpsLignes = document.getElementById('corpsLignes');
+    var totalFormsInput = document.querySelector('input[name="{{ formset.prefix }}-TOTAL_FORMS"]');
+    var gabaritLigne = document.getElementById('gabaritLigneVide').querySelector('.ligne-row');
+    var boutonAjouterLigne = document.getElementById('boutonAjouterLigne');
+    var urlDernierPrixGabarit = '{% url "factures:designation_dernier_prix" 1 %}';
+
+    function activerVentilation() {
+        champVentiler.value = '1';
+        carteVentilation.style.display = '';
+        if (boutonVentiler) { boutonVentiler.style.display = 'none'; }
+        if (champMontant) {
+            champMontant.setAttribute('readonly', 'readonly');
+            indicationMontantAuto.style.display = '';
+        }
+        recalculerMontantTotal();
+    }
+
+    if (boutonVentiler) {
+        boutonVentiler.addEventListener('click', activerVentilation);
+    }
+    if (champVentiler.value === '1' && champMontant) {
+        champMontant.setAttribute('readonly', 'readonly');
+        indicationMontantAuto.style.display = '';
+    }
+
+    function recalculerLigne(ligneEl) {
+        var quantiteEl = ligneEl.querySelector('.ligne-quantite');
+        var prixUnitaireEl = ligneEl.querySelector('.ligne-prix-unitaire');
+        var prixTotalEl = ligneEl.querySelector('.ligne-prix-total');
+        if (!quantiteEl || !prixUnitaireEl || !prixTotalEl) { return; }
+        var quantite = parseFloat(quantiteEl.value.replace(',', '.')) || 0;
+        var prixUnitaire = parseFloat(prixUnitaireEl.value.replace(',', '.')) || 0;
+        prixTotalEl.textContent = (quantite * prixUnitaire).toFixed(2);
+    }
+
+    function recalculerMontantTotal() {
+        if (!champMontant) { return; }
+        var total = 0;
+        corpsLignes.querySelectorAll('.ligne-row').forEach(function (ligneEl) {
+            var supprEl = ligneEl.querySelector('input[name$="-DELETE"]');
+            if (supprEl && supprEl.checked) { return; }
+            var prixTotalEl = ligneEl.querySelector('.ligne-prix-total');
+            if (prixTotalEl) { total += parseFloat(prixTotalEl.textContent) || 0; }
+        });
+        champMontant.value = total.toFixed(2);
+    }
+
+    function afficherComparaisonPrix(ligneEl, dernierPrix) {
+        var infoEl = ligneEl.querySelector('.dernier-prix-info');
+        var prixUnitaireEl = ligneEl.querySelector('.ligne-prix-unitaire');
+        if (!infoEl) { return; }
+        if (dernierPrix === null || dernierPrix === undefined) {
+            infoEl.innerHTML = '';
+            return;
+        }
+        infoEl.setAttribute('data-dernier-prix', dernierPrix);
+        var nouveauPrix = parseFloat((prixUnitaireEl.value || '').replace(',', '.'));
+        var texte = 'Prix précédent : ' + dernierPrix + ' €';
+        if (!isNaN(nouveauPrix)) {
+            if (nouveauPrix > parseFloat(dernierPrix)) {
+                texte += ' <span class="text-danger">▲ plus élevé</span>';
+            } else if (nouveauPrix < parseFloat(dernierPrix)) {
+                texte += ' <span class="text-success">▼ moins élevé</span>';
+            } else {
+                texte += ' <span class="text-muted">= identique</span>';
+            }
+        }
+        infoEl.innerHTML = texte;
+    }
+
+    function chargerDernierPrix(ligneEl) {
+        var designationEl = ligneEl.querySelector('.ligne-designation');
+        if (!designationEl || !designationEl.value) {
+            afficherComparaisonPrix(ligneEl, null);
+            return;
+        }
+        fetch(urlDernierPrixGabarit.replace('/1/', '/' + designationEl.value + '/'))
+            .then(function (reponse) { return reponse.json(); })
+            .then(function (data) {
+                afficherComparaisonPrix(ligneEl, data.dernier_prix);
+            })
+            .catch(function () { afficherComparaisonPrix(ligneEl, null); });
+    }
+
+    function initialiserLigne(ligneEl) {
+        recalculerLigne(ligneEl);
+        var designationEl = ligneEl.querySelector('.ligne-designation');
+        if (designationEl && designationEl.value) {
+            chargerDernierPrix(ligneEl);
+        }
+    }
+
+    corpsLignes.querySelectorAll('.ligne-row').forEach(initialiserLigne);
+
+    corpsLignes.addEventListener('input', function (evenement) {
+        if (evenement.target.matches('.ligne-quantite, .ligne-prix-unitaire')) {
+            var ligneEl = evenement.target.closest('.ligne-row');
+            recalculerLigne(ligneEl);
+            recalculerMontantTotal();
+            if (evenement.target.matches('.ligne-prix-unitaire')) {
+                var infoEl = ligneEl.querySelector('.dernier-prix-info');
+                var dernierPrix = infoEl ? infoEl.getAttribute('data-dernier-prix') : null;
+                if (dernierPrix) { afficherComparaisonPrix(ligneEl, dernierPrix); }
+            }
+        }
+    });
+
+    corpsLignes.addEventListener('change', function (evenement) {
+        if (evenement.target.matches('.ligne-designation')) {
+            chargerDernierPrix(evenement.target.closest('.ligne-row'));
+        }
+        if (evenement.target.matches('input[name$="-DELETE"]')) {
+            recalculerMontantTotal();
+        }
+    });
+
+    corpsLignes.addEventListener('click', function (evenement) {
+        var boutonRetirer = evenement.target.closest('.bouton-retirer-ligne');
+        if (boutonRetirer) {
+            var ligneEl = boutonRetirer.closest('.ligne-row');
+            ligneEl.remove();
+            renumeroterLignes();
+            recalculerMontantTotal();
+        }
+    });
+
+    function renumeroterLignes() {
+        var lignes = corpsLignes.querySelectorAll('.ligne-row');
+        lignes.forEach(function (ligneEl, index) {
+            ligneEl.querySelectorAll('input, select').forEach(function (champ) {
+                ['name', 'id'].forEach(function (attribut) {
+                    var valeur = champ.getAttribute(attribut);
+                    if (valeur) {
+                        champ.setAttribute(attribut, valeur.replace(/-(\d+|__prefix__)-/, '-' + index + '-'));
+                    }
+                });
+            });
+        });
+        totalFormsInput.value = lignes.length;
+    }
+
+    boutonAjouterLigne.addEventListener('click', function () {
+        activerVentilation();
+        var index = corpsLignes.querySelectorAll('.ligne-row').length;
+        var nouvelleLigne = gabaritLigne.cloneNode(true);
+        nouvelleLigne.querySelectorAll('input, select').forEach(function (champ) {
+            ['name', 'id'].forEach(function (attribut) {
+                var valeur = champ.getAttribute(attribut);
+                if (valeur) {
+                    champ.setAttribute(attribut, valeur.replace('__prefix__', index));
+                }
+            });
+        });
+
+        // Animal concerné : reprend par défaut celui de la dernière ligne
+        // existante, jusqu'à ce qu'on le change explicitement pour cette
+        // nouvelle ligne (saisie plus rapide quand plusieurs lignes
+        // consécutives concernent le même animal).
+        var lignesExistantes = corpsLignes.querySelectorAll('.ligne-row');
+        if (lignesExistantes.length) {
+            var derniereCible = lignesExistantes[lignesExistantes.length - 1].querySelector('.ligne-cible');
+            var nouvelleCible = nouvelleLigne.querySelector('.ligne-cible');
+            if (derniereCible && nouvelleCible) { nouvelleCible.value = derniereCible.value; }
+        }
+
+        corpsLignes.appendChild(nouvelleLigne);
+        totalFormsInput.value = corpsLignes.querySelectorAll('.ligne-row').length;
+        initialiserLigne(nouvelleLigne);
+    });
+
+    // --- Modale « Ajouter une désignation » ---
+    var modalDesignationEl = document.getElementById('modalNouvelleDesignation');
+    var nomDesignationField = document.getElementById('nouvelleDesignationNom');
+    var erreursDesignationDiv = document.getElementById('nouvelleDesignationErreurs');
+    var boutonValiderDesignation = document.getElementById('nouvelleDesignationValider');
+    var ligneEnCoursPourDesignation = null;
+
+    document.addEventListener('click', function (evenement) {
+        var bouton = evenement.target.closest('.bouton-ajouter-designation');
+        if (!bouton) { return; }
+        ligneEnCoursPourDesignation = bouton.closest('.ligne-row');
+        var modal = bootstrap.Modal.getOrCreateInstance(modalDesignationEl);
+        modal.show();
+    });
+
+    modalDesignationEl.addEventListener('show.bs.modal', function () {
+        erreursDesignationDiv.classList.add('d-none');
+        erreursDesignationDiv.innerHTML = '';
+        nomDesignationField.value = '';
+    });
+
+    boutonValiderDesignation.addEventListener('click', function () {
+        var nom = nomDesignationField.value.trim();
+        if (!nom) {
+            erreursDesignationDiv.innerHTML = 'La désignation est obligatoire.';
+            erreursDesignationDiv.classList.remove('d-none');
+            return;
+        }
+        var donnees = new URLSearchParams();
+        donnees.set('nom', nom);
+
+        boutonValiderDesignation.disabled = true;
+        fetch('{% url "factures:designation_create_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: donnees.toString(),
+        })
+            .then(function (reponse) { return reponse.json().then(function (data) { return { ok: reponse.ok, data: data }; }); })
+            .then(function (resultat) {
+                if (!resultat.ok || !resultat.data.success) {
+                    var messages = [];
+                    Object.keys(resultat.data.errors || {}).forEach(function (champ) {
+                        resultat.data.errors[champ].forEach(function (erreur) { messages.push(erreur.message || erreur); });
+                    });
+                    erreursDesignationDiv.innerHTML = messages.join('<br>') || "Impossible d'ajouter cette désignation.";
+                    erreursDesignationDiv.classList.remove('d-none');
+                    return;
+                }
+                var designation = resultat.data;
+                document.querySelectorAll('.ligne-designation').forEach(function (select) {
+                    var option = document.createElement('option');
+                    option.value = designation.id;
+                    option.text = designation.nom;
+                    select.appendChild(option);
+                });
+                if (ligneEnCoursPourDesignation) {
+                    var selectDeLaLigne = ligneEnCoursPourDesignation.querySelector('.ligne-designation');
+                    if (selectDeLaLigne) {
+                        selectDeLaLigne.value = designation.id;
+                        chargerDernierPrix(ligneEnCoursPourDesignation);
+                    }
+                }
+                bootstrap.Modal.getInstance(modalDesignationEl).hide();
+            })
+            .catch(function () {
+                erreursDesignationDiv.innerHTML = "Impossible d'ajouter cette désignation.";
+                erreursDesignationDiv.classList.remove('d-none');
+            })
+            .finally(function () { boutonValiderDesignation.disabled = false; });
+    });
+});
+</script>
+{% endblock %}

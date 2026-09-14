@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des factures{% endblock %}
+
+{% block content %}
+    <h1>Liste des factures</h1>
+    <a href="{% url 'factures:facture_create' %}" class="btn btn-primary mb-3">
+        <i class="bi bi-plus"></i> Ajouter une facture
+    </a>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Dépenses mensuelles ({{ mois_courant|date:"F Y" }})</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">Vétérinaire :</dt>
+                        <dd class="col-sm-6">{{ depenses_mensuelles_veterinaires }} €</dd>
+                        <dt class="col-sm-6">Alimentaire :</dt>
+                        <dd class="col-sm-6">{{ depenses_mensuelles_alimentaires }} €</dd>
+                        <dt class="col-sm-6"><strong>Total :</strong></dt>
+                        <dd class="col-sm-6">
+                            <strong>{{ depenses_mensuelles_veterinaires|add:depenses_mensuelles_alimentaires }} €</strong>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Dépenses annuelles ({{ annee }})</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">Vétérinaire :</dt>
+                        <dd class="col-sm-6">{{ depenses_annuelles_veterinaires }} €</dd>
+                        <dt class="col-sm-6">Alimentaire :</dt>
+                        <dd class="col-sm-6">{{ depenses_annuelles_alimentaires }} €</dd>
+                        <dt class="col-sm-6"><strong>Total :</strong></dt>
+                        <dd class="col-sm-6">
+                            <strong>{{ depenses_annuelles_veterinaires|add:depenses_annuelles_alimentaires }} €</strong>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>N°</th>
+                    <th>Animal</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Titre</th>
+                    <th>Montant</th>
+                    <th>Fichier</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for facture in factures %}
+                    <tr>
+                        <td>{{ facture.numero|default:"—" }}</td>
+                        <td>
+                            {% if facture.animal %}
+                                <a href="{% url 'animaux:animal_detail' facture.animal.pk %}">{{ facture.animal.nom }}</a>
+                            {% elif facture.est_ventilee %}
+                                <span class="badge bg-info">Ventilée</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ facture.date|date:"d/m/Y" }}</td>
+                        <td>{{ facture.get_type_depense_display }}</td>
+                        <td>{{ facture.titre }}</td>
+                        <td>{{ facture.montant }} €</td>
+                        <td>
+                            {% if facture.fichier %}
+                                <a href="{{ facture.fichier.url }}" target="_blank" class="btn btn-sm btn-info">
+                                    <i class="bi bi-file-earmark-pdf"></i> Voir
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'factures:facture_detail' facture.pk %}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{% url 'factures:facture_update' facture.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                            <a href="{% url 'factures:facture_delete' facture.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Aucune facture enregistrée.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+        {% block extra_js %}
+    {{ block.super }}
+    <script>
+    $(document).ready(function() {
+        $('#animauxTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json',
+            },
+            responsive: true,
+            dom: '<"row"<"col-md-6"B><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'csv',
+                    text: '<i class="bi bi-file-earmark-csv"></i> CSV',
+                    className: 'btn btn-sm btn-outline-secondary',
+                    title: 'Liste des animaux',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer"></i> Imprimer',
+                    className: 'btn btn-sm btn-outline-secondary',
+                    title: 'Liste des animaux',
+                },
+            ],
+        });
+    });
+    </script>
+    {% endblock %}
