@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Suivi vaccins & traitements{% endblock %}
+
+{% block content %}
+    <h1>Suivi vaccins & traitements</h1>
+    <div class="mb-3 d-flex gap-2">
+        <a href="{% url 'vaccins:vaccin_list' %}" class="btn btn-outline-primary">Voir les vaccins</a>
+        <a href="{% url 'vaccins:traitement_list' %}" class="btn btn-outline-primary">Voir les traitements</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped" id="suiviTable">
+            <thead>
+                <tr>
+                    <th>Animal</th>
+                    <th>Type</th>
+                    <th>Nom</th>
+                    <th>Date</th>
+                    <th>Prochaine dose</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for suivi in suivis %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'animaux:animal_detail' suivi.animal.pk %}">{{ suivi.animal.nom }}</a>
+                        </td>
+                        <td>
+                            {% if suivi.vaccin %}
+                                Vaccin
+                            {% else %}
+                                Traitement
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if suivi.vaccin %}
+                                {{ suivi.vaccin.nom }}
+                            {% else %}
+                                {{ suivi.traitement.nom }}
+                            {% endif %}
+                        </td>
+                        <td>{{ suivi.date|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if suivi.date_prochaine_dose %}
+                                {{ suivi.date_prochaine_dose|date:"d/m/Y" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'vaccins:suivi_update' suivi.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                            <a href="{% url 'vaccins:suivi_delete' suivi.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun suivi enregistré.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

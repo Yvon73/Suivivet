@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer un suivi{% endblock %}
+
+{% block content %}
+    <h1>Supprimer un suivi</h1>
+
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <i class="bi bi-exclamation-triangle"></i> Confirmation requise
+        </div>
+        <div class="card-body">
+            <p>Es-tu sûr(e) de vouloir supprimer <strong>{{ object }}</strong> ? Cette action est irréversible.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmer la suppression
+                </button>
+                <a href="{% url 'vaccins:suivi_list' %}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Vaccins{% endblock %}
+
+{% block content %}
+    <h1>Catalogue des vaccins</h1>
+
+    <div class="mb-3 d-flex gap-2">
+        <a href="{% url 'vaccins:traitement_list' %}" class="btn btn-outline-primary">
+            <i class="bi bi-capsule"></i> Voir les traitements
+        </a>
+        <a href="{% url 'vaccins:suivi_list' %}" class="btn btn-outline-primary">
+            <i class="bi bi-clipboard2-pulse"></i> Voir tous les suivis
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Catégorie</th>
+                    <th>Intervalle de rappel</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vaccin in vaccins %}
+                    <tr>
+                        <td>{{ vaccin.nom }}</td>
+                        <td>
+                            {% if vaccin.categorie == 'OBLIGATOIRE' %}
+                                <span class="badge bg-danger">{{ vaccin.get_categorie_display }}</span>
+                            {% elif vaccin.categorie == 'ESSENTIEL' %}
+                                <span class="badge bg-warning text-dark">{{ vaccin.get_categorie_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ vaccin.get_categorie_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ vaccin.rappel_interval|default:"-" }}</td>
+                        <td>{{ vaccin.description|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">Aucun vaccin enregistré.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="text-muted">
+        <i class="bi bi-info-circle"></i> Pour ajouter un vaccin au catalogue, utilise
+        l'<a href="{% url 'admin:index' %}">administration</a>.
+    </p>
+{% endblock %}
