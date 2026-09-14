@@ -1,0 +1,39 @@
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Secrets / configuration locale
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Django
+staticfiles/
+media/
+db.sqlite3
+db.sqlite3-journal
+
+# Exports de base de données (données personnelles)
+backups/
+
+# Logs
+*.log
+logs/
+
+# Outils / IDE
+.idea/
+.vscode/
+.claude/
+.claude-code-gui/
+.mcp.json
+
+# Tests / couverture
+.coverage
+htmlcov/
+.pytest_cache/
