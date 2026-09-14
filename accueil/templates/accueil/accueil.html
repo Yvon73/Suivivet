@@ -1,0 +1,295 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<script>
+    (function () {
+        try {
+            var html = document.documentElement;
+            var taille = localStorage.getItem('a11yTaille');
+            if (taille === 'grand') { html.classList.add('a11y-taille-grand'); }
+            if (taille === 'tres-grand') { html.classList.add('a11y-taille-tres-grand'); }
+            if (localStorage.getItem('a11yContraste') === '1') { html.classList.add('a11y-contraste'); }
+            if (localStorage.getItem('a11yPolice') === '1') { html.classList.add('a11y-police-lisible'); }
+            if (localStorage.getItem('a11yReduireAnimations') === '1') { html.classList.add('a11y-reduire-animations'); }
+            if (localStorage.getItem('a11yPaletteDaltonisme') === '1') { html.classList.add('a11y-palette-daltonisme'); }
+        } catch (e) {}
+    })();
+</script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi Vétérinaire — Accueil</title>
+
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+    <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .accueil-hero {
+            background: linear-gradient(135deg, #1D3557 0%, #2A9D8F 100%);
+            color: #fff;
+        }
+        .accueil-logo {
+            width: 96px;
+            height: 96px;
+            flex: none;
+        }
+    </style>
+</head>
+<body>
+<a class="visually-hidden-focusable btn btn-primary position-absolute m-2" href="#contenu-principal">
+    Aller au contenu principal
+</a>
+
+<!-- En-tête : logo + nom de l'application + panneau accessibilité -->
+<header class="accueil-hero py-4">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <img src="{% static 'img/logo.svg' %}" alt="Logo de Suivi Vétérinaire" class="accueil-logo">
+            <div>
+                <h1 class="h3 mb-0">Suivi Vétérinaire</h1>
+                <p class="mb-0">Le carnet de santé numérique de vos animaux de compagnie.</p>
+            </div>
+        </div>
+        {% include 'partials/panneau_accessibilite.html' %}
+    </div>
+</header>
+
+<main class="container my-5" id="contenu-principal">
+
+    {% if messages %}
+        <div aria-live="polite">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Présentation de l'application -->
+    <section class="mb-5" aria-labelledby="titre-presentation">
+        <h2 id="titre-presentation" class="visually-hidden-focusable">Présentation</h2>
+        <div class="row g-4">
+            <div class="col-md-8">
+                <p class="lead">
+                    <strong>Suivi Vétérinaire</strong> est une application personnelle et gratuite pour
+                    suivre au quotidien la santé de vos animaux de compagnie : une fiche par animal
+                    (espèce, race, identification), l'historique de ses vaccins et traitements avec
+                    rappels automatiques, ses rendez-vous chez le vétérinaire sur un calendrier (avec
+                    rappel par email 2 jours avant), ses factures — éventuellement détaillées poste par
+                    poste — et ses documents (analyses, radios, ordonnances...).
+                </p>
+                <p>
+                    Pensée pour un usage privé, pas professionnel : toi, ta famille ou les proches à qui
+                    tu fais confiance pour s'occuper de tes animaux peuvent disposer chacun de leur propre
+                    compte, avec un historique complet et des rappels automatiques pour ne rien oublier.
+                </p>
+            </div>
+            <div class="col-md-4">
+                <ul class="list-unstyled d-flex flex-column gap-2">
+                    <li><i class="bi bi-heart-pulse text-success" aria-hidden="true"></i> Fiches animaux &amp; propriétaires</li>
+                    <li><i class="bi bi-capsule-pill text-success" aria-hidden="true"></i> Vaccins &amp; traitements, rappels inclus</li>
+                    <li><i class="bi bi-calendar2-check text-success" aria-hidden="true"></i> Calendrier des rendez-vous vétérinaires</li>
+                    <li><i class="bi bi-receipt-cutoff text-success" aria-hidden="true"></i> Factures &amp; suivi des dépenses</li>
+                    <li><i class="bi bi-file-earmark-pdf text-success" aria-hidden="true"></i> Documents &amp; export PDF</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Accès -->
+    <section class="row g-4 mb-5" aria-labelledby="titre-acces">
+        <h2 id="titre-acces" class="visually-hidden-focusable">Accès à l'application</h2>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="h5 mb-0"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Vous avez déjà un compte</h3>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        <p>Tu es déjà connecté(e) en tant que <strong>{{ user.username }}</strong>.</p>
+                        <a href="{% url 'animaux:animal_list' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-right-circle" aria-hidden="true"></i> Accéder à l'application
+                        </a>
+                    {% else %}
+                        <form method="post" action="{% url 'login' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label">Nom d'utilisateur</label>
+                                <input type="text" class="form-control" id="id_username" name="username" required autocomplete="username">
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_password" class="form-label">Mot de passe</label>
+                                <input type="password" class="form-control" id="id_password" name="password" required autocomplete="current-password">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> Se connecter
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="h5 mb-0"><i class="bi bi-person-plus" aria-hidden="true"></i> Premier lancement</h3>
+                </div>
+                <div class="card-body">
+                    {% if premier_lancement %}
+                        <p>
+                            Aucun compte n'existe encore sur cette installation : crée le premier compte
+                            (administrateur) pour commencer à utiliser l'application.
+                        </p>
+                        <a href="{% url 'accueil:premier_compte' %}" class="btn btn-success">
+                            <i class="bi bi-person-plus" aria-hidden="true"></i> Créer le premier compte
+                        </a>
+                    {% else %}
+                        <p class="mb-0">
+                            Un compte existe déjà sur cette installation. Si tu n'as pas encore
+                            d'identifiants, demande à la personne qui l'a mise en place (administratrice
+                            ou administrateur) de t'en créer un depuis l'
+                            <a href="{% url 'admin:index' %}">administration</a>.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Informations légales / RGPD (obligatoires en Europe) -->
+    <section aria-labelledby="titre-legal">
+        <h2 id="titre-legal" class="h4">Informations légales</h2>
+        <div class="accordion" id="accordionLegal">
+
+            <div class="accordion-item">
+                <h3 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMentions">
+                        Mentions légales
+                    </button>
+                </h3>
+                <div id="collapseMentions" class="accordion-collapse collapse" data-bs-parent="#accordionLegal">
+                    <div class="accordion-body">
+                        <p>
+                            <strong>Éditeur du site :</strong> {{ editeur.nom }}, à titre personnel et non
+                            professionnel.{% if editeur.adresse %}<br>{{ editeur.adresse }}{% endif %}<br>
+                            Email : <a href="mailto:{{ editeur.email }}">{{ editeur.email }}</a>
+                            {% if editeur.telephone %} — Téléphone : {{ editeur.telephone }}{% endif %}
+                        </p>
+                        <p><strong>Hébergement :</strong> {{ hebergeur.nom }}{% if hebergeur.adresse %}, {{ hebergeur.adresse }}{% endif %}</p>
+                        <p class="text-muted small mb-0">
+                            Ces coordonnées sont configurées par les variables d'environnement
+                            <code>EDITEUR_*</code> / <code>HEBERGEUR_*</code> (cf. <code>Projet_veto/settings.py</code>) —
+                            à compléter avec tes informations réelles avant toute mise à disposition du public.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfidentialite">
+                        Confidentialité &amp; protection des données (RGPD)
+                    </button>
+                </h3>
+                <div id="collapseConfidentialite" class="accordion-collapse collapse" data-bs-parent="#accordionLegal">
+                    <div class="accordion-body">
+                        <p>
+                            Cette application, éditée par un particulier à titre non professionnel, traite
+                            des données à caractère personnel concernant les personnes qui l'utilisent pour
+                            suivre leurs animaux (nom, adresse, email, téléphone) ainsi que des données
+                            relatives à ces animaux (identité, santé, vaccination, traitements, rendez-vous
+                            vétérinaires, factures).
+                        </p>
+                        <p>
+                            Ces données sont utilisées exclusivement pour assurer ce suivi (fiches,
+                            rappels de vaccination et de rendez-vous, suivi des dépenses) et ne sont ni
+                            cédées ni exploitées à des fins commerciales. Elles sont conservées pour la
+                            durée nécessaire à ce suivi.
+                        </p>
+                        <p>
+                            Conformément au Règlement Général sur la Protection des Données (RGPD), toute
+                            personne concernée dispose d'un droit d'accès, de rectification, d'effacement
+                            et de portabilité de ses données, ainsi que d'un droit d'opposition, en
+                            écrivant à <a href="mailto:{{ editeur.email }}">{{ editeur.email }}</a>.
+                        </p>
+                        <p class="mb-0">
+                            L'application dépose uniquement des cookies strictement nécessaires à son
+                            fonctionnement (session de connexion, protection contre les attaques CSRF) :
+                            aucun cookie publicitaire ou de mesure d'audience n'est utilisé, et ces
+                            cookies ne nécessitent donc pas de recueil de consentement préalable.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h3 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccessibilite">
+                        Déclaration d'accessibilité
+                    </button>
+                </h3>
+                <div id="collapseAccessibilite" class="accordion-collapse collapse" data-bs-parent="#accordionLegal">
+                    <div class="accordion-body">
+                        <p>
+                            Suivi Vétérinaire s'engage à rendre son application accessible, conformément
+                            à ce qu'exigent le Référentiel Général d'Amélioration de l'Accessibilité
+                            (RGAA) et l'European Accessibility Act. Cette déclaration reflète un état
+                            <strong>partiellement conforme</strong>, en amélioration continue.
+                        </p>
+                        <ul>
+                            <li>Navigation intégralement possible au clavier, avec un lien d'évitement vers le contenu principal
+                                et un focus toujours visible.</li>
+                            <li>Le bouton <strong>« Accessibilité »</strong> (en haut de page) ouvre un panneau avec plusieurs
+                                réglages indépendants et mémorisés :
+                                <ul>
+                                    <li>taille du texte sur 3 niveaux (normal, grand, très grand) ;</li>
+                                    <li>contraste élevé ;</li>
+                                    <li>police plus lisible, pensée pour la basse vision (Atkinson Hyperlegible) ;</li>
+                                    <li>réduction des animations (en plus du respect automatique de la préférence système) ;</li>
+                                    <li><strong>palette adaptée daltonisme</strong> : remplace les rouge/vert/orange
+                                        habituels (statuts, badges, calendrier) par la palette Okabe-Ito, conçue pour
+                                        rester bien distinguable en protanopie, deutéranopie et tritanopie ;</li>
+                                    <li><strong>lecture à voix haute</strong> du contenu de la page, via la synthèse vocale du
+                                        navigateur — utile en cas de déficience visuelle ou de simple fatigue oculaire.</li>
+                                </ul>
+                            </li>
+                            <li>Au-delà de ce réglage optionnel, aucune information de l'application ne repose sur la
+                                couleur seule : chaque statut ou catégorie est toujours accompagné d'un texte ou d'une
+                                icône (ex. les badges de catégorie de vaccin, les événements du calendrier).</li>
+                            <li>Les messages et notifications sont annoncés aux lecteurs d'écran (zones <code>aria-live</code>).</li>
+                            <li>Aucun contenu audio ou vidéo n'est utilisé : toutes les alertes (rappels de vaccination,
+                                de rendez-vous, notifications) sont visuelles et/ou envoyées par email, sans nécessiter
+                                de sous-titrage — ce qui couvre les besoins des personnes sourdes ou malentendantes sans
+                                fonctionnalité supplémentaire à ce niveau.</li>
+                        </ul>
+                        <p class="mb-0">
+                            Un problème d'accessibilité à signaler ? Écris à
+                            <a href="mailto:{{ editeur.email }}">{{ editeur.email }}</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<footer class="bg-light py-4 mt-5">
+    <div class="container text-center text-muted small">
+        <p class="mb-0">Suivi Vétérinaire — © 2026 {{ editeur.nom }}</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/accessibilite.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<script>
+    (function () {
+        try {
+            var html = document.documentElement;
+            var taille = localStorage.getItem('a11yTaille');
+            if (taille === 'grand') { html.classList.add('a11y-taille-grand'); }
+            if (taille === 'tres-grand') { html.classList.add('a11y-taille-tres-grand'); }
+            if (localStorage.getItem('a11yContraste') === '1') { html.classList.add('a11y-contraste'); }
+            if (localStorage.getItem('a11yPolice') === '1') { html.classList.add('a11y-police-lisible'); }
+            if (localStorage.getItem('a11yReduireAnimations') === '1') { html.classList.add('a11y-reduire-animations'); }
+            if (localStorage.getItem('a11yPaletteDaltonisme') === '1') { html.classList.add('a11y-palette-daltonisme'); }
+        } catch (e) {}
+    })();
+</script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi Vétérinaire — Premier compte</title>
+
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+    <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<a class="visually-hidden-focusable btn btn-primary position-absolute m-2" href="#contenu-principal">
+    Aller au contenu principal
+</a>
+
+<div class="d-flex justify-content-end container mt-3">
+    {% include 'partials/panneau_accessibilite.html' with bouton_classe='btn-outline-secondary' %}
+</div>
+
+<div class="container my-3" id="contenu-principal">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center mb-4">
+                <img src="{% static 'img/logo.svg' %}" alt="Logo de Suivi Vétérinaire" width="72" height="72">
+            </div>
+
+            {% if messages %}
+                <div aria-live="polite">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="h4 mb-0"><i class="bi bi-person-plus" aria-hidden="true"></i> Créer le premier compte</h1>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Ce compte sera administrateur : il pourra ensuite créer d'autres comptes (pour ta
+                        famille ou les proches à qui tu fais confiance) depuis l'administration.
+                    </p>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                            {{ form.username }}
+                            {% for error in form.username.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            {% if form.username.help_text %}<div class="form-text">{{ form.username.help_text }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+                            {{ form.password1 }}
+                            {% for error in form.password1.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            {% if form.password1.help_text %}<div class="form-text">{{ form.password1.help_text|safe }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                            {{ form.password2 }}
+                            {% for error in form.password2.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <fieldset class="mb-3">
+                            <legend class="h6">Options d'accessibilité</legend>
+                            <p class="form-text mt-0">
+                                Facultatif — activées tout de suite sur ce compte, réappliquées
+                                automatiquement à chaque connexion (modifiables ensuite à tout moment
+                                depuis le bouton « Accessibilité » en haut de page).
+                            </p>
+                            <div class="form-check">
+                                {{ form.texte_agrandi }}
+                                <label class="form-check-label" for="{{ form.texte_agrandi.id_for_label }}">{{ form.texte_agrandi.label }}</label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.contraste_eleve }}
+                                <label class="form-check-label" for="{{ form.contraste_eleve.id_for_label }}">{{ form.contraste_eleve.label }}</label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.police_lisible }}
+                                <label class="form-check-label" for="{{ form.police_lisible.id_for_label }}">{{ form.police_lisible.label }}</label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.reduire_animations }}
+                                <label class="form-check-label" for="{{ form.reduire_animations.id_for_label }}">{{ form.reduire_animations.label }}</label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.palette_daltonisme }}
+                                <label class="form-check-label" for="{{ form.palette_daltonisme.id_for_label }}">{{ form.palette_daltonisme.label }}</label>
+                            </div>
+                        </fieldset>
+
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle" aria-hidden="true"></i> Créer mon compte
+                        </button>
+                        <a href="{% url 'accueil:accueil' %}" class="btn btn-secondary">Annuler</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/accessibilite.js' %}"></script>
+</body>
+</html>
