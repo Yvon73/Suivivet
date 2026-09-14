@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer {{ object.nom_complet }}{% endblock %}
+
+{% block content %}
+    <h1>Supprimer un propriétaire</h1>
+
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <i class="bi bi-exclamation-triangle"></i> Confirmation requise
+        </div>
+        <div class="card-body">
+            <p>
+                Es-tu sûr(e) de vouloir supprimer <strong>{{ object.nom_complet }}</strong> ?
+            </p>
+            <p class="text-muted">
+                La fiche est conservée en base (les animaux déjà enregistrés continueront de
+                l'afficher) mais sera retirée de la liste des propriétaires, des listes
+                déroulantes de sélection pour un nouvel animal, et de la sortie PDF de la fiche
+                animal.
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmer la suppression
+                </button>
+                <a href="{% url 'animaux:proprietaire_detail' object.pk %}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

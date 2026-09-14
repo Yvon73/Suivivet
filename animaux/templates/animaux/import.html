@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Importer des animaux{% endblock %}
+
+{% block content %}
+    <h1>Importer des animaux depuis un fichier CSV</h1>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Instructions</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                Pour importer des animaux, préparez un fichier CSV avec les colonnes suivantes :
+                <strong>Nom, Espèce, Race, Identification, Date de Naissance</strong>.
+            </p>
+            <p>
+                Colonnes optionnelles : <strong>Propriétaire, Organisme, Robe</strong>.
+            </p>
+            <p>
+                Exemple de format :
+            </p>
+            <pre>
+Nom,Espèce,Race,Identification,Date de Naissance,Propriétaire,Organisme,Robe
+Rex,CHIEN,Labrador,123456,2020-05-15,Jean Dupont,LOF,NOIR
+Moustache,CHAT,Européen,654321,2019-08-20,Marie Martin,LOOF,ROUX
+            </pre>
+            <p class="text-muted small">
+                Une ligne dont l'<strong>Identification</strong> correspond à un animal déjà enregistré
+                met à jour cet animal plutôt que d'en créer un doublon.
+            </p>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Importer un fichier CSV</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="csv_file" class="form-label">Fichier CSV</label>
+                    <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-upload"></i> Importer
+                </button>
+                <a href="{% url 'animaux:animal_list' %}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

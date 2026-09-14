@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Courbe de poids - {{ animal.nom }}{% endblock %}
+
+{% block content %}
+    <h1>Courbe de poids pour {{ animal.nom }}</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <img src="data:image/png;base64,{{ graphique }}" alt="Courbe de poids" class="img-fluid">
+        </div>
+    </div>
+
+    <a href="{% url 'animaux:animal_detail' animal.pk %}" class="btn btn-secondary">
+        Retour à la fiche de {{ animal.nom }}
+    </a>
+{% endblock %}

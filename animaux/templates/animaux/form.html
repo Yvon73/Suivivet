@@ -1,0 +1,1160 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}
+        Modifier {{ object.nom }}
+    {% else %}
+        Ajouter un animal
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">
+        <i class="bi bi-paw"></i>
+        {% if object %}
+            Modifier {{ object.nom }}
+        {% else %}
+            Ajouter un animal
+        {% endif %}
+    </h1>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> Informations générales
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Photo -->
+                    <div class="col-md-3 text-center mb-3">
+                        <img id="apercuPhoto"
+                             src="{% if object.photo %}{{ object.photo.url }}{% endif %}"
+                             alt="Photo de l'animal"
+                             class="img-fluid rounded mb-2 border {% if not object.photo %}d-none{% endif %}"
+                             style="max-height: 160px; object-fit: cover;">
+                        <div id="apercuPhotoPlaceholder" class="border rounded d-flex align-items-center justify-content-center text-muted mb-2 {% if object.photo %}d-none{% endif %}" style="height: 160px;">
+                            <i class="bi bi-camera fs-1"></i>
+                        </div>
+                        <label for="{{ form.photo.id_for_label }}" class="form-label">{{ form.photo.label }}</label>
+                        {{ form.photo }}
+                        {% for error in form.photo.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <!-- Identité -->
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
+                                {{ form.nom }}
+                                {% for error in form.nom.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.proprietaire.id_for_label }}" class="form-label">{{ form.proprietaire.label }}</label>
+                                <div class="input-group">
+                                    {{ form.proprietaire }}
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#modalNouveauProprietaire" title="Ajouter un propriétaire absent de la liste">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                                {% for error in form.proprietaire.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.espece.id_for_label }}" class="form-label">{{ form.espece.label }}</label>
+                                <div class="input-group">
+                                    {{ form.espece }}
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#modalNouvelleEspece" title="Ajouter une espèce absente de la liste">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                                {% for error in form.espece.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.race.id_for_label }}" class="form-label">{{ form.race.label }}</label>
+                                <div class="input-group">
+                                    {{ form.race }}
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#modalNouvelleRace" title="Ajouter une race absente du catalogue">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                                {% for error in form.race.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+
+                            <!-- Fiche de la race sélectionnée (catalogue de races, cf. static/data/races_*.json) -->
+                            <div id="ficheRace" class="col-12 d-none mb-3">
+                                <div class="border rounded p-3 bg-light">
+                                    <div id="ficheRaceDangerosite" class="alert py-1 px-2 mb-2 d-none small fw-semibold"></div>
+                                    <div class="row small">
+                                        <div id="ficheRaceOrigineWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Origine :</strong> <span id="ficheRaceOrigine"></span></div>
+                                        <div id="ficheRaceTailleWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Taille :</strong> <span id="ficheRaceTaille"></span></div>
+                                        <div id="ficheRacePoidsWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Poids :</strong> <span id="ficheRacePoids"></span></div>
+                                        <div id="ficheRaceEsperanceVieWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Espérance de vie :</strong> <span id="ficheRaceEsperanceVie"></span></div>
+                                        <div id="ficheRaceGroupeFciWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Groupe FCI :</strong> <span id="ficheRaceGroupeFci"></span></div>
+                                        <div id="ficheRaceCategorieWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Catégorie :</strong> <span id="ficheRaceCategorie"></span></div>
+                                        <div id="ficheRaceNiveauSoinWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Niveau de soin :</strong> <span id="ficheRaceNiveauSoin"></span></div>
+                                        <div id="ficheRaceLegislationWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Législation (France) :</strong> <span id="ficheRaceLegislation"></span></div>
+                                    </div>
+                                    <p id="ficheRaceDescription" class="small mb-0 mt-1 fst-italic"></p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.robe.id_for_label }}" class="form-label">{{ form.robe.label }}</label>
+                                <div class="input-group">
+                                    {{ form.robe }}
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#modalNouvelleRobe" title="Ajouter une robe absente de la liste">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                                {% for error in form.robe.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="{{ form.date_naissance.id_for_label }}" class="form-label">{{ form.date_naissance.label }}</label>
+                                        {{ form.date_naissance }}
+                                        {% for error in form.date_naissance.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="{{ form.date_deces.id_for_label }}" class="form-label">{{ form.date_deces.label }}</label>
+                                        {{ form.date_deces }}
+                                        {% for error in form.date_deces.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Identifications (organisme + n° d'identification) : un animal
+                                 peut être enregistré auprès de plusieurs organismes, cf.
+                                 AnimalIdentificationFormSet. Le bouton « + » en bout de ligne
+                                 affiche une nouvelle ligne organisme/identification en dessous. -->
+                            <div class="col-12">
+                                <hr class="my-2">
+                                {{ identifications_formset.management_form }}
+                                <div id="identificationsContainer">
+                                    {% for ident_form in identifications_formset %}
+                                        <div class="identification-row row gx-2 align-items-start mb-2">
+                                            {% for hidden in ident_form.hidden_fields %}{{ hidden }}{% endfor %}
+                                            <div class="col-md-5">
+                                                {% if forloop.first %}<label for="{{ ident_form.organisme.id_for_label }}" class="form-label">{{ ident_form.organisme.label }}</label>{% endif %}
+                                                <div class="input-group">
+                                                    {{ ident_form.organisme }}
+                                                    <button type="button" class="btn btn-outline-primary btn-ajouter-organisme" data-bs-toggle="modal"
+                                                            data-bs-target="#modalNouvelOrganisme" data-target-select="{{ ident_form.organisme.id_for_label }}"
+                                                            title="Ajouter un organisme absent de la liste">
+                                                        <i class="bi bi-plus-lg"></i>
+                                                    </button>
+                                                </div>
+                                                {% for error in ident_form.organisme.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                            </div>
+                                            <div class="col-md-5">
+                                                {% if forloop.first %}<label for="{{ ident_form.identification.id_for_label }}" class="form-label">{{ ident_form.identification.label }}</label>{% endif %}
+                                                {{ ident_form.identification }}
+                                                {% for error in ident_form.identification.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-center {% if forloop.first %}pt-4{% endif %}">
+                                                <button type="button" class="btn btn-outline-danger btn-supprimer-identification {% if forloop.first %}d-none{% endif %}" title="Retirer cette identification">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                            <div class="d-none">{{ ident_form.DELETE }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <template id="identificationRowTemplate">
+                                    <div class="identification-row row gx-2 align-items-start mb-2">
+                                        <div class="col-md-5">
+                                            <div class="input-group">
+                                                {{ identifications_formset.empty_form.organisme }}
+                                                <button type="button" class="btn btn-outline-primary btn-ajouter-organisme" data-bs-toggle="modal"
+                                                        data-bs-target="#modalNouvelOrganisme" data-target-select="{{ identifications_formset.empty_form.organisme.id_for_label }}"
+                                                        title="Ajouter un organisme absent de la liste">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            {{ identifications_formset.empty_form.identification }}
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-center">
+                                            <button type="button" class="btn btn-outline-danger btn-supprimer-identification" title="Retirer cette identification">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="d-none">{{ identifications_formset.empty_form.DELETE }}</div>
+                                    </div>
+                                </template>
+                                <button type="button" id="btnAjouterIdentification" class="btn btn-outline-primary btn-sm mt-1">
+                                    <i class="bi bi-plus-lg"></i> Ajouter un identifiant / organisme supplémentaire
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check"></i> Enregistrer
+                </button>
+                <a href="{% url 'animaux:animal_list' %}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Modale d'ajout rapide d'une espèce absente de la liste -->
+    <div class="modal fade" id="modalNouvelleEspece" tabindex="-1" aria-labelledby="modalNouvelleEspeceLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNouvelleEspeceLabel">
+                        <i class="bi bi-plus-circle"></i> Ajouter une espèce
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nouvelleEspeceErreurs" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="nouvelleEspeceNom" class="form-label">Nom de l'espèce</label>
+                        <input type="text" id="nouvelleEspeceNom" class="form-control" maxlength="50" placeholder="Ex : Furet" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nouvelleEspeceRaceNom" class="form-label">Nom de la race</label>
+                        <input type="text" id="nouvelleEspeceRaceNom" class="form-control" maxlength="100" placeholder="Par défaut : « Autre »">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="nouvelleEspeceValider">
+                        <i class="bi bi-check"></i> Ajouter l'espèce
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'ajout rapide d'une race absente du catalogue -->
+    <div class="modal fade" id="modalNouvelleRace" tabindex="-1" aria-labelledby="modalNouvelleRaceLabel" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 520px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNouvelleRaceLabel">
+                        <i class="bi bi-plus-circle"></i> Ajouter une race
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nouvelleRaceErreurs" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="nouvelleRaceEspece" class="form-label">Espèce</label>
+                        <select id="nouvelleRaceEspece" class="form-select">
+                            {% for espece in especes %}
+                                <option value="{{ espece.pk }}">{{ espece.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nouvelleRaceNom" class="form-label">Nom de la race</label>
+                        <input type="text" id="nouvelleRaceNom" class="form-control" maxlength="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nouvelleRaceDangerosite" class="form-label">Degré de dangerosité</label>
+                        <select id="nouvelleRaceDangerosite" class="form-select">
+                            {% for valeur, libelle in niveaux_dangerosite %}
+                                <option value="{{ valeur }}">{{ libelle }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            Indicateur interne de précaution à la manipulation propre au cabinet
+                            (ne constitue pas une catégorisation légale).
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-2">Informations complémentaires (facultatif)</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label for="nouvelleRaceOrigine" class="form-label small mb-1">Origine</label>
+                            <input type="text" id="nouvelleRaceOrigine" class="form-control form-control-sm" maxlength="150">
+                        </div>
+                        <div class="col-6">
+                            <label for="nouvelleRaceEsperanceVie" class="form-label small mb-1">Espérance de vie</label>
+                            <input type="text" id="nouvelleRaceEsperanceVie" class="form-control form-control-sm" maxlength="50" placeholder="Ex : 10-15 ans">
+                        </div>
+                        <div class="col-6">
+                            <label for="nouvelleRaceTailleMin" class="form-label small mb-1">Taille min (cm)</label>
+                            <input type="number" step="0.1" min="0" id="nouvelleRaceTailleMin" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label for="nouvelleRaceTailleMax" class="form-label small mb-1">Taille max (cm)</label>
+                            <input type="number" step="0.1" min="0" id="nouvelleRaceTailleMax" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label for="nouvelleRacePoidsMin" class="form-label small mb-1">Poids min (kg)</label>
+                            <input type="number" step="0.1" min="0" id="nouvelleRacePoidsMin" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label for="nouvelleRacePoidsMax" class="form-label small mb-1">Poids max (kg)</label>
+                            <input type="number" step="0.1" min="0" id="nouvelleRacePoidsMax" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-12">
+                            <label for="nouvelleRaceDescription" class="form-label small mb-1">Description</label>
+                            <textarea id="nouvelleRaceDescription" class="form-control form-control-sm" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="nouvelleRaceValider">
+                        <i class="bi bi-check"></i> Ajouter la race
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'ajout rapide d'un organisme absent du catalogue -->
+    <div class="modal fade" id="modalNouvelOrganisme" tabindex="-1" aria-labelledby="modalNouvelOrganismeLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNouvelOrganismeLabel">
+                        <i class="bi bi-plus-circle"></i> Ajouter un organisme
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nouvelOrganismeErreurs" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="nouvelOrganismeEspece" class="form-label">Espèce concernée</label>
+                        <select id="nouvelOrganismeEspece" class="form-select">
+                            {% for code, libelle in organisme_especes %}
+                                <option value="{{ code }}">{{ libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nouvelOrganismeNomCourt" class="form-label">Nom court</label>
+                        <input type="text" id="nouvelOrganismeNomCourt" class="form-control" maxlength="30" placeholder="Ex : LOF" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nouvelOrganismeNom" class="form-label">Nom complet</label>
+                        <input type="text" id="nouvelOrganismeNom" class="form-control" maxlength="200" placeholder="Ex : LOF (Livre des Origines Français)" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <label for="nouvelOrganismePays" class="form-label small mb-1">Pays</label>
+                            <input type="text" id="nouvelOrganismePays" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label for="nouvelOrganismeSiteWeb" class="form-label small mb-1">Site web</label>
+                            <input type="url" id="nouvelOrganismeSiteWeb" class="form-control form-control-sm" placeholder="https://...">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="nouvelOrganismeDescription" class="form-label small mb-1">Description</label>
+                            <textarea id="nouvelOrganismeDescription" class="form-control form-control-sm" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input type="checkbox" id="nouvelOrganismeEstOfficiel" class="form-check-input" checked>
+                                <label class="form-check-label small" for="nouvelOrganismeEstOfficiel">Organisme officiel</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="nouvelOrganismeValider">
+                        <i class="bi bi-check"></i> Ajouter l'organisme
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'ajout rapide d'une robe absente de la liste -->
+    <div class="modal fade" id="modalNouvelleRobe" tabindex="-1" aria-labelledby="modalNouvelleRobeLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNouvelleRobeLabel">
+                        <i class="bi bi-plus-circle"></i> Ajouter une robe
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nouvelleRobeErreurs" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label for="nouvelleRobeNom" class="form-label">Nom de la robe</label>
+                        <input type="text" id="nouvelleRobeNom" class="form-control" maxlength="50" placeholder="Ex : Bringé" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="nouvelleRobeValider">
+                        <i class="bi bi-check"></i> Ajouter la robe
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'ajout rapide d'un propriétaire absent de la liste -->
+    <div class="modal fade" id="modalNouveauProprietaire" tabindex="-1" aria-labelledby="modalNouveauProprietaireLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNouveauProprietaireLabel">
+                        <i class="bi bi-plus-circle"></i> Ajouter un propriétaire
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nouveauProprietaireErreurs" class="alert alert-danger d-none"></div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <label for="nouveauProprietaireNom" class="form-label">Nom</label>
+                            <input type="text" id="nouveauProprietaireNom" class="form-control" maxlength="100" required>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label for="nouveauProprietairePrenom" class="form-label">Prénom</label>
+                            <input type="text" id="nouveauProprietairePrenom" class="form-control" maxlength="100">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="nouveauProprietaireAdresse" class="form-label">Adresse</label>
+                            <input type="text" id="nouveauProprietaireAdresse" class="form-control" maxlength="255">
+                        </div>
+                        <div class="col-sm-4 mb-3">
+                            <label for="nouveauProprietaireCodePostal" class="form-label">Code postal</label>
+                            <input type="text" id="nouveauProprietaireCodePostal" class="form-control" maxlength="10">
+                        </div>
+                        <div class="col-sm-8 mb-3">
+                            <label for="nouveauProprietaireVille" class="form-label">Ville</label>
+                            <input type="text" id="nouveauProprietaireVille" class="form-control" maxlength="100">
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label for="nouveauProprietaireTelephone" class="form-label">Téléphone</label>
+                            <input type="text" id="nouveauProprietaireTelephone" class="form-control" maxlength="20">
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label for="nouveauProprietaireEmail" class="form-label">Email</label>
+                            <input type="email" id="nouveauProprietaireEmail" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="nouveauProprietaireValider">
+                        <i class="bi bi-check"></i> Ajouter le propriétaire
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ races_info|json_script:"races-info-data" }}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var especeField = document.getElementById('id_espece');
+            var raceField = document.getElementById('id_race');
+            if (!especeField || !raceField) {
+                return;
+            }
+
+            // --- Fiche de la race sélectionnée (catalogue static/data/races_*.json) ---
+            // Chargée une fois pour toutes (peu de volume par race), complétée à la
+            // volée par les races ajoutées via la modale ci-dessous.
+            var racesInfo = JSON.parse(document.getElementById('races-info-data').textContent);
+
+            var ficheRace = document.getElementById('ficheRace');
+            var ficheRaceDangerosite = document.getElementById('ficheRaceDangerosite');
+            // Chaque champ de la fiche n'est affiché que si la race en cause a
+            // effectivement cette information : le formulaire s'adapte au
+            // contenu réel du catalogue plutôt que d'afficher des tirets vides
+            // (ex. un chat n'a pas de taille cataloguée, un NAC n'a pas de
+            // groupe FCI...).
+            var ficheRaceChamps = {
+                origine: { valeur: document.getElementById('ficheRaceOrigine'), wrap: document.getElementById('ficheRaceOrigineWrap') },
+                taille: { valeur: document.getElementById('ficheRaceTaille'), wrap: document.getElementById('ficheRaceTailleWrap') },
+                poids: { valeur: document.getElementById('ficheRacePoids'), wrap: document.getElementById('ficheRacePoidsWrap') },
+                esperance_vie: { valeur: document.getElementById('ficheRaceEsperanceVie'), wrap: document.getElementById('ficheRaceEsperanceVieWrap') },
+                groupe_fci: { valeur: document.getElementById('ficheRaceGroupeFci'), wrap: document.getElementById('ficheRaceGroupeFciWrap') },
+                niveau_soin: { valeur: document.getElementById('ficheRaceNiveauSoin'), wrap: document.getElementById('ficheRaceNiveauSoinWrap') },
+                legislation_france: { valeur: document.getElementById('ficheRaceLegislation'), wrap: document.getElementById('ficheRaceLegislationWrap') },
+            };
+            var ficheRaceCategorieWrap = document.getElementById('ficheRaceCategorieWrap');
+            var ficheRaceCategorie = document.getElementById('ficheRaceCategorie');
+            var ficheRaceDescription = document.getElementById('ficheRaceDescription');
+
+            function actualiserFicheRace() {
+                if (!ficheRace) {
+                    return;
+                }
+                var race = racesInfo[raceField.value];
+                if (!race) {
+                    ficheRace.classList.add('d-none');
+                    return;
+                }
+                var auMoinsUnChamp = false;
+                Object.keys(ficheRaceChamps).forEach(function (champ) {
+                    var cellule = ficheRaceChamps[champ];
+                    var present = !!race[champ];
+                    cellule.wrap.classList.toggle('d-none', !present);
+                    cellule.valeur.textContent = present ? race[champ] : '';
+                    auMoinsUnChamp = auMoinsUnChamp || present;
+                });
+                var categorie = [race.categorie, race.sous_categorie].filter(Boolean).join(' / ');
+                ficheRaceCategorieWrap.classList.toggle('d-none', !categorie);
+                ficheRaceCategorie.textContent = categorie;
+                auMoinsUnChamp = auMoinsUnChamp || !!categorie;
+                ficheRaceDescription.textContent = race.description || '';
+
+                if (race.niveau_dangerosite && race.niveau_dangerosite !== 'NON_RENSEIGNE') {
+                    ficheRaceDangerosite.textContent = 'Dangerosité : ' + race.niveau_dangerosite_display;
+                    ficheRaceDangerosite.className = 'alert alert-' + race.classe_dangerosite + ' py-1 px-2 mb-2 small fw-semibold';
+                } else {
+                    ficheRaceDangerosite.classList.add('d-none');
+                }
+
+                // Rien d'autre qu'un nom de race à afficher (race ajoutée sans fiche
+                // détaillée) : pas besoin d'afficher un bloc vide.
+                ficheRace.classList.toggle('d-none', !auMoinsUnChamp && !race.description);
+            }
+
+            raceField.addEventListener('change', actualiserFicheRace);
+            actualiserFicheRace();
+
+            // --- Aperçu de la photo choisie, avant envoi ---------------------
+            var champPhoto = document.getElementById('id_photo');
+            var apercuPhoto = document.getElementById('apercuPhoto');
+            var apercuPhotoPlaceholder = document.getElementById('apercuPhotoPlaceholder');
+            if (champPhoto && apercuPhoto && apercuPhotoPlaceholder) {
+                champPhoto.addEventListener('change', function () {
+                    var fichier = champPhoto.files && champPhoto.files[0];
+                    if (!fichier) {
+                        return;
+                    }
+                    var lecteur = new FileReader();
+                    lecteur.onload = function (evenement) {
+                        apercuPhoto.src = evenement.target.result;
+                        apercuPhoto.classList.remove('d-none');
+                        apercuPhotoPlaceholder.classList.add('d-none');
+                    };
+                    lecteur.readAsDataURL(fichier);
+                });
+            }
+
+            function filtrerRaces() {
+                var especeId = especeField.value;
+                Array.from(raceField.options).forEach(function (option) {
+                    if (!option.value) {
+                        return;
+                    }
+                    var correspond = !especeId || option.dataset.espece === especeId;
+                    option.hidden = !correspond;
+                    option.disabled = !correspond;
+                });
+                Array.from(raceField.getElementsByTagName('optgroup')).forEach(function (optgroup) {
+                    var aUneOptionVisible = Array.from(optgroup.children).some(function (option) {
+                        return !option.hidden;
+                    });
+                    optgroup.hidden = !aUneOptionVisible;
+                });
+                // Si la race actuellement sélectionnée ne correspond plus à l'espèce
+                // choisie, on force un nouveau choix (les données déjà enregistrées
+                // en base ne sont pas modifiées, seul l'affichage du formulaire l'est).
+                var optionCourante = raceField.options[raceField.selectedIndex];
+                if (optionCourante && optionCourante.value && optionCourante.hidden) {
+                    raceField.value = '';
+                }
+            }
+
+            // On ne filtre qu'au changement d'espèce, jamais au chargement de la page :
+            // en modification, la race déjà enregistrée reste visible telle quelle.
+            especeField.addEventListener('change', filtrerRaces);
+
+            // --- Ajout rapide d'une race absente du catalogue ---------------------
+            // Le bouton « + » est déjà dans le gabarit (input-group autour du
+            // champ) : la modale n'a besoin ici que de sa logique de soumission.
+
+            var modalEl = document.getElementById('modalNouvelleRace');
+            var especeModalField = document.getElementById('nouvelleRaceEspece');
+            var nomModalField = document.getElementById('nouvelleRaceNom');
+            var dangerositeModalField = document.getElementById('nouvelleRaceDangerosite');
+            var erreursDiv = document.getElementById('nouvelleRaceErreurs');
+            var boutonValider = document.getElementById('nouvelleRaceValider');
+
+            modalEl.addEventListener('show.bs.modal', function () {
+                erreursDiv.classList.add('d-none');
+                erreursDiv.innerHTML = '';
+                nomModalField.value = '';
+                dangerositeModalField.value = 'NON_RENSEIGNE';
+                if (especeField.value) {
+                    especeModalField.value = especeField.value;
+                }
+                ['nouvelleRaceOrigine', 'nouvelleRaceEsperanceVie', 'nouvelleRaceTailleMin',
+                    'nouvelleRaceTailleMax', 'nouvelleRacePoidsMin', 'nouvelleRacePoidsMax',
+                    'nouvelleRaceDescription'].forEach(function (id) {
+                    document.getElementById(id).value = '';
+                });
+            });
+
+            function afficherErreurs(erreurs) {
+                var messages = [];
+                Object.keys(erreurs || {}).forEach(function (champ) {
+                    erreurs[champ].forEach(function (erreur) {
+                        messages.push(erreur.message || erreur);
+                    });
+                });
+                if (!messages.length) {
+                    messages.push("Impossible d'ajouter cette race.");
+                }
+                erreursDiv.innerHTML = messages.join('<br>');
+                erreursDiv.classList.remove('d-none');
+            }
+
+            boutonValider.addEventListener('click', function () {
+                var nom = nomModalField.value.trim();
+                if (!nom) {
+                    afficherErreurs({ nom: [{ message: 'Le nom de la race est obligatoire.' }] });
+                    return;
+                }
+
+                var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+                var donnees = new URLSearchParams();
+                donnees.set('espece', especeModalField.value);
+                donnees.set('nom', nom);
+                donnees.set('niveau_dangerosite', dangerositeModalField.value);
+                // Fiche descriptive facultative : on n'envoie que les champs remplis,
+                // le formulaire côté serveur accepte l'absence de chacun d'eux.
+                [
+                    ['origine', 'nouvelleRaceOrigine'],
+                    ['esperance_vie', 'nouvelleRaceEsperanceVie'],
+                    ['taille_min', 'nouvelleRaceTailleMin'],
+                    ['taille_max', 'nouvelleRaceTailleMax'],
+                    ['poids_min', 'nouvelleRacePoidsMin'],
+                    ['poids_max', 'nouvelleRacePoidsMax'],
+                    ['description', 'nouvelleRaceDescription'],
+                ].forEach(function (paire) {
+                    var valeur = document.getElementById(paire[1]).value.trim();
+                    if (valeur) {
+                        donnees.set(paire[0], valeur);
+                    }
+                });
+
+                boutonValider.disabled = true;
+                fetch('{% url "animaux:race_create_ajax" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: donnees.toString(),
+                })
+                    .then(function (reponse) {
+                        return reponse.json().then(function (data) {
+                            return { ok: reponse.ok, data: data };
+                        });
+                    })
+                    .then(function (resultat) {
+                        if (!resultat.ok || !resultat.data.success) {
+                            afficherErreurs(resultat.data.errors);
+                            return;
+                        }
+                        var race = resultat.data;
+
+                        // Retrouve (ou crée) l'optgroup correspondant à l'espèce de la
+                        // nouvelle race, pour rester cohérent avec le regroupement existant.
+                        var optgroup = Array.from(raceField.getElementsByTagName('optgroup'))
+                            .find(function (og) { return og.label === race.espece_nom; });
+                        if (!optgroup) {
+                            optgroup = document.createElement('optgroup');
+                            optgroup.label = race.espece_nom;
+                            raceField.appendChild(optgroup);
+                        }
+
+                        var option = document.createElement('option');
+                        option.value = race.id;
+                        option.text = race.nom;
+                        option.dataset.espece = String(race.espece_id);
+                        optgroup.appendChild(option);
+
+                        // Complète le panneau d'aperçu (racesInfo) avec la fiche de la
+                        // race qu'on vient de créer, pour qu'elle s'affiche immédiatement.
+                        racesInfo[String(race.id)] = race;
+
+                        // Sélectionne la nouvelle race et aligne le champ espèce du
+                        // formulaire principal si besoin, sans modifier de donnée existante.
+                        if (especeField.value !== String(race.espece_id)) {
+                            especeField.value = String(race.espece_id);
+                        }
+                        filtrerRaces();
+                        raceField.value = race.id;
+                        actualiserFicheRace();
+
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        modal.hide();
+                    })
+                    .catch(function () {
+                        afficherErreurs({});
+                    })
+                    .finally(function () {
+                        boutonValider.disabled = false;
+                    });
+            });
+
+            // --- Ajout rapide d'une espèce absente de la liste --------------------
+            // (remplace l'ancien choix « Autre » du menu déroulant « Espèce »)
+            var modalEspeceEl = document.getElementById('modalNouvelleEspece');
+            var nomEspeceModalField = document.getElementById('nouvelleEspeceNom');
+            var nomEspeceRaceModalField = document.getElementById('nouvelleEspeceRaceNom');
+            var erreursEspeceDiv = document.getElementById('nouvelleEspeceErreurs');
+            var boutonValiderEspece = document.getElementById('nouvelleEspeceValider');
+
+            modalEspeceEl.addEventListener('show.bs.modal', function () {
+                erreursEspeceDiv.classList.add('d-none');
+                erreursEspeceDiv.innerHTML = '';
+                nomEspeceModalField.value = '';
+                nomEspeceRaceModalField.value = '';
+            });
+
+            function afficherErreursEspece(erreurs) {
+                var messages = [];
+                Object.keys(erreurs || {}).forEach(function (champ) {
+                    erreurs[champ].forEach(function (erreur) {
+                        messages.push(erreur.message || erreur);
+                    });
+                });
+                if (!messages.length) {
+                    messages.push("Impossible d'ajouter cette espèce.");
+                }
+                erreursEspeceDiv.innerHTML = messages.join('<br>');
+                erreursEspeceDiv.classList.remove('d-none');
+            }
+
+            boutonValiderEspece.addEventListener('click', function () {
+                var nom = nomEspeceModalField.value.trim();
+                if (!nom) {
+                    afficherErreursEspece({ nom: [{ message: "Le nom de l'espèce est obligatoire." }] });
+                    return;
+                }
+
+                var donnees = new URLSearchParams();
+                donnees.set('nom', nom);
+                var nomRace = nomEspeceRaceModalField.value.trim();
+                if (nomRace) {
+                    donnees.set('nom_race', nomRace);
+                }
+
+                var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+                boutonValiderEspece.disabled = true;
+                fetch('{% url "animaux:espece_create_ajax" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: donnees.toString(),
+                })
+                    .then(function (reponse) {
+                        return reponse.json().then(function (data) {
+                            return { ok: reponse.ok, data: data };
+                        });
+                    })
+                    .then(function (resultat) {
+                        if (!resultat.ok || !resultat.data.success) {
+                            afficherErreursEspece(resultat.data.errors);
+                            return;
+                        }
+                        var espece = resultat.data.espece;
+                        var race = resultat.data.race;
+
+                        // Ajoute la nouvelle espèce au menu déroulant principal.
+                        var optionEspece = document.createElement('option');
+                        optionEspece.value = espece.id;
+                        optionEspece.text = espece.nom;
+                        especeField.appendChild(optionEspece);
+
+                        // Ajoute sa première race (avec sa propre optgroup), même mécanisme
+                        // que l'ajout rapide d'une race seule (cf. plus haut).
+                        var optgroup = Array.from(raceField.getElementsByTagName('optgroup'))
+                            .find(function (og) { return og.label === race.espece_nom; });
+                        if (!optgroup) {
+                            optgroup = document.createElement('optgroup');
+                            optgroup.label = race.espece_nom;
+                            raceField.appendChild(optgroup);
+                        }
+                        var optionRace = document.createElement('option');
+                        optionRace.value = race.id;
+                        optionRace.text = race.nom;
+                        optionRace.dataset.espece = String(race.espece_id);
+                        optgroup.appendChild(optionRace);
+                        racesInfo[String(race.id)] = race;
+
+                        especeField.value = String(espece.id);
+                        filtrerRaces();
+                        raceField.value = race.id;
+                        actualiserFicheRace();
+
+                        var modal = bootstrap.Modal.getInstance(modalEspeceEl);
+                        modal.hide();
+                    })
+                    .catch(function () {
+                        afficherErreursEspece({});
+                    })
+                    .finally(function () {
+                        boutonValiderEspece.disabled = false;
+                    });
+            });
+
+            // --- Identifications (organisme + n° d'identification) : ajout et
+            // suppression dynamiques de lignes ---------------------------------
+            // Le bouton « + » en bout de ligne clone le gabarit caché
+            // #identificationRowTemplate (formset Django, cf. AnimalIdentificationFormSet)
+            // et l'affiche en dessous de la ligne précédente ; chaque ligne
+            // ajoutée peut ensuite être retirée via son icône de suppression
+            // (qui coche la case DELETE du formset plutôt que de retirer la ligne
+            // du DOM, pour que les lignes déjà enregistrées soient bien supprimées
+            // en base à l'enregistrement).
+            var identificationsContainer = document.getElementById('identificationsContainer');
+            var totalFormsInput = document.getElementById('id_identifications-TOTAL_FORMS');
+            var identificationRowTemplate = document.getElementById('identificationRowTemplate');
+            var btnAjouterIdentification = document.getElementById('btnAjouterIdentification');
+
+            function attacherSuppressionLigneIdentification(ligne) {
+                var boutonSupprimer = ligne.querySelector('.btn-supprimer-identification');
+                if (!boutonSupprimer) {
+                    return;
+                }
+                boutonSupprimer.addEventListener('click', function () {
+                    var caseDelete = ligne.querySelector('input[name$="-DELETE"]');
+                    if (caseDelete) {
+                        caseDelete.checked = true;
+                    }
+                    ligne.classList.add('d-none');
+                });
+            }
+
+            if (identificationsContainer) {
+                Array.from(identificationsContainer.querySelectorAll('.identification-row'))
+                    .forEach(attacherSuppressionLigneIdentification);
+            }
+
+            if (btnAjouterIdentification && identificationsContainer && identificationRowTemplate && totalFormsInput) {
+                btnAjouterIdentification.addEventListener('click', function () {
+                    var index = parseInt(totalFormsInput.value, 10);
+                    var html = identificationRowTemplate.innerHTML.split('__prefix__').join(index);
+                    var conteneurTemporaire = document.createElement('div');
+                    conteneurTemporaire.innerHTML = html.trim();
+                    var ligne = conteneurTemporaire.firstElementChild;
+                    identificationsContainer.appendChild(ligne);
+                    totalFormsInput.value = index + 1;
+                    attacherSuppressionLigneIdentification(ligne);
+                });
+            }
+
+            // --- Ajout rapide d'un organisme absent du catalogue ------------------
+            // Le bouton « + » est répété sur chaque ligne d'identification (cf.
+            // #identificationsContainer) : la modale retient, via
+            // event.relatedTarget, le champ <select> à mettre à jour une fois
+            // l'organisme créé.
+            var modalOrganismeEl = document.getElementById('modalNouvelOrganisme');
+            if (modalOrganismeEl) {
+                var especeOrganismeModalField = document.getElementById('nouvelOrganismeEspece');
+                var nomCourtModalField = document.getElementById('nouvelOrganismeNomCourt');
+                var nomModalOrganismeField = document.getElementById('nouvelOrganismeNom');
+                var erreursOrganismeDiv = document.getElementById('nouvelOrganismeErreurs');
+                var boutonValiderOrganisme = document.getElementById('nouvelOrganismeValider');
+                var organismeFieldActif = null;
+
+                modalOrganismeEl.addEventListener('show.bs.modal', function (evenement) {
+                    organismeFieldActif = evenement.relatedTarget
+                        ? document.getElementById(evenement.relatedTarget.dataset.targetSelect)
+                        : null;
+                    erreursOrganismeDiv.classList.add('d-none');
+                    erreursOrganismeDiv.innerHTML = '';
+                    ['nouvelOrganismeNomCourt', 'nouvelOrganismeNom', 'nouvelOrganismePays',
+                        'nouvelOrganismeSiteWeb', 'nouvelOrganismeDescription'].forEach(function (id) {
+                        document.getElementById(id).value = '';
+                    });
+                    document.getElementById('nouvelOrganismeEstOfficiel').checked = true;
+                });
+
+                function afficherErreursOrganisme(erreurs) {
+                    var messages = [];
+                    Object.keys(erreurs || {}).forEach(function (champ) {
+                        erreurs[champ].forEach(function (erreur) {
+                            messages.push(erreur.message || erreur);
+                        });
+                    });
+                    if (!messages.length) {
+                        messages.push("Impossible d'ajouter cet organisme.");
+                    }
+                    erreursOrganismeDiv.innerHTML = messages.join('<br>');
+                    erreursOrganismeDiv.classList.remove('d-none');
+                }
+
+                boutonValiderOrganisme.addEventListener('click', function () {
+                    if (!organismeFieldActif) {
+                        return;
+                    }
+                    var nomCourt = nomCourtModalField.value.trim();
+                    var nom = nomModalOrganismeField.value.trim();
+                    if (!nomCourt || !nom) {
+                        afficherErreursOrganisme({
+                            nom_court: [{ message: 'Le nom court et le nom complet sont obligatoires.' }],
+                        });
+                        return;
+                    }
+
+                    var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+                    var donnees = new URLSearchParams();
+                    donnees.set('espece', especeOrganismeModalField.value);
+                    donnees.set('nom_court', nomCourt);
+                    donnees.set('nom', nom);
+                    donnees.set('pays', document.getElementById('nouvelOrganismePays').value.trim());
+                    donnees.set('site_web', document.getElementById('nouvelOrganismeSiteWeb').value.trim());
+                    donnees.set('description', document.getElementById('nouvelOrganismeDescription').value.trim());
+                    donnees.set('est_officiel', document.getElementById('nouvelOrganismeEstOfficiel').checked ? 'on' : '');
+
+                    boutonValiderOrganisme.disabled = true;
+                    fetch('{% url "animaux:organisme_create_ajax" %}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: donnees.toString(),
+                    })
+                        .then(function (reponse) {
+                            return reponse.json().then(function (data) {
+                                return { ok: reponse.ok, data: data };
+                            });
+                        })
+                        .then(function (resultat) {
+                            if (!resultat.ok || !resultat.data.success) {
+                                afficherErreursOrganisme(resultat.data.errors);
+                                return;
+                            }
+                            var organisme = resultat.data;
+
+                            // Retrouve (ou crée) l'optgroup correspondant à l'espèce du
+                            // nouvel organisme, pour rester cohérent avec le regroupement existant.
+                            var optgroup = Array.from(organismeFieldActif.getElementsByTagName('optgroup'))
+                                .find(function (og) { return og.label === organisme.espece_libelle; });
+                            if (!optgroup) {
+                                optgroup = document.createElement('optgroup');
+                                optgroup.label = organisme.espece_libelle;
+                                organismeFieldActif.appendChild(optgroup);
+                            }
+
+                            var option = document.createElement('option');
+                            option.value = organisme.id;
+                            option.text = organisme.nom_court;
+                            optgroup.appendChild(option);
+                            organismeFieldActif.value = organisme.id;
+
+                            var modal = bootstrap.Modal.getInstance(modalOrganismeEl);
+                            modal.hide();
+                        })
+                        .catch(function () {
+                            afficherErreursOrganisme({});
+                        })
+                        .finally(function () {
+                            boutonValiderOrganisme.disabled = false;
+                        });
+                });
+            }
+
+            // --- Ajout rapide d'une robe absente de la liste -----------------------
+            var robeField = document.getElementById('id_robe');
+            if (robeField) {
+                var modalRobeEl = document.getElementById('modalNouvelleRobe');
+                var nomRobeModalField = document.getElementById('nouvelleRobeNom');
+                var erreursRobeDiv = document.getElementById('nouvelleRobeErreurs');
+                var boutonValiderRobe = document.getElementById('nouvelleRobeValider');
+
+                modalRobeEl.addEventListener('show.bs.modal', function () {
+                    erreursRobeDiv.classList.add('d-none');
+                    erreursRobeDiv.innerHTML = '';
+                    nomRobeModalField.value = '';
+                });
+
+                function afficherErreursRobe(erreurs) {
+                    var messages = [];
+                    Object.keys(erreurs || {}).forEach(function (champ) {
+                        erreurs[champ].forEach(function (erreur) {
+                            messages.push(erreur.message || erreur);
+                        });
+                    });
+                    if (!messages.length) {
+                        messages.push("Impossible d'ajouter cette robe.");
+                    }
+                    erreursRobeDiv.innerHTML = messages.join('<br>');
+                    erreursRobeDiv.classList.remove('d-none');
+                }
+
+                boutonValiderRobe.addEventListener('click', function () {
+                    var nom = nomRobeModalField.value.trim();
+                    if (!nom) {
+                        afficherErreursRobe({ nom: [{ message: 'Le nom de la robe est obligatoire.' }] });
+                        return;
+                    }
+
+                    var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+                    var donnees = new URLSearchParams();
+                    donnees.set('nom', nom);
+
+                    boutonValiderRobe.disabled = true;
+                    fetch('{% url "animaux:robe_create_ajax" %}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: donnees.toString(),
+                    })
+                        .then(function (reponse) {
+                            return reponse.json().then(function (data) {
+                                return { ok: reponse.ok, data: data };
+                            });
+                        })
+                        .then(function (resultat) {
+                            if (!resultat.ok || !resultat.data.success) {
+                                afficherErreursRobe(resultat.data.errors);
+                                return;
+                            }
+                            var robe = resultat.data;
+
+                            var option = document.createElement('option');
+                            option.value = robe.id;
+                            option.text = robe.nom;
+                            robeField.appendChild(option);
+                            robeField.value = robe.id;
+
+                            var modal = bootstrap.Modal.getInstance(modalRobeEl);
+                            modal.hide();
+                        })
+                        .catch(function () {
+                            afficherErreursRobe({});
+                        })
+                        .finally(function () {
+                            boutonValiderRobe.disabled = false;
+                        });
+                });
+            }
+
+            // --- Ajout rapide d'un propriétaire absent de la liste ----------------
+            var proprietaireField = document.getElementById('id_proprietaire');
+            if (proprietaireField) {
+                var modalProprietaireEl = document.getElementById('modalNouveauProprietaire');
+                var nomProprietaireModalField = document.getElementById('nouveauProprietaireNom');
+                var prenomProprietaireModalField = document.getElementById('nouveauProprietairePrenom');
+                var adresseProprietaireModalField = document.getElementById('nouveauProprietaireAdresse');
+                var codePostalProprietaireModalField = document.getElementById('nouveauProprietaireCodePostal');
+                var villeProprietaireModalField = document.getElementById('nouveauProprietaireVille');
+                var telephoneProprietaireModalField = document.getElementById('nouveauProprietaireTelephone');
+                var emailProprietaireModalField = document.getElementById('nouveauProprietaireEmail');
+                var erreursProprietaireDiv = document.getElementById('nouveauProprietaireErreurs');
+                var boutonValiderProprietaire = document.getElementById('nouveauProprietaireValider');
+
+                modalProprietaireEl.addEventListener('show.bs.modal', function () {
+                    erreursProprietaireDiv.classList.add('d-none');
+                    erreursProprietaireDiv.innerHTML = '';
+                    [nomProprietaireModalField, prenomProprietaireModalField, adresseProprietaireModalField,
+                        codePostalProprietaireModalField, villeProprietaireModalField,
+                        telephoneProprietaireModalField, emailProprietaireModalField].forEach(function (champ) {
+                        champ.value = '';
+                    });
+                });
+
+                function afficherErreursProprietaire(erreurs) {
+                    var messages = [];
+                    Object.keys(erreurs || {}).forEach(function (champ) {
+                        erreurs[champ].forEach(function (erreur) {
+                            messages.push(erreur.message || erreur);
+                        });
+                    });
+                    if (!messages.length) {
+                        messages.push("Impossible d'ajouter ce propriétaire.");
+                    }
+                    erreursProprietaireDiv.innerHTML = messages.join('<br>');
+                    erreursProprietaireDiv.classList.remove('d-none');
+                }
+
+                boutonValiderProprietaire.addEventListener('click', function () {
+                    var nom = nomProprietaireModalField.value.trim();
+                    var email = emailProprietaireModalField.value.trim();
+                    if (!nom || !email) {
+                        afficherErreursProprietaire({
+                            nom: [{ message: 'Le nom et l\'email sont obligatoires.' }],
+                        });
+                        return;
+                    }
+
+                    var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
+                    var donnees = new URLSearchParams();
+                    donnees.set('nom', nom);
+                    donnees.set('prenom', prenomProprietaireModalField.value.trim());
+                    donnees.set('adresse', adresseProprietaireModalField.value.trim());
+                    donnees.set('code_postal', codePostalProprietaireModalField.value.trim());
+                    donnees.set('ville', villeProprietaireModalField.value.trim());
+                    donnees.set('telephone', telephoneProprietaireModalField.value.trim());
+                    donnees.set('email', email);
+
+                    boutonValiderProprietaire.disabled = true;
+                    fetch('{% url "animaux:proprietaire_create_ajax" %}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: donnees.toString(),
+                    })
+                        .then(function (reponse) {
+                            return reponse.json().then(function (data) {
+                                return { ok: reponse.ok, data: data };
+                            });
+                        })
+                        .then(function (resultat) {
+                            if (!resultat.ok || !resultat.data.success) {
+                                afficherErreursProprietaire(resultat.data.errors);
+                                return;
+                            }
+                            var proprietaire = resultat.data;
+
+                            var option = document.createElement('option');
+                            option.value = proprietaire.id;
+                            option.text = proprietaire.nom;
+                            proprietaireField.appendChild(option);
+                            proprietaireField.value = proprietaire.id;
+
+                            var modal = bootstrap.Modal.getInstance(modalProprietaireEl);
+                            modal.hide();
+                        })
+                        .catch(function () {
+                            afficherErreursProprietaire({});
+                        })
+                        .finally(function () {
+                            boutonValiderProprietaire.disabled = false;
+                        });
+                });
+            }
+        });
+    </script>
+{% endblock %}

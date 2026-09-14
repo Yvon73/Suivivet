@@ -1,0 +1,594 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ animal.nom }} - Fiche détaillée{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <!-- Colonne principale -->
+        <div class="col-lg-8">
+            <!-- En-tête de la fiche -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if animal.photo %}
+                            <img src="{{ animal.photo.url }}" alt="Photo de {{ animal.nom }}"
+                                 class="rounded-circle border border-light" style="width: 64px; height: 64px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                <i class="bi bi-camera text-secondary fs-4"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h1 class="mb-0">
+                                <i class="bi bi-paw"></i> {{ animal.nom }}
+                            </h1>
+                            <p class="mb-0 text-white-50">
+                                {{ animal.espece }} - {{ animal.race }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'animaux:pdf_fiche_animal' animal.pk %}" class="btn btn-light" target="_blank">
+                            <i class="bi bi-file-earmark-pdf text-danger"></i> PDF
+                        </a>
+                        <a href="{% url 'animaux:animal_update' animal.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        <a href="{% url 'animaux:animal_delete' animal.pk %}" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </a>
+                    </div>
+                </div>
+                {% if animal.race.niveau_dangerosite != 'NON_RENSEIGNE' %}
+                    <div class="alert alert-{{ animal.race.classe_bootstrap_dangerosite }} rounded-0 mb-0 text-center fw-semibold">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Degré de dangerosité de la race ({{ animal.race.nom }}) :
+                        {{ animal.race.get_niveau_dangerosite_display }}
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-5">Âge :</dt>
+                                <dd class="col-sm-7">
+                                    {% if animal.date_deces %}
+                                        <span class="badge bg-danger">Décédé à {{ animal.age_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ animal.age_display }}</span>
+                                    {% endif %}
+                                </dd>
+                                <dt class="col-sm-5">Propriétaire :</dt>
+                                <dd class="col-sm-7">
+                                    <a href="{% url 'animaux:proprietaire_detail' animal.proprietaire.pk %}">{{ animal.proprietaire }}</a>
+                                    {% if not animal.proprietaire.actif %}<span class="badge bg-secondary">Archivé</span>{% endif %}
+                                </dd>
+                                <dt class="col-sm-5">Date de naissance :</dt>
+                                <dd class="col-sm-7">{{ animal.date_naissance|date:"d/m/Y" }}</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-5">Identifications :</dt>
+                                <dd class="col-sm-7">
+                                    {% for ident in animal.identifications.all %}
+                                        <span class="badge bg-success d-block mb-1 text-start" title="{% if ident.organisme %}{{ ident.organisme.nom }}{% endif %}">
+                                            <i class="bi bi-check-circle"></i>
+                                            {{ ident.identification|default:"—" }}
+                                            {% with organisme_libelle=ident.organisme_affiche %}
+                                                {% if organisme_libelle %}({{ organisme_libelle }}){% endif %}
+                                            {% endwith %}
+                                        </span>
+                                    {% empty %}
+                                        <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Non renseigné</span>
+                                    {% endfor %}
+                                </dd>
+                                <dt class="col-sm-5">Robe :</dt>
+                                <dd class="col-sm-7">{{ animal.robe }}</dd>
+                                {% if animal.date_deces %}
+                                    <dt class="col-sm-5">Date de décès :</dt>
+                                    <dd class="col-sm-7">{{ animal.date_deces|date:"d/m/Y" }}</dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fiche de la race (catalogue static/data/races_*.json) -->
+            {% if animal.race.a_une_fiche_detaillee %}
+                <div class="card mb-4 fade-in">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-journal-bookmark"></i> Fiche de la race — {{ animal.race.nom }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row mb-0">
+                                    {% if animal.race.origine %}
+                                        <dt class="col-sm-5">Origine :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.origine }}</dd>
+                                    {% endif %}
+                                    {% if animal.race.taille_affichee %}
+                                        <dt class="col-sm-5">Taille :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.taille_affichee }}</dd>
+                                    {% endif %}
+                                    {% if animal.race.poids_affiche %}
+                                        <dt class="col-sm-5">Poids :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.poids_affiche }}</dd>
+                                    {% endif %}
+                                    {% if animal.race.esperance_vie %}
+                                        <dt class="col-sm-5">Espérance de vie :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.esperance_vie }}</dd>
+                                    {% endif %}
+                                    {% if animal.race.nom_scientifique %}
+                                        <dt class="col-sm-5">Nom scientifique :</dt>
+                                        <dd class="col-sm-7 fst-italic">{{ animal.race.nom_scientifique }}</dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row mb-0">
+                                    {% if animal.race.groupe_fci %}
+                                        <dt class="col-sm-5">Groupe FCI :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.groupe_fci }}</dd>
+                                    {% endif %}
+                                    {% if animal.race.categorie %}
+                                        <dt class="col-sm-5">Catégorie :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.categorie }}{% if animal.race.sous_categorie %} / {{ animal.race.sous_categorie }}{% endif %}</dd>
+                                    {% endif %}
+                                    {% if animal.race.niveau_soin %}
+                                        <dt class="col-sm-5">Niveau de soin :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.niveau_soin }}</dd>
+                                    {% endif %}
+                                    {% if animal.race.legislation_france %}
+                                        <dt class="col-sm-5">Législation (France) :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.legislation_france }}</dd>
+                                    {% endif %}
+                                    {% if animal.race.prix_moyen %}
+                                        <dt class="col-sm-5">Prix moyen constaté :</dt>
+                                        <dd class="col-sm-7">{{ animal.race.prix_moyen }}</dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </div>
+                        {% if animal.race.description %}
+                            <p class="mt-2 mb-0">{{ animal.race.description }}</p>
+                        {% endif %}
+
+                        {% with infos=animal.race.infos_complementaires_lisibles %}
+                            {% if infos %}
+                                <hr>
+                                <div class="accordion accordion-flush" id="accordionInfosRace">
+                                    {% for info in infos %}
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#infoRace{{ forloop.counter }}">
+                                                    {{ info.label }}
+                                                </button>
+                                            </h2>
+                                            <div id="infoRace{{ forloop.counter }}" class="accordion-collapse collapse"
+                                                 data-bs-parent="#accordionInfosRace">
+                                                <div class="accordion-body">
+                                                    <ul class="mb-0 ps-3">
+                                                        {% for ligne in info.lignes %}<li>{{ ligne }}</li>{% endfor %}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Suivi du poids -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Suivi du poids
+                    </h5>
+                    <a href="{% url 'animaux:poids_create' animal.pk %}" class="btn btn-sm btn-light">
+                        <i class="bi bi-plus"></i> Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if poids_list %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Poids (kg)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for poids in poids_list %}
+                                        <tr>
+                                            <td>{{ poids.date|date:"d/m/Y" }}</td>
+                                            <td>{{ poids.valeur }}</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="{% url 'animaux:graphique_poids' animal.pk %}" class="btn btn-info mt-3">
+                            <i class="bi bi-bar-chart-line"></i> Voir la courbe de poids
+                        </a>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Aucune mesure de poids enregistrée.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historique des vaccins et traitements -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-syringe"></i> Historique médical
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="medicalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="vaccins-tab" data-bs-toggle="tab" data-bs-target="#vaccins" type="button" role="tab">
+                                <i class="bi bi-virus"></i> Vaccins
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="traitements-tab" data-bs-toggle="tab" data-bs-target="#traitements" type="button" role="tab">
+                                <i class="bi bi-capsule"></i> Traitements
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="medicalTabsContent">
+                        <div class="tab-pane fade show active" id="vaccins" role="tabpanel">
+                            {% if vaccins %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Vaccin</th>
+                                                    <th>Date</th>
+                                                    <th>Prochaine dose</th>
+                                                    <th>Notes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for vaccin in vaccins %}
+                                                    <tr>
+                                                        <td>{{ vaccin.vaccin.nom }}</td>
+                                                        <td>{{ vaccin.date|date:"d/m/Y" }}</td>
+                                                        <td>
+                                                            {% if vaccin.date_prochaine_dose %}
+                                                                {{ vaccin.date_prochaine_dose|date:"d/m/Y" }}
+                                                            {% else %}
+                                                                -
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>{{ vaccin.notes|default:"-" }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle"></i> Aucun vaccin enregistré.
+                                    </div>
+                                {% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="traitements" role="tabpanel">
+                            {% if traitements %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Traitement</th>
+                                                    <th>Date</th>
+                                                    <th>Dose</th>
+                                                    <th>Notes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for traitement in traitements %}
+                                                    <tr>
+                                                        <td>{{ traitement.traitement.nom }}</td>
+                                                        <td>{{ traitement.date|date:"d/m/Y" }}</td>
+                                                        <td>{{ traitement.traitement.dose|default:"-" }}</td>
+                                                        <td>{{ traitement.notes|default:"-" }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle"></i> Aucun traitement enregistré.
+                                    </div>
+                                {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consultations -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check"></i> Consultations
+                    </h5>
+                    <a href="{% url 'consultations:consultation_create' animal.pk %}" class="btn btn-sm btn-light">
+                        <i class="bi bi-plus"></i> Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if animal.consultations.all %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Motif</th>
+                                        <th>Vétérinaire</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for consultation in animal.consultations.all %}
+                                        <tr>
+                                            <td>{{ consultation.date|date:"d/m/Y H:i" }}</td>
+                                            <td>{{ consultation.motif }}</td>
+                                            <td>
+                                                <a href="{% url 'consultations:veterinaire_detail' consultation.veterinaire.pk %}">{{ consultation.veterinaire }}</a>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'consultations:consultation_detail' consultation.pk %}" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'consultations:consultation_update' consultation.pk %}" class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Aucune consultation enregistrée.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Factures -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt"></i> Factures
+                    </h5>
+                    <a href="{% url 'factures:facture_create' animal.pk %}" class="btn btn-sm btn-light">
+                        <i class="bi bi-plus"></i> Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if animal.factures.all %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Titre</th>
+                                        <th>Montant</th>
+                                        <th>Fichier</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for facture in animal.factures.all %}
+                                        <tr>
+                                            <td>{{ facture.date|date:"d/m/Y" }}</td>
+                                            <td>{{ facture.get_type_depense_display }}</td>
+                                            <td>{{ facture.titre }}</td>
+                                            <td>{{ facture.montant }} €</td>
+                                            <td>
+                                                {% if facture.fichier %}
+                                                    <a href="{{ facture.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Aucune facture enregistrée.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-pdf"></i> Documents
+                    </h5>
+                    <a href="{% url 'documents:document_create' animal.pk %}" class="btn btn-sm btn-light">
+                        <i class="bi bi-plus"></i> Ajouter
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if animal.documents.all %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Titre</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Fichier</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for document in animal.documents.all %}
+                                        <tr>
+                                            <td>{{ document.type_document }}</td>
+                                            <td>{{ document.titre }}</td>
+                                            <td>{{ document.date_ajout|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <a href="{{ document.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Aucun document enregistré.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <a href="{% url 'animaux:animal_list' %}" class="btn btn-secondary mt-3">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <!-- Colonne latérale -->
+        <div class="col-lg-4">
+            <!-- Actions rapides -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning-charge"></i> Actions rapides
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'vaccins:suivi_create' animal.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-syringe me-2"></i> Ajouter un vaccin/traitement
+                        </a>
+                        <a href="{% url 'consultations:consultation_create' animal.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-check me-2"></i> Planifier une consultation
+                        </a>
+                        <a href="{% url 'factures:facture_create' animal.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-receipt me-2"></i> Ajouter une facture
+                        </a>
+                        <a href="{% url 'documents:document_create' animal.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-file-earmark-pdf me-2"></i> Ajouter un document
+                        </a>
+                        <a href="{% url 'animaux:poids_create' animal.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-scale me-2"></i> Ajouter une mesure de poids
+                        </a>
+                        <a href="{% url 'animaux:pdf_fiche_animal' animal.pk %}" class="btn btn-outline-danger" target="_blank">
+                            <i class="bi bi-file-pdf me-2"></i> Générer la fiche PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques rapides -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart"></i> Statistiques
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-syringe fs-1 text-primary"></i>
+                                <h6 class="mt-2">{{ animal.suivi_vaccins_traitements.count }}</h6>
+                                <small>Vaccins/Traitements</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-calendar-check fs-1 text-success"></i>
+                                <h6 class="mt-2">{{ animal.consultations.count }}</h6>
+                                <small>Consultations</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-receipt fs-1 text-warning"></i>
+                                <h6 class="mt-2">{{ animal.factures.count }}</h6>
+                                <small>Factures</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                <h6 class="mt-2">{{ animal.documents.count }}</h6>
+                                <small>Documents</small>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-graph-up fs-1 text-info"></i>
+                                <h6 class="mt-2">
+                                    {% if poids_list %}
+                                        {{ poids_list|length }} mesures de poids
+                                    {% else %}
+                                        0 mesure
+                                    {% endif %}
+                                </h6>
+                                <small>Suivi du poids</small>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-cash-coin fs-1 text-success"></i>
+                                <h6 class="mt-2 mb-0">Coût de revient</h6>
+                                <small class="text-muted d-block mb-2">
+                                    Lignes de facture ventilées attribuées à cet animal, + une part égale des
+                                    factures non ventilées sans animal renseigné.
+                                </small>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>{{ cout_revient_mensuel|floatformat:2 }} €</strong>
+                                        <small class="d-block">ce mois-ci</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>{{ cout_revient_annuel|floatformat:2 }} €</strong>
+                                        <small class="d-block">cette année</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

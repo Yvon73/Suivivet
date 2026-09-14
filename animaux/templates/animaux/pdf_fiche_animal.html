@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche de {{ animal.nom }}</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11pt; }
+        h1 { color: #2c3e50; text-align: center; font-size: 20pt; }
+        h2 { color: #3498db; border-bottom: 1px solid #eee; padding-bottom: 5px; font-size: 14pt; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 10pt; }
+        th { background-color: #f2f2f2; }
+        .section { margin-bottom: 30px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .logo { width: 100px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Fiche Vétérinaire</h1>
+            <p>Clinique Vétérinaire - Suivi des Animaux Domestiques</p>
+        </div>
+        <div>
+            <p>Date: {{ today|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Informations Générales</h2>
+        <table>
+            <tr>
+                <th width: 30%>Nom</th>
+                <td>{{ animal.nom }}</td>
+            </tr>
+            <tr>
+                <th>Espèce</th>
+                <td>{{ animal.espece }}</td>
+            </tr>
+            <tr>
+                <th>Race</th>
+                <td>{{ animal.race }}</td>
+            </tr>
+            <tr>
+                <th>Identifications</th>
+                <td>{{ animal.identifications_display|default:"Non renseigné" }}</td>
+            </tr>
+            <tr>
+                <th>Date de Naissance</th>
+                <td>{{ animal.date_naissance|date:"d/m/Y" }}</td>
+            </tr>
+            <tr>
+                <th>Âge</th>
+                <td>{{ animal.age_display }}</td>
+            </tr>
+            <tr>
+                <th>Propriétaire</th>
+                <td>
+                    {% if animal.proprietaire.actif %}
+                        {{ animal.proprietaire.nom_complet }}
+                        {% if animal.proprietaire.telephone %} — {{ animal.proprietaire.telephone }}{% endif %}
+                        {% if animal.proprietaire.email %} — {{ animal.proprietaire.email }}{% endif %}
+                    {% else %}
+                        Non communiqué
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Robe</th>
+                <td>{{ animal.robe }}</td>
+            </tr>
+        </table>
+    </div>
+
+    {% if animal.race.a_une_fiche_detaillee %}
+    <div class="section">
+        <h2>Fiche de la race — {{ animal.race.nom }}</h2>
+        <table>
+            {% if animal.race.origine %}<tr><th>Origine</th><td>{{ animal.race.origine }}</td></tr>{% endif %}
+            {% if animal.race.taille_affichee %}<tr><th>Taille</th><td>{{ animal.race.taille_affichee }}</td></tr>{% endif %}
+            {% if animal.race.poids_affiche %}<tr><th>Poids</th><td>{{ animal.race.poids_affiche }}</td></tr>{% endif %}
+            {% if animal.race.esperance_vie %}<tr><th>Espérance de vie</th><td>{{ animal.race.esperance_vie }}</td></tr>{% endif %}
+            {% if animal.race.nom_scientifique %}<tr><th>Nom scientifique</th><td>{{ animal.race.nom_scientifique }}</td></tr>{% endif %}
+            {% if animal.race.groupe_fci %}<tr><th>Groupe FCI</th><td>{{ animal.race.groupe_fci }}</td></tr>{% endif %}
+            {% if animal.race.categorie %}<tr><th>Catégorie</th><td>{{ animal.race.categorie }}{% if animal.race.sous_categorie %} / {{ animal.race.sous_categorie }}{% endif %}</td></tr>{% endif %}
+            {% if animal.race.niveau_soin %}<tr><th>Niveau de soin</th><td>{{ animal.race.niveau_soin }}</td></tr>{% endif %}
+            {% if animal.race.legislation_france %}<tr><th>Législation (France)</th><td>{{ animal.race.legislation_france }}</td></tr>{% endif %}
+            {% if animal.race.niveau_dangerosite != 'NON_RENSEIGNE' %}<tr><th>Degré de dangerosité</th><td>{{ animal.race.get_niveau_dangerosite_display }}</td></tr>{% endif %}
+            {% if animal.race.description %}<tr><th>Description</th><td>{{ animal.race.description }}</td></tr>{% endif %}
+        </table>
+    </div>
+    {% endif %}
+
+    {% if poids_list %}
+    <div class="section">
+        <h2>Suivi du Poids</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Poids (kg)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poids in poids_list %}
+                <tr>
+                    <td>{{ poids.date|date:"d/m/Y" }}</td>
+                    <td>{{ poids.valeur }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if vaccins %}
+    <div class="section">
+        <h2>Historique des Vaccins</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Vaccin</th>
+                    <th>Date</th>
+                    <th>Prochaine Dose</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vaccin in vaccins %}
+                <tr>
+                    <td>{{ vaccin.vaccin.nom }}</td>
+                    <td>{{ vaccin.date|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if vaccin.date_prochaine_dose %}
+                            {{ vaccin.date_prochaine_dose|date:"d/m/Y" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ vaccin.notes|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if traitements %}
+    <div class="section">
+        <h2>Historique des Traitements</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Traitement</th>
+                    <th>Date</th>
+                    <th>Dose</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for traitement in traitements %}
+                <tr>
+                    <td>{{ traitement.traitement.nom }}</td>
+                    <td>{{ traitement.date|date:"d/m/Y" }}</td>
+                    <td>{{ traitement.traitement.dose|default:"-" }}</td>
+                    <td>{{ traitement.notes|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if consultations %}
+    <div class="section">
+        <h2>Historique des Consultations</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Motif</th>
+                    <th>Vétérinaire</th>
+                    <th>Compte Rendu</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consultation in consultations %}
+                <tr>
+                    <td>{{ consultation.date|date:"d/m/Y H:i" }}</td>
+                    <td>{{ consultation.motif }}</td>
+                    <td>{% if consultation.veterinaire.actif %}{{ consultation.veterinaire }}{% else %}Non communiqué{% endif %}</td>
+                    <td>{{ consultation.compte_rendu|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if factures %}
+    <div class="section">
+        <h2>Historique des Factures</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Titre</th>
+                    <th>Montant (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for facture in factures %}
+                <tr>
+                    <td>{{ facture.date|date:"d/m/Y" }}</td>
+                    <td>{{ facture.get_type_depense_display }}</td>
+                    <td>{{ facture.titre }}</td>
+                    <td>{{ facture.montant }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</body>
+</html>

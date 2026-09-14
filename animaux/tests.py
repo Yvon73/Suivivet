@@ -1,0 +1,320 @@
+import io
+from django.test import TestCase, Client
+from django.urls import reverse
+from django.contrib.auth.models import User
+from .models import Animal, AnimalIdentification, Poids, Espece, Robe, Race, Proprietaire
+from datetime import date
+from .forms import AnimalForm
+
+
+def _creer_proprietaire_test(email, nom='Test', prenom=''):
+    """Crée un Proprietaire de test (catalogue partagé, cf. Proprietaire)."""
+    return Proprietaire.objects.create(nom=nom, prenom=prenom, email=email)
+
+class AnimalModelTest(TestCase):
+    """Tests pour le modèle Animal."""
+
+    def setUp(self):
+        """Créer des données de test."""
+        self.chien = Espece.objects.get(code='CHIEN')
+        self.noir = Robe.objects.get(code='NOIR')
+        self.race_chien = Race.objects.filter(espece=self.chien).first()
+        self.proprietaire = _creer_proprietaire_test("jean.dupont@example.com", nom="Dupont", prenom="Jean")
+        self.animal = Animal.objects.create(
+            nom="Rex",
+            race=self.race_chien,
+            espece=self.chien,
+            date_naissance=date(2020, 1, 1),
+            proprietaire=self.proprietaire,
+            robe=self.noir,
+        )
+        AnimalIdentification.objects.create(animal=self.animal, identification="123456")
+
+    def test_age_calcul(self):
+        """Test du calcul de l'âge."""
+        # Âge aujourd'hui
+        today = date.today()
+        expected_age = today.year - self.animal.date_naissance.year
+        if (today.month, today.day) < (self.animal.date_naissance.month, self.animal.date_naissance.day):
+            expected_age -= 1
+        self.assertEqual(self.animal.age(), expected_age)
+
+        # Âge avec date de décès
+        self.animal.date_deces = date(2025, 1, 1)
+        self.animal.save()
+        expected_age = (
+            self.animal.date_deces.year - self.animal.date_naissance.year -
+            ((self.animal.date_deces.month, self.animal.date_deces.day) <
+             (self.animal.date_naissance.month, self.animal.date_naissance.day))
+        )
+        self.assertEqual(self.animal.age(), expected_age)
+
+    def test_str_method(self):
+        """Test de la méthode __str__."""
+        self.assertEqual(str(self.animal), "Rex (Chien)")
+
+    def test_unique_identification(self):
+        """Test de l'unicité de l'identification."""
+        max = Animal.objects.create(
+            nom="Max",
+            race=self.race_chien,
+            espece=self.chien,
+            date_naissance=date(2021, 1, 1),
+            proprietaire=_creer_proprietaire_test("marie.martin@example.com", nom="Martin", prenom="Marie"),
+            robe=self.noir,
+        )
+        with self.assertRaises(Exception):
+            AnimalIdentification.objects.create(
+                animal=max,
+                identification="123456",  # Même identification que Rex
+            )
+
+class PoidsModelTest(TestCase):
+    """Tests pour le modèle Poids."""
+
+    def setUp(self):
+        chat = Espece.objects.get(code='CHAT')
+        robe = Robe.objects.get(code='AUTRE')
+        race_chat = Race.objects.filter(espece=chat).first()
+        self.animal = Animal.objects.create(
+            nom="Moustache",
+            race=race_chat,
+            espece=chat,
+            date_naissance=date(2019, 5, 15),
+            proprietaire=_creer_proprietaire_test("pierre.martin@example.com", nom="Martin", prenom="Pierre"),
+            robe=robe,
+        )
+        self.poids = Poids.objects.create(
+            animal=self.animal,
+            date=date(2023, 1, 1),
+            valeur=4.5,
+        )
+
+    def test_str_method(self):
+        """Test de la méthode __str__."""
+        self.assertEqual(str(self.poids), "Moustache - 4.5 kg (2023-01-01)")
+
+    def test_unique_poids_par_animal_et_date(self):
+        """Test de l'unicité du poids par animal et date."""
+        with self.assertRaises(Exception):
+            Poids.objects.create(
+                animal=self.animal,
+                date=date(2023, 1, 1),  # Même date
+                valeur=5.0,
+            )
+
+class AnimalFormTest(TestCase):
+    """Tests pour le formulaire AnimalForm."""
+
+    def setUp(self):
+        self.chat = Espece.objects.get(code='CHAT')
+        self.blanc = Robe.objects.get(code='BLANC')
+        self.race_chat = Race.objects.filter(espece=self.chat).first()
+        self.proprietaire = _creer_proprietaire_test("sophie.laurent@example.com", nom="Laurent", prenom="Sophie")
+
+    def test_valid_form(self):
+        """Test d'un formulaire valide."""
+        form_data = {
+            'nom': 'Bella',
+            'race': self.race_chat.pk,
+            'espece': self.chat.pk,
+            'date_naissance': date(2021, 3, 10),
+            'proprietaire': self.proprietaire.pk,
+            'robe': self.blanc.pk,
+        }
+        form = AnimalForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_form(self):
+        """Test d'un formulaire invalide (champ requis manquant)."""
+        form_data = {
+            'nom': '',  # Nom vide
+            'race': self.race_chat.pk,
+            'espece': self.chat.pk,
+            'date_naissance': date(2021, 3, 10),
+        }
+        form = AnimalForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('nom', form.errors)
+
+class AnimalViewTest(TestCase):
+    """Tests pour les vues de l'application animaux."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123',
+        )
+        self.client.login(username='testuser', password='testpass123')
+        self.chien = Espece.objects.get(code='CHIEN')
+        self.chat = Espece.objects.get(code='CHAT')
+        self.noir = Robe.objects.get(code='NOIR')
+        self.race_chien = Race.objects.filter(espece=self.chien).first()
+        self.race_chat = Race.objects.filter(espece=self.chat).first()
+        self.proprietaire = _creer_proprietaire_test("test.user@example.com")
+        self.animal = Animal.objects.create(
+            nom="Test",
+            race=self.race_chien,
+            espece=self.chien,
+            date_naissance=date(2020, 1, 1),
+            proprietaire=self.proprietaire,
+            robe=self.noir,
+        )
+        AnimalIdentification.objects.create(animal=self.animal, identification="000000")
+
+        # Données de management form du formset identifications, requises par
+        # les vues de création/modification (cf. AnimalIdentificationFormSet).
+        self.identifications_management_data = {
+            'identifications-TOTAL_FORMS': '0',
+            'identifications-INITIAL_FORMS': '0',
+            'identifications-MIN_NUM_FORMS': '0',
+            'identifications-MAX_NUM_FORMS': '1000',
+        }
+
+    def test_animal_list_view(self):
+        """Test de la vue liste des animaux."""
+        response = self.client.get(reverse('animaux:animal_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'animaux/liste.html')
+        self.assertContains(response, "Test")
+
+    def test_animal_detail_view(self):
+        """Test de la vue détail d'un animal."""
+        response = self.client.get(reverse('animaux:animal_detail', args=[self.animal.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'animaux/detail.html')
+        self.assertContains(response, "Test")
+
+    def test_animal_detail_view_cout_revient(self):
+        """La case « Coût de revient » (Statistiques) reprend le total d'une
+        facture non ventilée attribuée à l'animal (cf. factures.Facture)."""
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from factures.models import Facture
+
+        Facture.objects.create(
+            animal=self.animal, type_depense='VETERINAIRE', titre='Facture test',
+            montant='50.00', date=date.today(),
+            fichier=SimpleUploadedFile('f.pdf', b'%PDF-1.4', content_type='application/pdf'),
+        )
+
+        response = self.client.get(reverse('animaux:animal_detail', args=[self.animal.pk]))
+        self.assertEqual(response.context['cout_revient_annuel'], 50)
+        self.assertEqual(response.context['cout_revient_mensuel'], 50)
+
+        response_liste = self.client.get(reverse('animaux:animal_list'))
+        animaux_page = list(response_liste.context['animaux'])
+        animal_affiche = next(a for a in animaux_page if a.pk == self.animal.pk)
+        self.assertEqual(animal_affiche.cout_revient_annuel, 50)
+
+    def test_animal_create_view(self):
+        """Test de la vue création d'un animal."""
+        response = self.client.post(reverse('animaux:animal_create'), {
+            'nom': 'Nouveau',
+            'race': self.race_chien.pk,
+            'espece': self.chien.pk,
+            'date_naissance': '2022-01-01',
+            'proprietaire': self.proprietaire.pk,
+            'robe': self.noir.pk,
+            **self.identifications_management_data,
+        })
+        self.assertEqual(response.status_code, 302)  # Redirection après création
+        self.assertTrue(Animal.objects.filter(nom='Nouveau').exists())
+
+    def test_animal_update_view(self):
+        """Test de la vue modification d'un animal."""
+        response = self.client.post(
+            reverse('animaux:animal_update', args=[self.animal.pk]),
+            {
+                'nom': 'Test Modifié',
+                'race': self.race_chien.pk,
+                'espece': self.chien.pk,
+                'date_naissance': '2020-01-01',
+                'proprietaire': self.proprietaire.pk,
+                'robe': self.noir.pk,
+                **self.identifications_management_data,
+            }
+        )
+        self.assertEqual(response.status_code, 302)
+        self.animal.refresh_from_db()
+        self.assertEqual(self.animal.nom, 'Test Modifié')
+
+    def test_animal_delete_view(self):
+        """Test de la vue suppression d'un animal."""
+        response = self.client.post(reverse('animaux:animal_delete', args=[self.animal.pk]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Animal.objects.filter(pk=self.animal.pk).exists())
+
+    def test_pdf_generation(self):
+        """Test de la génération du PDF."""
+        response = self.client.get(reverse('animaux:pdf_fiche_animal', args=[self.animal.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertIn('attachment', response['Content-Disposition'])
+
+    def test_search_view(self):
+        """Test de la recherche d'animaux."""
+        # Ajouter un deuxième animal
+        autre = Animal.objects.create(
+            nom="Autre",
+            race=self.race_chat,
+            espece=self.chat,
+            date_naissance=date(2021, 1, 1),
+            proprietaire=_creer_proprietaire_test("autre.user@example.com"),
+            robe=self.noir,
+        )
+        AnimalIdentification.objects.create(animal=autre, identification="222222")
+        # Recherche par nom
+        response = self.client.get(reverse('animaux:animal_list'), {'nom': 'Test'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Test")
+        self.assertNotContains(response, "222222")  # identification de l'animal "Autre"
+
+        # Recherche par espèce
+        response = self.client.get(reverse('animaux:animal_list'), {'espece': self.chien.pk})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Test")
+        self.assertNotContains(response, "222222")
+
+    def test_unauthenticated_access(self):
+        """Test de l'accès non autorisé."""
+        self.client.logout()
+        response = self.client.get(reverse('animaux:animal_list'))
+        self.assertEqual(response.status_code, 302)  # Redirection vers la page de login.
+
+    def test_export_csv(self):
+        """Test de l'export CSV des animaux."""
+        response = self.client.get(reverse('animaux:exporter_csv'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv')
+        self.assertIn('attachment', response['Content-Disposition'])
+        self.assertIn('Nom,Espèce,Race', response.content.decode('utf-8'))
+
+    def test_export_excel(self):
+        """Test de l'export Excel des animaux."""
+        response = self.client.get(reverse('animaux:exporter_excel'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        self.assertIn('attachment', response['Content-Disposition'])
+
+    def test_import_csv(self):
+        """Test de l'import CSV des animaux."""
+        # Créer un fichier CSV valide
+        csv_content = (
+            "Nom,Espèce,Race,Identification,Date de Naissance,Propriétaire,LOF,Robe\n"
+            "NouvelAnimal,CHIEN,Berger,999999,2022-01-01,Nouveau Propriétaire,Oui,NOIR\n"
+        )
+        csv_file = io.StringIO(csv_content)
+        csv_file.name = 'test.csv'
+
+        # Test de l'import
+        response = self.client.post(
+            reverse('animaux:importer_csv'),
+            {'csv_file': csv_file},
+            format='multipart',
+        )
+        self.assertEqual(response.status_code, 302)  # Redirection après import
+        self.assertTrue(Animal.objects.filter(nom='NouvelAnimal').exists())

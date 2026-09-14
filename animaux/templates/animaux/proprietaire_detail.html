@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ proprietaire.nom_complet }} - Fiche propriétaire{% endblock %}
+
+{% block content %}
+    <div class="card mb-4 fade-in">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h1 class="mb-0 h4">
+                <i class="bi bi-person-vcard"></i> {{ proprietaire.nom_complet }}
+                {% if not proprietaire.actif %}
+                    <span class="badge bg-secondary">Archivé</span>
+                {% endif %}
+            </h1>
+            <div class="d-flex gap-2">
+                <a href="{% url 'animaux:proprietaire_update' proprietaire.pk %}" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Modifier
+                </a>
+                <a href="{% url 'animaux:proprietaire_delete' proprietaire.pk %}" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Supprimer
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Adresse :</dt>
+                <dd class="col-sm-9">{{ proprietaire.adresse|default:"Non renseignée" }}</dd>
+                <dt class="col-sm-3">Code postal :</dt>
+                <dd class="col-sm-9">{{ proprietaire.code_postal|default:"Non renseigné" }}</dd>
+                <dt class="col-sm-3">Ville :</dt>
+                <dd class="col-sm-9">{{ proprietaire.ville|default:"Non renseignée" }}</dd>
+                <dt class="col-sm-3">Téléphone :</dt>
+                <dd class="col-sm-9">{{ proprietaire.telephone|default:"Non renseigné" }}</dd>
+                <dt class="col-sm-3">Email :</dt>
+                <dd class="col-sm-9">{{ proprietaire.email }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-paw"></i> Animaux
+        </div>
+        <div class="card-body">
+            {% if proprietaire.animaux.all %}
+                <ul class="list-group list-group-flush">
+                    {% for animal in proprietaire.animaux.all %}
+                        <li class="list-group-item">
+                            <a href="{% url 'animaux:animal_detail' animal.pk %}">{{ animal.nom }}</a>
+                            — {{ animal.espece }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted mb-0">Aucun animal rattaché.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{% url 'animaux:proprietaire_list' %}" class="btn btn-outline-secondary btn-sm mt-3">
+        <i class="bi bi-arrow-left"></i> Retour à la liste
+    </a>
+{% endblock %}

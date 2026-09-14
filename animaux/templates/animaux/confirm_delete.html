@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer {{ object.nom }}{% endblock %}
+
+{% block content %}
+    <h1>Supprimer un animal</h1>
+
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <i class="bi bi-exclamation-triangle"></i> Confirmation requise
+        </div>
+        <div class="card-body">
+            <p>
+                Es-tu sûr(e) de vouloir supprimer <strong>{{ object.nom }}</strong> ?
+                Cette action est irréversible et supprimera également son historique
+                (poids, vaccins/traitements, consultations, factures, documents).
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmer la suppression
+                </button>
+                <a href="{% url 'animaux:animal_detail' object.pk %}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}
