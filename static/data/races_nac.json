@@ -1,0 +1,929 @@
+{
+  "categories": [
+    {
+      "nom": "Mammifères",
+      "description": "Rongeurs, lagomorphes, carnivores, insectivores, etc.",
+      "sous_categories": [
+        {
+          "nom": "Rongeurs",
+          "description": "Hamsters, cobayes, rats, souris, chinchillas, octodons, gerbilles"
+        },
+        {
+          "nom": "Lagomorphes",
+          "description": "Lapins nains, lapins domestiques"
+        },
+        {
+          "nom": "Carnivores",
+          "description": "Furets, fennecs, mangoustes (selon la législation)"
+        },
+        {
+          "nom": "Insectivores",
+          "description": "Hérissons, sugar gliders (attention : législation stricte)"
+        }
+      ]
+    },
+    {
+      "nom": "Oiseaux",
+      "description": "Perroquets, passereaux, gallinacés, etc.",
+      "sous_categories": [
+        {
+          "nom": "Perroquets et Psittacidés",
+          "description": "Cacatoès, aras, perruches, inséparables, amazones, gris du Gabon"
+        },
+        {
+          "nom": "Passereaux",
+          "description": "Canaris, diamants mandarins, diamants de Gould, moineaux du Japon"
+        },
+        {
+          "nom": "Gallinacés",
+          "description": "Poules naines, cailles, poulets Serama"
+        }
+      ]
+    },
+    {
+      "nom": "Reptiles",
+      "description": "Serpents, lézards, tortues, etc.",
+      "sous_categories": [
+        {
+          "nom": "Serpents",
+          "description": "Pythons, couleuvres, boas, vipères (attention : législation stricte)"
+        },
+        {
+          "nom": "Lézards",
+          "description": "Geckos, pogonas, iguanes, caméléons, anoles"
+        },
+        {
+          "nom": "Tortues",
+          "description": "Tortues terrestres, tortues aquatiques (attention : législation stricte)"
+        }
+      ]
+    },
+    {
+      "nom": "Amphibiens",
+      "description": "Grenouilles, crapauds, salamandres, axolotls, etc.",
+      "sous_categories": []
+    },
+    {
+      "nom": "Poissons",
+      "description": "Poissons d’aquarium d’eau douce et d’eau de mer.",
+      "sous_categories": [
+        {
+          "nom": "Eau douce",
+          "description": "Guppys, poissons rouges, scalaires, discus, bettas, cichlidés"
+        },
+        {
+          "nom": "Eau de mer",
+          "description": "Poissons-clowns, poissons-chirurgiens, gobies, tangs"
+        }
+      ]
+    },
+    {
+      "nom": "Invertébrés",
+      "description": "Araignées, scorpions, insectes, escargots, etc.",
+      "sous_categories": [
+        {
+          "nom": "Arachnides",
+          "description": "Mygales, scorpions, araignées sauteuses"
+        },
+        {
+          "nom": "Insectes",
+          "description": "Phasmes, mantis religieuses, grillons, blattes"
+        },
+        {
+          "nom": "Gastéropodes",
+          "description": "Escargots de Bourgogne, escargots africains géants"
+        }
+      ]
+    }
+  ],
+  "especes": [
+    {
+      "nom": "Mammifère",
+      "description": "Animaux à sang chaud, vertébrés, avec des poils ou des épines."
+    },
+    {
+      "nom": "Oiseau",
+      "description": "Animaux à sang chaud, vertébrés, avec des plumes et un bec."
+    },
+    {
+      "nom": "Reptile",
+      "description": "Animaux à sang froid, vertébrés, avec des écailles."
+    },
+    {
+      "nom": "Amphibien",
+      "description": "Animaux à sang froid, vertébrés, avec une peau humide."
+    },
+    {
+      "nom": "Poisson",
+      "description": "Animaux à sang froid, vertébrés, avec des branchies."
+    },
+    {
+      "nom": "Invertébré",
+      "description": "Animaux sans colonne vertébrale (araignées, insectes, escargots, etc.)."
+    }
+  ],
+  "nac": [
+    // === MAMMIFÈRES - RONGEURS ===
+    {
+      "nom": "Hamster Doré (Syrien)",
+      "categorie": "Rongeur",
+      "espece": "Mammifère",
+      "sous_categorie": "Rongeurs",
+      "nom_scientifique": "Mesocricetus auratus",
+      "taille_min": 10,
+      "taille_max": 17,
+      "poids_min": 0.08,
+      "poids_max": 0.15,
+      "esperance_vie": "2-3 ans",
+      "origine": "Syrie",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "10-30 €",
+      "alimentation": {
+        "type": "Omnivore",
+        "aliments_principaux": [
+          "Mélange de graines pour hamster",
+          "Légumes frais",
+          "Fruits",
+          "Protéines animales"
+        ],
+        "aliments_a_eviter": [
+          "Chou",
+          "Oignon, ail, échalote",
+          "Agrumes",
+          "Chocolat, café, thé"
+        ]
+      },
+      "habitat": {
+        "type": "Cage",
+        "taille_min": "80 x 50 cm",
+        "accessoires": ["Roue", "Cachettes", "Jouets à ronger"]
+      },
+      "comportement": {
+        "tempérament": ["Solitaires", "Nocturnes", "Territoriaux"],
+        "social": "Non"
+      },
+      "sante": {
+        "problemes_courants": ["Abcès", "Diarrhée", "Problèmes dentaires"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 3-6 mois"
+      },
+      "description": "Le hamster doré est le plus populaire des hamsters domestiques. Solitaire et nocturne, il est idéal pour les débutants."
+    },
+    {
+      "nom": "Cobaye Péruvien",
+      "categorie": "Rongeur",
+      "espece": "Mammifère",
+      "sous_categorie": "Rongeurs",
+      "nom_scientifique": "Cavia porcellus",
+      "taille_min": 20,
+      "taille_max": 40,
+      "poids_min": 0.7,
+      "poids_max": 1.5,
+      "esperance_vie": "5-8 ans",
+      "origine": "Pérou",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "50-120 €",
+      "alimentation": {
+        "type": "Herbivore strict",
+        "aliments_principaux": ["Foin", "Granulés", "Légumes frais", "Fruits"],
+        "aliments_a_eviter": ["Légumes riches en calcium", "Fruits trop sucrés"]
+      },
+      "habitat": {
+        "type": "Cage ou enclos",
+        "taille_min": "120 x 60 cm",
+        "accessoires": ["Cachettes", "Jouets à ronger", "Bac à foin"]
+      },
+      "comportement": {
+        "tempérament": ["Sociable", "Calme", "Diurne"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Carence en vitamine C", "Problèmes dentaires"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 3-6 mois"
+      },
+      "description": "Le cobaye Péruvien est une race élégante et sociable, idéale pour les familles. Son pelage long nécessite un brossage régulier."
+    },
+    {
+      "nom": "Rat Dumbo",
+      "categorie": "Rongeur",
+      "espece": "Mammifère",
+      "sous_categorie": "Rongeurs",
+      "nom_scientifique": "Rattus norvegicus domestica",
+      "taille_min": 15,
+      "taille_max": 25,
+      "poids_min": 0.2,
+      "poids_max": 0.5,
+      "esperance_vie": "2-3 ans",
+      "origine": "Inconnue",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "20-50 €",
+      "alimentation": {
+        "type": "Omnivore",
+        "aliments_principaux": ["Mélange de graines", "Légumes frais", "Protéines animales"],
+        "aliments_a_eviter": ["Chou", "Oignon, ail", "Agrumes"]
+      },
+      "habitat": {
+        "type": "Cage à barreaux",
+        "taille_min": "60 x 40 x 40 cm",
+        "accessoires": ["Étages", "Cachettes", "Roue"]
+      },
+      "comportement": {
+        "tempérament": ["Sociable", "Intelligent", "Joueur"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Infections respiratoires", "Tumeurs"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 3-6 mois"
+      },
+      "description": "Le rat Dumbo est une variété de rat domestique connue pour ses oreilles tombantes. Très sociable et intelligent, il est idéal pour les propriétaires débutants."
+    },
+    {
+      "nom": "Chinchilla Standard",
+      "categorie": "Rongeur",
+      "espece": "Mammifère",
+      "sous_categorie": "Rongeurs",
+      "nom_scientifique": "Chinchilla lanigera",
+      "taille_min": 23,
+      "taille_max": 38,
+      "poids_min": 0.4,
+      "poids_max": 0.6,
+      "esperance_vie": "10-20 ans",
+      "origine": "Chili",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "100-300 €",
+      "alimentation": {
+        "type": "Herbivore strict",
+        "aliments_principaux": ["Foin", "Granulés", "Légumes frais"],
+        "aliments_a_eviter": ["Légumes riches en eau", "Fruits frais"]
+      },
+      "habitat": {
+        "type": "Cage multi-étages",
+        "taille_min": "100 x 50 x 80 cm",
+        "accessoires": ["Plateformes", "Cachettes", "Bac à sable"]
+      },
+      "comportement": {
+        "tempérament": ["Timide", "Nocturne", "Propre"],
+        "social": "Non (ou en paire)"
+      },
+      "sante": {
+        "problemes_courants": ["Problèmes dentaires", "Coup de chaleur"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "Le chinchilla est un rongeur élégant et doux, connu pour son pelage dense. Originaire des Andes, il est adapté aux climats froids et nécessite une température ambiante fraîche."
+    },
+    {
+      "nom": "Octodon",
+      "categorie": "Rongeur",
+      "espece": "Mammifère",
+      "sous_categorie": "Rongeurs",
+      "nom_scientifique": "Octodon degus",
+      "taille_min": 15,
+      "taille_max": 20,
+      "poids_min": 0.2,
+      "poids_max": 0.4,
+      "esperance_vie": "5-8 ans",
+      "origine": "Chili",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "100-250 €",
+      "alimentation": {
+        "type": "Herbivore strict",
+        "aliments_principaux": ["Foin", "Granulés", "Légumes frais"],
+        "aliments_a_eviter": ["Légumes riches en oxalates", "Fruits trop sucrés"]
+      },
+      "habitat": {
+        "type": "Cage ou terrarium",
+        "taille_min": "100 x 50 x 80 cm",
+        "accessoires": ["Étages", "Cachettes", "Roue"]
+      },
+      "comportement": {
+        "tempérament": ["Sociable", "Actif", "Joueur"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Diabète", "Problèmes dentaires"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "L’octodon est un petit rongeur sociable et intelligent, proche parent du cobaye et du chinchilla. Il est diurne et aime interagir avec les humains."
+    },
+    {
+      "nom": "Gerbille de Mongolie",
+      "categorie": "Rongeur",
+      "espece": "Mammifère",
+      "sous_categorie": "Rongeurs",
+      "nom_scientifique": "Meriones unguiculatus",
+      "taille_min": 10,
+      "taille_max": 15,
+      "poids_min": 0.06,
+      "poids_max": 0.13,
+      "esperance_vie": "3-4 ans",
+      "origine": "Mongolie",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "10-30 €",
+      "alimentation": {
+        "type": "Omnivore",
+        "aliments_principaux": ["Mélange de graines", "Légumes frais", "Protéines animales"],
+        "aliments_a_eviter": ["Chou", "Oignon, ail", "Agrumes"]
+      },
+      "habitat": {
+        "type": "Terrarium",
+        "taille_min": "60 x 40 x 40 cm",
+        "accessoires": ["Substrat profond", "Tunnels", "Cachettes"]
+      },
+      "comportement": {
+        "tempérament": ["Sociable", "Actif", "Creuseur"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Problèmes dentaires", "Infections respiratoires"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "La gerbille de Mongolie est un petit rongeur très actif et sociable, idéal pour les débutants. Elle aime creuser des tunnels dans son substrat."
+    },
+    // === MAMMIFÈRES - LAGOMORPHES ===
+    {
+      "nom": "Lapin Bélier",
+      "categorie": "Lagomorphe",
+      "espece": "Mammifère",
+      "sous_categorie": "Lagomorphes",
+      "nom_scientifique": "Oryctolagus cuniculus",
+      "taille_min": 30,
+      "taille_max": 50,
+      "poids_min": 1.5,
+      "poids_max": 3,
+      "esperance_vie": "7-12 ans",
+      "origine": "Europe",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "30-80 €",
+      "alimentation": {
+        "type": "Herbivore strict",
+        "aliments_principaux": ["Foin", "Granulés", "Légumes frais"],
+        "aliments_a_eviter": ["Légumes riches en calcium", "Fruits trop sucrés"]
+      },
+      "habitat": {
+        "type": "Poulailler ou enclos",
+        "taille_min": "1 m²",
+        "accessoires": ["Cachettes", "Jouets à ronger"]
+      },
+      "comportement": {
+        "tempérament": ["Sociable", "Calme", "Joueur"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Problèmes dentaires", "Parasites internes"],
+        "vaccins": ["Myxomatose (recommandé)"],
+        "vermifuges": "Tous les 3-6 mois"
+      },
+      "description": "Le lapin Bélier est connu pour ses oreilles tombantes. Sociable et calme, il est idéal pour les familles."
+    },
+    // === MAMMIFÈRES - CARNIVORES ===
+    {
+      "nom": "Furet",
+      "categorie": "Carnivore",
+      "espece": "Mammifère",
+      "sous_categorie": "Carnivores",
+      "nom_scientifique": "Mustela putorius furo",
+      "taille_min": 30,
+      "taille_max": 50,
+      "poids_min": 0.6,
+      "poids_max": 2,
+      "esperance_vie": "6-10 ans",
+      "origine": "Europe",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Déclaration obligatoire (puce + passeport)",
+      "prix_moyen": "100-300 €",
+      "alimentation": {
+        "type": "Carnivore strict",
+        "aliments_principaux": ["Viande crue", "Proies entières", "Œufs"],
+        "aliments_a_eviter": ["Aliments pour chats/chiens", "Légumes"]
+      },
+      "habitat": {
+        "type": "Cage multi-étages",
+        "taille_min": "100 x 50 x 100 cm",
+        "accessoires": ["Étages", "Tunnels", "Cachettes"]
+      },
+      "comportement": {
+        "tempérament": ["Joueur", "Curieux", "Sociable"],
+        "social": "Oui (en groupe ou seul)"
+      },
+      "sante": {
+        "problemes_courants": ["Maladie surrénalienne", "Lymphome"],
+        "vaccins": ["Rage (obligatoire)", "Maladie de Carré (obligatoire)"],
+        "vermifuges": "Tous les 3-6 mois"
+      },
+      "description": "Le furet est un carnivore domestique très joueur et affectueux. En France, sa détention est soumise à une déclaration obligatoire et à une identification par puce."
+    },
+    // === MAMMIFÈRES - INSECTIVORES ===
+    {
+      "nom": "Hérisson pygmée africain",
+      "categorie": "Insectivore",
+      "espece": "Mammifère",
+      "sous_categorie": "Insectivores",
+      "nom_scientifique": "Atelerix albiventris",
+      "taille_min": 15,
+      "taille_max": 25,
+      "poids_min": 0.2,
+      "poids_max": 0.6,
+      "esperance_vie": "3-6 ans",
+      "origine": "Afrique",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "100-300 €",
+      "alimentation": {
+        "type": "Insectivore",
+        "aliments_principaux": ["Insectes vivants", "Viande crue", "Œufs"],
+        "aliments_a_eviter": ["Lait", "Agrumes", "Oignon"]
+      },
+      "habitat": {
+        "type": "Terrarium",
+        "taille_min": "60 x 40 x 40 cm",
+        "accessoires": ["Cachettes", "Roue", "Bac à sable"]
+      },
+      "comportement": {
+        "tempérament": ["Nocturne", "Timide", "Propre"],
+        "social": "Non (solitaires)"
+      },
+      "sante": {
+        "problemes_courants": ["Obésité", "Problèmes dentaires"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "Le hérisson pygmée africain est un petit mammifère nocturne et solitaire, connu pour son apparence adorable. Contrairement aux hérissons européens, il peut être détenu légalement en France."
+    },
+    // === OISEAUX - PERROQUETS ===
+    {
+      "nom": "Perruche Calopsitte",
+      "categorie": "Psittacidé",
+      "espece": "Oiseau",
+      "sous_categorie": "Perroquets et Psittacidés",
+      "nom_scientifique": "Nymphicus hollandicus",
+      "taille_min": 30,
+      "taille_max": 35,
+      "poids_min": 0.08,
+      "poids_max": 0.12,
+      "esperance_vie": "10-15 ans",
+      "origine": "Australie",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "50-200 €",
+      "alimentation": {
+        "type": "Granivore",
+        "aliments_principaux": ["Mélange de graines", "Granulés", "Légumes frais"],
+        "aliments_a_eviter": ["Avoine", "Laitue", "Avocat"]
+      },
+      "habitat": {
+        "type": "Cage verticale",
+        "taille_min": "80 x 50 x 80 cm",
+        "accessoires": ["Perchoirs", "Jouets à picorer"]
+      },
+      "comportement": {
+        "tempérament": ["Sociable", "Joueur", "Calme"],
+        "social": "Oui (en couple ou seul)"
+      },
+      "sante": {
+        "problemes_courants": ["Carence en calcium", "Psittacose"],
+        "vaccins": "Aucun obligatoire (psittacose recommandé)",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "La perruche Calopsitte est un oiseau sociable et affectueux, idéal pour les débutants. Connue pour sa crête distinctive, elle peut apprendre à imiter des sons."
+    },
+    {
+      "nom": "Canari",
+      "categorie": "Passereau",
+      "espece": "Oiseau",
+      "sous_categorie": "Passereaux",
+      "nom_scientifique": "Serinus canaria domestica",
+      "taille_min": 12,
+      "taille_max": 14,
+      "poids_min": 0.015,
+      "poids_max": 0.03,
+      "esperance_vie": "7-10 ans",
+      "origine": "Îles Canaries",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "20-100 €",
+      "alimentation": {
+        "type": "Granivore",
+        "aliments_principaux": ["Mélange de graines", "Pâtée aux œufs", "Légumes frais"],
+        "aliments_a_eviter": ["Laitue", "Avocat"]
+      },
+      "habitat": {
+        "type": "Cage verticale",
+        "taille_min": "40 x 30 x 40 cm",
+        "accessoires": ["Perchoirs", "Bain d’eau"]
+      },
+      "comportement": {
+        "tempérament": ["Chanteur", "Calme", "Sociable"],
+        "social": "Oui (en couple ou seul)"
+      },
+      "sante": {
+        "problemes_courants": ["Problèmes respiratoires", "Carence en vitamine A"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "Le canari est un oiseau chanteur très populaire, connu pour son chant mélodieux (surtout chez les mâles). Facile à entretenir, il est idéal pour les débutants."
+    },
+    {
+      "nom": "Poule naine",
+      "categorie": "Gallinacé",
+      "espece": "Oiseau",
+      "sous_categorie": "Gallinacés",
+      "nom_scientifique": "Gallus gallus domesticus",
+      "taille_min": 30,
+      "taille_max": 40,
+      "poids_min": 0.5,
+      "poids_max": 1,
+      "esperance_vie": "5-10 ans",
+      "origine": "Europe/Asie",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé (déclaration si >20)",
+      "prix_moyen": "20-50 €",
+      "alimentation": {
+        "type": "Omnivore",
+        "aliments_principaux": ["Granulés", "Légumes frais", "Protéines animales"],
+        "aliments_a_eviter": ["Pain", "Avocat"]
+      },
+      "habitat": {
+        "type": "Poulailler avec enclos",
+        "taille_min": "1 m²",
+        "accessoires": ["Perchoirs", "Nids", "Bac à poussière"]
+      },
+      "comportement": {
+        "tempérament": ["Sociable", "Calme", "Pondeuse"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Parasites internes", "Problèmes respiratoires"],
+        "vaccins": ["Newcastle + Bronchite Infectieuse (recommandé)"],
+        "vermifuges": "Tous les 3-6 mois"
+      },
+      "description": "La poule naine est un oiseau domestique très populaire pour son tempérament calme et sa capacité à pondre des œufs régulièrement. Contrairement aux poules classiques, les races naines sont plus petites et nécessitent moins d’espace."
+    },
+    // === REPTILES - SERPENTS ===
+    {
+      "nom": "Python Royal",
+      "categorie": "Serpent",
+      "espece": "Reptile",
+      "sous_categorie": "Serpents",
+      "nom_scientifique": "Python regius",
+      "taille_min": 90,
+      "taille_max": 150,
+      "poids_min": 1,
+      "poids_max": 3,
+      "esperance_vie": "20-30 ans",
+      "origine": "Afrique",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Déclaration obligatoire (CITES)",
+      "prix_moyen": "100-500 €",
+      "alimentation": {
+        "type": "Carnivore",
+        "aliments_principaux": ["Souris ou rats congelés/décongelés"],
+        "frequence": {
+          "jeunes": "Tous les 5-7 jours",
+          "adultes": "Tous les 10-14 jours"
+        }
+      },
+      "habitat": {
+        "type": "Terrarium",
+        "taille_min": "120 x 60 x 60 cm",
+        "accessoires": ["Cachettes", "Branches", "Gamelle d’eau"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Docile", "Nocturne"],
+        "social": "Non (solitaires)"
+      },
+      "sante": {
+        "problemes_courants": ["Problèmes de mue", "Infections respiratoires"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "Le Python Royal est l’un des serpents les plus populaires en captivité, grâce à son tempérament docile et sa taille raisonnable. En France, sa détention est soumise à une déclaration obligatoire en raison de son inclusion dans la CITES."
+    },
+    {
+      "nom": "Gecko Léopard",
+      "categorie": "Lézard",
+      "espece": "Reptile",
+      "sous_categorie": "Lézards",
+      "nom_scientifique": "Eublepharis macularius",
+      "taille_min": 15,
+      "taille_max": 25,
+      "poids_min": 0.05,
+      "poids_max": 0.1,
+      "esperance_vie": "10-20 ans",
+      "origine": "Asie",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "50-200 €",
+      "alimentation": {
+        "type": "Insectivore",
+        "aliments_principaux": ["Grillons", "Vers de farine", "Blattes"],
+        "frequence": {
+          "jeunes": "Tous les jours",
+          "adultes": "Tous les 2-3 jours"
+        }
+      },
+      "habitat": {
+        "type": "Terrarium",
+        "taille_min": "60 x 40 x 40 cm",
+        "accessoires": ["Cachettes", "Branches", "Gamelle d’eau"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Nocturne", "Propre"],
+        "social": "Oui (en couple ou seul)"
+      },
+      "sante": {
+        "problemes_courants": ["Carence en calcium", "Problèmes de mue"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "Le Gecko Léopard est un lézard très populaire en captivité, connu pour son tempérament docile et sa facilité d’entretien. Il nécessite un apport régulier en calcium pour éviter les problèmes osseux."
+    },
+    {
+      "nom": "Tortue d’Hermann",
+      "categorie": "Tortue terrestre",
+      "espece": "Reptile",
+      "sous_categorie": "Tortues",
+      "nom_scientifique": "Testudo hermanni",
+      "taille_min": 15,
+      "taille_max": 25,
+      "poids_min": 0.5,
+      "poids_max": 1.5,
+      "esperance_vie": "50-100 ans",
+      "origine": "Europe du Sud",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Déclaration obligatoire (CITES)",
+      "prix_moyen": "200-800 €",
+      "alimentation": {
+        "type": "Herbivore strict",
+        "aliments_principaux": ["Légumes à feuilles vertes", "Fleurs", "Herbes"],
+        "aliments_a_eviter": ["Légumes riches en oxalates", "Fruits trop sucrés"]
+      },
+      "habitat": {
+        "type": "Enclos extérieur + abri chauffé",
+        "taille_min": "2 m²",
+        "accessoires": ["Cachettes", "Bassin d’eau", "Plantes"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Lente", "Hibernante"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Carence en calcium", "Problèmes respiratoires"],
+        "vaccins": "Aucun",
+        "vermifuges": "Tous les 6 mois"
+      },
+      "description": "La tortue d’Hermann est une tortue terrestre européenne protégée, connue pour sa longévité (jusqu’à 100 ans !). Herbivore stricte, elle nécessite une alimentation riche en légumes verts et en calcium."
+    },
+    // === AMPHIBIENS ===
+    {
+      "nom": "Axolotl",
+      "categorie": "Amphibien",
+      "espece": "Amphibien",
+      "sous_categorie": "Amphibiens",
+      "nom_scientifique": "Ambystoma mexicanum",
+      "taille_min": 15,
+      "taille_max": 30,
+      "poids_min": 0.1,
+      "poids_max": 0.2,
+      "esperance_vie": "10-15 ans",
+      "origine": "Mexique",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "30-150 €",
+      "alimentation": {
+        "type": "Carnivore",
+        "aliments_principaux": ["Vers de sang", "Vers de terre", "Petits morceaux de viande"],
+        "frequence": {
+          "jeunes": "Tous les jours",
+          "adultes": "Tous les 2-3 jours"
+        }
+      },
+      "habitat": {
+        "type": "Aquarium",
+        "volume_min": "50 litres",
+        "eau": {
+          "temperature": "14-18°C",
+          "pH": "6.5-8.0"
+        },
+        "accessoires": ["Cachettes", "Plantes aquatiques", "Filtre"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Nocturne", "Sensible"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Infections fongiques", "Problèmes de peau"],
+        "vaccins": "Aucun",
+        "vermifuges": "Non nécessaires"
+      },
+      "description": "L’axolotl est un amphibien aquatique unique, connu pour sa capacité à régénérer ses membres. Son habitat doit être un aquarium frais (14-18°C) avec une eau propre et bien oxygénée."
+    },
+    // === POISSONS ===
+    {
+      "nom": "Poisson Rouge (Carpe Koï)",
+      "categorie": "Poisson d’eau douce",
+      "espece": "Poisson",
+      "sous_categorie": "Eau douce",
+      "nom_scientifique": "Cyprinus carpio",
+      "taille_min": 10,
+      "taille_max": 25,
+      "esperance_vie": "5-10 ans",
+      "origine": "Chine",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "5-50 €",
+      "alimentation": {
+        "type": "Omnivore",
+        "aliments_principaux": ["Granulés", "Légumes", "Protéines animales"],
+        "frequence": "2-3 fois par jour"
+      },
+      "habitat": {
+        "type": "Bassin ou aquarium",
+        "volume_min": "100 litres",
+        "eau": {
+          "temperature": "18-24°C",
+          "pH": "6.5-8.0"
+        },
+        "accessoires": ["Plantes", "Décors", "Aération"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Sociable", "Robuste"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Infections bactériennes", "Parasites"],
+        "vaccins": "Aucun",
+        "traitements": "Bains de sel"
+      },
+      "description": "Le poisson rouge (ou carpe koï) est l’un des poissons d’aquarium les plus populaires. Robuste et facile à entretenir, il est idéal pour les débutants, mais nécessite un bassin ou un aquarium très spacieux."
+    },
+    {
+      "nom": "Poisson-Clown",
+      "categorie": "Poisson d’eau de mer",
+      "espece": "Poisson",
+      "sous_categorie": "Eau de mer",
+      "nom_scientifique": "Amphiprioninae",
+      "taille_min": 8,
+      "taille_max": 10,
+      "esperance_vie": "5-10 ans",
+      "origine": "Pacifique",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "20-100 €",
+      "alimentation": {
+        "type": "Omnivore",
+        "aliments_principaux": ["Granulés pour poissons marins", "Aliments vivants ou surgelés"],
+        "frequence": "2-3 fois par jour"
+      },
+      "habitat": {
+        "type": "Aquarium récifal",
+        "volume_min": "100 litres",
+        "eau": {
+          "temperature": "24-26°C",
+          "pH": "8.1-8.4",
+          "salinite": "30-35 ppt"
+        },
+        "accessoires": ["Anémone", "Coraux", "Roches vivantes"]
+      },
+      "comportement": {
+        "tempérament": ["Actif", "Sociable", "Territorial"],
+        "social": "Oui (en couple ou avec d’autres poissons pacifiques)"
+      },
+      "sante": {
+        "problemes_courants": ["Ichthyophthiriose", "Infections bactériennes"],
+        "vaccins": "Aucun",
+        "traitements": "Bains de sel"
+      },
+      "description": "Le poisson-clown est l’un des poissons marins les plus populaires, connu pour sa symbiose avec les anémones. Il nécessite un aquarium récifal stable avec une eau de qualité irréprochable."
+    },
+    // === INVERTÉBRÉS ===
+    {
+      "nom": "Mygale Rose",
+      "categorie": "Araignée",
+      "espece": "Invertébré",
+      "sous_categorie": "Arachnides",
+      "nom_scientifique": "Grammostola rosea",
+      "taille_min": 12,
+      "taille_max": 15,
+      "esperance_vie": {
+        "male": "2-4 ans",
+        "female": "10-20 ans"
+      },
+      "origine": "Amérique du Sud",
+      "niveau_soin": "Modéré",
+      "legislation_france": "Déclaration obligatoire (CITES)",
+      "prix_moyen": "50-200 €",
+      "alimentation": {
+        "type": "Carnivore",
+        "aliments_principaux": ["Grillons", "Blattes", "Vers de farine"],
+        "frequence": {
+          "jeunes": "Tous les 2-3 jours",
+          "adultes": "Tous les 7-10 jours"
+        }
+      },
+      "habitat": {
+        "type": "Terrarium",
+        "taille_min": "40 x 40 x 40 cm",
+        "accessoires": ["Cachettes", "Plantes", "Gamelle d’eau"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Nocturne", "Docile"],
+        "social": "Non (solitaires)"
+      },
+      "sante": {
+        "problemes_courants": ["Problèmes de mue", "Infections fongiques"],
+        "venin": {
+          "dangerosite": "Faible",
+          "symptomes": "Douleur locale, gonflement"
+        },
+        "vaccins": "Aucun",
+        "vermifuges": "Non nécessaires"
+      },
+      "description": "La mygale rose est une araignée terrestre connue pour son tempérament calme et sa facilité d’entretien. En France, sa détention est soumise à une déclaration obligatoire en raison de son inclusion dans la CITES."
+    },
+    {
+      "nom": "Escargot Africain Géant",
+      "categorie": "Gastéropode",
+      "espece": "Invertébré",
+      "sous_categorie": "Gastéropodes",
+      "nom_scientifique": "Achatina fulica",
+      "taille_min": 10,
+      "taille_max": 20,
+      "poids_min": 0.1,
+      "poids_max": 0.2,
+      "esperance_vie": "3-5 ans",
+      "origine": "Afrique",
+      "niveau_soin": "Facile",
+      "legislation_france": "Déclaration obligatoire (CITES)",
+      "prix_moyen": "20-100 €",
+      "alimentation": {
+        "type": "Omnivore",
+        "aliments_principaux": ["Légumes", "Fruits", "Protéines animales"],
+        "frequence": "Tous les jours"
+      },
+      "habitat": {
+        "type": "Terrarium",
+        "taille_min": "60 x 40 x 40 cm",
+        "accessoires": ["Cachettes", "Gamelle d’eau", "Plantes"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Nocturne", "Propre"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Carence en calcium", "Déshydratation"],
+        "vaccins": "Aucun",
+        "vermifuges": "Non nécessaires"
+      },
+      "description": "L’escargot africain géant est un gastéropode terrestre connu pour sa grande taille et sa facilité d’entretien. En France, sa détention est soumise à une déclaration obligatoire en raison de son inclusion dans la CITES."
+    },
+    {
+      "nom": "Phasme",
+      "categorie": "Insecte",
+      "espece": "Invertébré",
+      "sous_categorie": "Insectes",
+      "nom_scientifique": "Carausius morosus",
+      "taille_min": 5,
+      "taille_max": 30,
+      "esperance_vie": {
+        "male": "6-8 mois",
+        "female": "8-12 mois"
+      },
+      "origine": "Asie",
+      "niveau_soin": "Facile",
+      "legislation_france": "Autorisé",
+      "prix_moyen": "10-50 €",
+      "alimentation": {
+        "type": "Herbivore",
+        "aliments_principaux": ["Feuilles de mûrier", "Feuilles de chêne"],
+        "frequence": "Tous les jours"
+      },
+      "habitat": {
+        "type": "Terrarium vertical",
+        "taille_min": "40 x 40 x 60 cm",
+        "accessoires": ["Branches", "Feuilles fraîches", "Gamelle d’eau"]
+      },
+      "comportement": {
+        "tempérament": ["Calme", "Lent", "Nocturne"],
+        "social": "Oui (en groupe)"
+      },
+      "sante": {
+        "problemes_courants": ["Problèmes de mue", "Infections fongiques"],
+        "vaccins": "Aucun",
+        "vermifuges": "Non nécessaires"
+      },
+      "description": "Le phasme est un insecte herbivore fascinant, connu pour son camouflage parfait. Facile à entretenir, il est idéal pour les débutants."
+    }
+  ]
+}

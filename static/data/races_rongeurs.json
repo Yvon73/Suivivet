@@ -1,0 +1,277 @@
+  // ===== RONGEURS =====
+  {
+    "especes": [
+      {
+        "nom": "Rongeur",
+        "description": "Rongeurs domestiques (hamsters, cobayes, souris, etc.)"
+      },
+      {
+        "nom": "Lapin",
+        "description": "Lapins domestiques"
+      }
+    ],
+    "races": [
+      // Hamsters
+      {
+        "nom": "Hamster Doré (Syrien)",
+        "espece": "Rongeur",
+        "origine": "Syrie",
+        "taille_min": 10,
+        "taille_max": 17,
+        "poids_min": 0.08,
+        "poids_max": 0.15,
+        "esperance_vie": "2-3 ans",
+        "description": "Le hamster le plus populaire comme animal de compagnie. Solitaire et nocturne."
+      },
+      {
+        "nom": "Hamster Nain de Campbell",
+        "espece": "Rongeur",
+        "origine": "Asie Centrale",
+        "taille_min": 7,
+        "taille_max": 10,
+        "poids_min": 0.03,
+        "poids_max": 0.05,
+        "esperance_vie": "1.5-2.5 ans",
+        "description": "Petit hamster sociable, souvent élevé en groupe. Actif et joueur."
+      },
+      {
+        "nom": "Hamster Nain de Roborovski",
+        "espece": "Rongeur",
+        "origine": "Désert de Gobi",
+        "taille_min": 4,
+        "taille_max": 6,
+        "poids_min": 0.02,
+        "poids_max": 0.03,
+        "esperance_vie": "2-3 ans",
+        "description": "Le plus petit hamster domestique. Très rapide et actif. Doit être élevé en groupe."
+      },
+      {
+        "nom": "Hamster Nain Russe",
+        "espece": "Rongeur",
+        "origine": "Russie",
+        "taille_min": 7,
+        "taille_max": 10,
+        "poids_min": 0.03,
+        "poids_max": 0.05,
+        "esperance_vie": "1.5-2.5 ans",
+        "description": "Hamster sociable, souvent élevé en groupe. Connu pour son pelage gris."
+      },
+      {
+        "nom": "Hamster Chinois",
+        "espece": "Rongeur",
+        "origine": "Chine",
+        "taille_min": 8,
+        "taille_max": 12,
+        "poids_min": 0.03,
+        "poids_max": 0.06,
+        "esperance_vie": "2-3 ans",
+        "description": "Hamster solitaire, connu pour sa queue légèrement plus longue que les autres hamsters."
+      },
+
+      // Cobayes (Cochons d'Inde)
+      {
+        "nom": "Cobaye Abyssin",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 20,
+        "taille_max": 30,
+        "poids_min": 0.7,
+        "poids_max": 1.2,
+        "esperance_vie": "5-8 ans",
+        "description": "Cobaye connu pour ses rosettes (touffes de poils). Sociable et affectueux."
+      },
+      {
+        "nom": "Cobaye Américain",
+        "espece": "Rongeur",
+        "origine": "États-Unis",
+        "taille_min": 20,
+        "taille_max": 30,
+        "poids_min": 0.7,
+        "poids_max": 1.2,
+        "esperance_vie": "5-8 ans",
+        "description": "Cobaye à poil court, souvent utilisé comme animal de laboratoire. Très sociable."
+      },
+      {
+        "nom": "Cobaye Angora",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 20,
+        "taille_max": 30,
+        "poids_min": 0.7,
+        "poids_max": 1.2,
+        "esperance_vie": "5-8 ans",
+        "description": "Cobaye à poil long, nécessite un brossage régulier. Très doux et calme."
+      },
+      {
+        "nom": "Cobaye Péruvien",
+        "espece": "Rongeur",
+        "origine": "Pérou",
+        "taille_min": 20,
+        "taille_max": 40,
+        "poids_min": 0.7,
+        "poids_max": 1.5,
+        "esperance_vie": "5-8 ans",
+        "description": "Cobaye à poil long, souvent élevé pour les expositions. Très élégant."
+      },
+      {
+        "nom": "Cobaye Skinny",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 20,
+        "taille_max": 30,
+        "poids_min": 0.7,
+        "poids_max": 1.2,
+        "esperance_vie": "5-8 ans",
+        "description": "Cobaye sans poils (ou presque), nécessite une protection contre le froid. Très rare."
+      },
+      {
+        "nom": "Cobaye Teddy",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 20,
+        "taille_max": 30,
+        "poids_min": 0.7,
+        "poids_max": 1.2,
+        "esperance_vie": "5-8 ans",
+        "description": "Cobaye à poil bouclé, très doux et affectueux."
+      },
+      {
+        "nom": "Cobaye Texel",
+        "espece": "Rongeur",
+        "origine": "Royaume-Uni",
+        "taille_min": 20,
+        "taille_max": 30,
+        "poids_min": 0.7,
+        "poids_max": 1.2,
+        "esperance_vie": "5-8 ans",
+        "description": "Cobaye à poil bouclé et long, très rare et élégant."
+      },
+
+      // Souris
+      {
+        "nom": "Souris Blanche",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 5,
+        "taille_max": 10,
+        "poids_min": 0.02,
+        "poids_max": 0.05,
+        "esperance_vie": "1-2 ans",
+        "description": "Souris domestique blanche, souvent utilisée comme animal de laboratoire ou de compagnie."
+      },
+      {
+        "nom": "Souris Fancy",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 5,
+        "taille_max": 10,
+        "poids_min": 0.02,
+        "poids_max": 0.05,
+        "esperance_vie": "1-2 ans",
+        "description": "Souris domestique de couleur variée, élevée comme animal de compagnie."
+      },
+
+      // Rats
+      {
+        "nom": "Rat Domestique",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 15,
+        "taille_max": 25,
+        "poids_min": 0.2,
+        "poids_max": 0.5,
+        "esperance_vie": "2-3 ans",
+        "description": "Rat élevé comme animal de compagnie. Très intelligent et sociable."
+      },
+      {
+        "nom": "Rat Dumbo",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 15,
+        "taille_max": 25,
+        "poids_min": 0.2,
+        "poids_max": 0.5,
+        "esperance_vie": "2-3 ans",
+        "description": "Rat domestique aux oreilles tombantes, très populaire comme animal de compagnie."
+      },
+      {
+        "nom": "Rat Hairless",
+        "espece": "Rongeur",
+        "origine": "Inconnue",
+        "taille_min": 15,
+        "taille_max": 25,
+        "poids_min": 0.2,
+        "poids_max": 0.5,
+        "esperance_vie": "2-3 ans",
+        "description": "Rat domestique sans poils, nécessite une protection contre le froid."
+      },
+
+      // Lapins
+      {
+        "nom": "Lapin Bélier",
+        "espece": "Lapin",
+        "origine": "Europe",
+        "taille_min": 30,
+        "taille_max": 50,
+        "poids_min": 1.5,
+        "poids_max": 3,
+        "esperance_vie": "7-12 ans",
+        "description": "Lapin connu pour ses oreilles tombantes. Très calme et affectueux."
+      },
+      {
+        "nom": "Lapin Nain de Hollande",
+        "espece": "Lapin",
+        "origine": "Pays-Bas",
+        "taille_min": 20,
+        "taille_max": 25,
+        "poids_min": 0.5,
+        "poids_max": 1.1,
+        "esperance_vie": "7-10 ans",
+        "description": "Un des plus petits lapins domestiques. Très actif et joueur."
+      },
+      {
+        "nom": "Lapin Rex",
+        "espece": "Lapin",
+        "origine": "France",
+        "taille_min": 30,
+        "taille_max": 40,
+        "poids_min": 1.5,
+        "poids_max": 2.5,
+        "esperance_vie": "7-10 ans",
+        "description": "Lapin connu pour son pelage court et dense, similaire au velours. Très sociable."
+      },
+      {
+        "nom": "Lapin Lion",
+        "espece": "Lapin",
+        "origine": "Belgique",
+        "taille_min": 20,
+        "taille_max": 30,
+        "poids_min": 1,
+        "poids_max": 1.7,
+        "esperance_vie": "7-10 ans",
+        "description": "Lapin connu pour sa crinière autour de la tête, ressemblant à un lion. Très affectueux."
+      },
+      {
+        "nom": "Lapin Géant des Flandres",
+        "espece": "Lapin",
+        "origine": "Belgique",
+        "taille_min": 60,
+        "taille_max": 80,
+        "poids_min": 5,
+        "poids_max": 9,
+        "esperance_vie": "5-8 ans",
+        "description": "Un des plus grands lapins domestiques. Très calme et doux."
+      },
+      {
+        "nom": "Lapin Angora",
+        "espece": "Lapin",
+        "origine": "Turquie",
+        "taille_min": 30,
+        "taille_max": 50,
+        "poids_min": 1.5,
+        "poids_max": 3,
+        "esperance_vie": "7-12 ans",
+        "description": "Lapin connu pour son pelage long et soyeux. Nécessite un brossage régulier."
+      }
+    ]
+  }

@@ -1,0 +1,455 @@
+{
+  "categories": [
+    {
+      "nom": "Organismes, Fédérations",
+      "description": "Organismes auxquels l'animal est inscrit (ex: LOF, LOOF, CITES)",
+      "labels": "Numéro LOF, LOOF, SIRE, CITES, etc.",
+      "sous_categories":[
+        {
+          "CHIEN": "Chien",
+          "CHAT": "Chat",
+          "CHEVAL": "Cheval",
+          "RONGEUR": "Rongeur",
+          "OISEAU": "Oiseau",
+          "REPTILE": "Reptile / Amphibien",
+          "POISSON": "Poisson",
+          "ABEILLE": "Abeille",
+          "PIGEON": "Pigeon",
+          "AUTRE": "Autre"
+        }
+      ]
+    }
+  ]
+}
+
+{
+  "organismes": [
+    ===
+    CHIENS
+    ===
+    {
+      'nom': 'LOF (Livre des Origines Français)',
+      'nom_court': 'LOF',
+      'description': 'Registre officiel des chiens de race en France, géré par la Société Centrale Canine (SCC). Atteste de la pureté de la race.',
+      'site_web': 'https://www.centrale-canine.fr/',
+      'espece': 'CHIEN',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'SCC (Société Centrale Canine)',
+      'nom_court': 'SCC',
+      'description': 'Organisme officiel qui gère le LOF et représente la France auprès de la FCI.',
+      'site_web': 'https://www.centrale-canine.fr/',
+      'espece': 'CHIEN',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'FCI (Fédération Cynologique Internationale)',
+      'nom_court': 'FCI',
+      'description': 'Organisme mondial qui définit les standards des 360+ races canines et organise les compétitions internationales.',
+      'site_web': 'https://www.fci.be/fr/',
+      'espece': 'CHIEN',
+      'pays': 'Suisse',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'AKC (American Kennel Club)',
+      'nom_court': 'AKC',
+      'description': 'Registre officiel des chiens de race aux États-Unis. Organise le Westminster Dog Show.',
+      'site_web': 'https://www.akc.org/',
+      'espece': 'CHIEN',
+      'pays': 'États-Unis',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'The Kennel Club',
+      'nom_court': 'KC',
+      'description': 'Registre officiel des chiens de race au Royaume-Uni. Fondé en 1873.',
+      'site_web': 'https://www.thekennelclub.org.uk/',
+      'espece': 'CHIEN',
+      'pays': 'Royaume-Uni',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'Club Français du Berger Allemand',
+      'nom_court': 'CFBA',
+      'description': 'Club dédié au Berger Allemand. Organise des expositions et tests de travail.',
+      'site_web': 'https://www.berger-allemand.fr/',
+      'espece': 'CHIEN',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'IPO (Internationales Prüfungs-Ordnung)',
+      'nom_court': 'IPO',
+      'description': 'Organisation internationale pour les chiens de travail (ex: Berger Allemand, Malinois). Organise des tests de travail (IPO, Mondioring).',
+      'site_web': 'https://www.ipo-dog.org/',
+      'espece': 'CHIEN',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    CHATS
+    ===
+    {
+      'nom': 'LOOF (Livre Officiel des Origines Félines)',
+      'nom_court': 'LOOF',
+      'description': 'Registre officiel des chats de race en France, géré par la Fédération Française des Associations Félines (FFAF).',
+      'site_web': 'https://www.loof-asso.fr/',
+      'espece': 'CHAT',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'FFAF (Fédération Française des Associations Félines)',
+      'nom_court': 'FFAF',
+      'description': 'Fédération qui regroupe les clubs de race félins en France.',
+      'site_web': 'https://www.ffaf-asso.fr/',
+      'espece': 'CHAT',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'FIFé (Fédération Internationale Féline)',
+      'nom_court': 'FIFé',
+      'description': 'Organisme mondial qui définit les standards des 70+ races félines et organise les compétitions internationales.',
+      'site_web': 'https://fifeweb.org/',
+      'espece': 'CHAT',
+      'pays': 'Belgique',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'TICA (The International Cat Association)',
+      'nom_court': 'TICA',
+      'description': 'Registre officiel des chats de race aux États-Unis. Reconnaît des races non reconnues par la FIFé (ex: Savannah, Bengal).',
+      'site_web': 'https://www.tica.org/',
+      'espece': 'CHAT',
+      'pays': 'États-Unis',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'GCCF (Governing Council of the Cat Fancy)',
+      'nom_court': 'GCCF',
+      'description': 'Registre officiel des chats de race au Royaume-Uni. Fondé en 1887.',
+      'site_web': 'https://www.gccfcats.org/',
+      'espece': 'CHAT',
+      'pays': 'Royaume-Uni',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    CHEVAUX
+    ===
+    {
+      'nom': 'SIRE (Système d’Information Relatif aux Équidés)',
+      'nom_court': 'SIRE',
+      'description': 'Registre officiel des chevaux en France. Obligatoire pour tous les équidés (chevaux, ânes, zèbres).',
+      'site_web': 'https://www.ifce.fr/',
+      'espece': 'CHEVAL',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'IFCE (Institut Français du Cheval et de l’Équitation)',
+      'nom_court': 'IFCE',
+      'description': 'Organisme public qui gère le SIRE et promeut la filière équine.',
+      'site_web': 'https://www.ifce.fr/',
+      'espece': 'CHEVAL',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'FFE (Fédération Française d’Équitation)',
+      'nom_court': 'FFE',
+      'description': 'Fédération qui régule les compétitions équestres en France.',
+      'site_web': 'https://www.ffe.com/',
+      'espece': 'CHEVAL',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'FEI (Fédération Équestre Internationale)',
+      'nom_court': 'FEI',
+      'description': 'Organisme mondial qui régule les compétitions équestres internationales (JO, Championnats du Monde).',
+      'site_web': 'https://www.fei.org/',
+      'espece': 'CHEVAL',
+      'pays': 'Suisse',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'The Jockey Club',
+      'nom_court': 'Jockey Club',
+      'description': 'Registre officiel des chevaux de course au Royaume-Uni.',
+      'site_web': 'https://www.thejockeyclub.co.uk/',
+      'espece': 'CHEVAL',
+      'pays': 'Royaume-Uni',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    RONGEURS
+    ===
+    {
+      'nom': 'UFA (Union Française des Aviculteurs)',
+      'nom_court': 'UFA',
+      'description': 'Fédération qui regroupe les éleveurs d’oiseaux et de rongeurs (cobayes, lapins, etc.).',
+      'site_web': 'https://www.ufa-asso.fr/',
+      'espece': 'RONGEUR',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'AFFA (Association Française des Furets Amateurs)',
+      'nom_court': 'AFFA',
+      'description': 'Association dédiée aux furets, qui promeut leur bien-être et leur adoption responsable.',
+      'site_web': 'https://www.affa-asso.fr/',
+      'espece': 'RONGEUR',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'FFC (Fédération Française de Cuniculture)',
+      'nom_court': 'FFC',
+      'description': 'Fédération française dédiée à l’élevage des lapins.',
+      'site_web': 'https://www.ffc-lapin.fr/',
+      'espece': 'RONGEUR',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'IFAR (International Fancy Rat Association)',
+      'nom_court': 'IFAR',
+      'description': 'Fédération internationale pour les rats de compagnie.',
+      'site_web': 'https://www.ifar.org/',
+      'espece': 'RONGEUR',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    OISEAUX
+    ===
+    {
+      'nom': 'SNOF (Syndicat National des Oiseaux de France)',
+      'nom_court': 'SNOF',
+      'description': 'Syndicat qui regroupe les éleveurs d’oiseaux d’ornement (canaris, perroquets, etc.).',
+      'site_web': 'https://www.snof.fr/',
+      'espece': 'OISEAU',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'OMJ (Ornithologie Mondiale et Juges)',
+      'nom_court': 'OMJ',
+      'description': 'Organisation internationale qui forme les juges d’expositions aviaires.',
+      'site_web': 'https://www.omj-ornithologie.com/',
+      'espece': 'OISEAU',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'COM (Confédération Ornithologique Mondiale)',
+      'nom_court': 'COM',
+      'description': 'Fédération mondiale qui regroupe les organisations aviaires.',
+      'site_web': 'https://www.com-world.org/',
+      'espece': 'OISEAU',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'APA (Association des Propriétaires d’Ara)',
+      'nom_court': 'APA',
+      'description': 'Association française dédiée aux aras.',
+      'site_web': 'https://www.apa-asso.fr/',
+      'espece': 'OISEAU',
+      'pays': 'France',
+      'est_officiel': False
+    }
+    ,
+
+    #
+    ===
+    REPTILES
+    ===
+    {
+      'nom': 'AFA (Association Française des Amateurs de Reptiles et Amphibiens)',
+      'nom_court': 'AFA',
+      'description': 'Association dédiée aux reptiles et amphibiens, qui promeut leur détention responsable.',
+      'site_web': 'https://www.afa-reptiles.com/',
+      'espece': 'REPTILE',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'CITES (Convention sur le commerce international)',
+      'nom_court': 'CITES',
+      'description': 'Accord international qui régule le commerce des espèces protégées, y compris les reptiles et amphibiens.',
+      'site_web': 'https://cites.org/fr',
+      'espece': 'REPTILE',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'EMB (European Studbook for Reptiles)',
+      'nom_court': 'EMB',
+      'description': 'Registre européen pour les reptiles menacés.',
+      'site_web': 'https://www.emb-reptiles.org/',
+      'espece': 'REPTILE',
+      'pays': 'Europe',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'IHS (International Herpetological Society)',
+      'nom_court': 'IHS',
+      'description': 'Société internationale dédiée à l’herpétologie (étude des reptiles et amphibiens).',
+      'site_web': 'https://www.ihs-reptiles.org/',
+      'espece': 'REPTILE',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    POISSONS
+    ===
+    {
+      'nom': 'FFS (Fédération Française de Sauvegarde des Poissons)',
+      'nom_court': 'FFS',
+      'description': 'Travaille sur la protection des poissons d’eau douce et la préservation des milieux aquatiques.',
+      'site_web': 'https://www.ffs-poissons.fr/',
+      'espece': 'POISSON',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'OATA (Ornamental Aquatic Trade Association)',
+      'nom_court': 'OATA',
+      'description': 'Organisation européenne qui représente les professionnels du commerce des poissons d’aquarium.',
+      'site_web': 'https://www.ornamentalfish.org/',
+      'espece': 'POISSON',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    ABEILLES
+    ===
+    {
+      'nom': 'GDSA (Groupement de Défense Sanitaire Apicole)',
+      'nom_court': 'GDSA',
+      'description': 'Organisme qui travaille sur la santé des abeilles et la lutte contre les maladies.',
+      'site_web': 'https://www.gdsa.fr/',
+      'espece': 'ABEILLE',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'UNAF (Union Nationale de l’Apiculture Française)',
+      'nom_court': 'UNAF',
+      'description': 'Fédération qui regroupe les apiculteurs en France.',
+      'site_web': 'https://www.unaf-apiculture.fr/',
+      'espece': 'ABEILLE',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'Apimondia',
+      'nom_court': 'Apimondia',
+      'description': 'Fédération mondiale qui regroupe les apiculteurs et promeut la recherche sur les abeilles.',
+      'site_web': 'https://www.apimondia.org/',
+      'espece': 'ABEILLE',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    PIGEONS
+    ===
+    {
+      'nom': 'FCPR (Fédération Colombophile Française)',
+      'nom_court': 'FCPR',
+      'description': 'Fédération qui regroupe les éleveurs de pigeons.',
+      'site_web': 'https://www.fcpr.fr/',
+      'espece': 'PIGEON',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'FCI (Fédération Colombophile Internationale)',
+      'nom_court': 'FCI',
+      'description': 'Fédération mondiale qui regroupe les éleveurs de pigeons.',
+      'site_web': 'https://www.fci-pigeons.com/',
+      'espece': 'PIGEON',
+      'pays': 'International',
+      'est_officiel': True
+    }
+    ,
+
+    #
+    ===
+    FAUCONNERIE
+    ===
+    {
+      'nom': 'ANFA (Association Nationale des Fauconniers et Autoursiers)',
+      'nom_court': 'ANFA',
+      'description': 'Association dédiée à la fauconnerie en France.',
+      'site_web': 'https://www.anfa-fauconnerie.fr/',
+      'espece': 'PIGEON',
+      'pays': 'France',
+      'est_officiel': True
+    }
+    ,
+    {
+      'nom': 'IAF (International Association for Falconry and Conservation of Birds of Prey)',
+      'nom_court': 'IAF',
+      'description': 'Organisation mondiale dédiée à la fauconnerie.',
+      'site_web': 'https://www.iaf-falconry.org/',
+      'espece': 'PIGEON',
+      'pays': 'International',
+      'est_officiel': True
+    }
+  ]
+}

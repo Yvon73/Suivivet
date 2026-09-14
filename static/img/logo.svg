@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+  <title>Projet Véto — électrocardiogramme, stéthoscope et animaux de compagnie</title>
+
+  <defs>
+    <style>
+      .badge  { fill:#2A9D8F; stroke:#FFFFFF; stroke-width:6; }
+      .dark   { fill:#1D3557; }
+      .eyeW   { fill:#FFFFFF; }
+      .eyeD   { fill:#1D3557; }
+      .ekg    { fill:none; stroke:#E63946; stroke-width:16; stroke-linecap:round; stroke-linejoin:round; }
+      .steth  { fill:none; stroke:#1D3557; stroke-width:18; stroke-linecap:round; stroke-linejoin:round; }
+      .stethFill { fill:#1D3557; }
+      .stethRing { fill:none; stroke:#1D3557; stroke-width:15; }
+    </style>
+  </defs>
+
+  <!-- ===== Bandeau haut : électrocardiogramme + stéthoscope superposé (compressés verticalement pour laisser toute la place aux animaux) ===== -->
+  <g transform="scale(1,0.8)">
+    <path class="ekg" d="M30,280 L90,280 Q130,250 170,280 L210,280 L230,300 L255,110 L285,330 L315,280
+                          L360,280 Q400,235 440,280 L490,280 L550,280 Q590,250 630,280 L670,280 L690,300
+                          L715,110 L745,330 L775,280 L820,280 Q860,235 900,280 L950,280" />
+    <ellipse class="stethFill" cx="300" cy="72" rx="19" ry="28" />
+    <ellipse class="stethFill" cx="440" cy="72" rx="19" ry="28" />
+    <path class="steth" d="M300,97 C300,182 330,222 372,258" />
+    <path class="steth" d="M440,97 C440,182 410,222 372,258" />
+    <path class="steth" d="M372,258 C455,300 555,278 650,300 C722,317 682,402 620,480 C600,508 610,538 616,556" />
+    <circle class="stethRing" cx="620" cy="574" r="56" />
+    <circle class="stethFill" cx="620" cy="574" r="28" />
+  </g>
+
+  <!-- ===== Premier plan : médaillons-visages des animaux, grille 4x2, grande taille ===== -->
+
+  <!-- Perroquet -->
+  <g transform="translate(125,625)">
+    <circle r="115" class="badge" />
+    <polygon points="-14,-88 -4,-122 6,-90" class="dark" />
+    <polygon points="4,-92 16,-128 24,-92" class="dark" />
+    <polygon points="20,-84 34,-116 42,-86" class="dark" />
+    <circle class="eyeW" cx="-24" cy="-10" r="16" />
+    <circle class="eyeD" cx="-19" cy="-10" r="8" />
+    <polygon points="8,-20 70,4 22,24" class="dark" />
+    <polygon points="22,24 48,30 24,42" class="dark" />
+  </g>
+
+  <!-- Chat -->
+  <g transform="translate(375,625)">
+    <circle r="115" class="badge" />
+    <polygon points="-58,-95 -78,-32 -16,-68" class="dark" />
+    <polygon points="58,-95 78,-32 16,-68" class="dark" />
+    <polygon points="-48,-78 -60,-42 -28,-60" class="badge" />
+    <polygon points="48,-78 60,-42 28,-60" class="badge" />
+    <ellipse class="eyeD" cx="-30" cy="-8" rx="15" ry="11" />
+    <ellipse class="eyeD" cx="30" cy="-8" rx="15" ry="11" />
+    <circle class="eyeW" cx="-25" cy="-12" r="3.5" />
+    <circle class="eyeW" cx="35" cy="-12" r="3.5" />
+    <polygon points="-9,20 9,20 0,33" class="dark" />
+    <path d="M0,33 Q0,42 -14,44" fill="none" stroke="#1D3557" stroke-width="4" stroke-linecap="round" />
+    <path d="M0,33 Q0,42 14,44" fill="none" stroke="#1D3557" stroke-width="4" stroke-linecap="round" />
+    <path d="M-15,18 L-55,8 M-15,25 L-58,25 M15,18 L55,8 M15,25 L58,25" stroke="#1D3557" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- Chien -->
+  <g transform="translate(625,625)">
+    <circle r="115" class="badge" />
+    <path d="M-58,-58 Q-98,-18 -76,46 Q-60,56 -54,12 Q-50,-30 -58,-58 Z" class="dark" />
+    <path d="M58,-58 Q98,-18 76,46 Q60,56 54,12 Q50,-30 58,-58 Z" class="dark" />
+    <ellipse class="eyeW" cx="-27" cy="-22" rx="12" ry="13" />
+    <ellipse class="eyeW" cx="27" cy="-22" rx="12" ry="13" />
+    <circle class="eyeD" cx="-24" cy="-19" r="6" />
+    <circle class="eyeD" cx="30" cy="-19" r="6" />
+    <ellipse cx="0" cy="38" rx="52" ry="38" fill="#FFFFFF" />
+    <ellipse class="dark" cx="0" cy="20" rx="15" ry="11" />
+    <path d="M0,31 L0,45 M0,45 Q-14,55 -26,50 M0,45 Q14,55 26,50" fill="none" stroke="#1D3557" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+  <!-- Chinchilla -->
+  <g transform="translate(875,625)">
+    <circle r="115" class="badge" />
+    <ellipse cx="-56" cy="-68" rx="26" ry="42" class="dark" />
+    <ellipse cx="56" cy="-68" rx="26" ry="42" class="dark" />
+    <ellipse cx="-56" cy="-64" rx="13" ry="26" fill="#FFFFFF" />
+    <ellipse cx="56" cy="-64" rx="13" ry="26" fill="#FFFFFF" />
+    <circle class="eyeD" cx="-27" cy="-6" r="17" />
+    <circle class="eyeD" cx="27" cy="-6" r="17" />
+    <circle class="eyeW" cx="-21" cy="-12" r="5" />
+    <circle class="eyeW" cx="33" cy="-12" r="5" />
+    <ellipse class="dark" cx="0" cy="30" rx="11" ry="8" />
+    <path d="M-40,20 L-72,14 M-38,30 L-70,32 M40,20 L72,14 M38,30 L70,32" stroke="#1D3557" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- Furet -->
+  <g transform="translate(125,875)">
+    <circle r="115" class="badge" />
+    <circle cx="-46" cy="-76" r="20" class="dark" />
+    <circle cx="46" cy="-76" r="20" class="dark" />
+    <ellipse cx="-26" cy="-8" rx="24" ry="20" class="dark" />
+    <ellipse cx="26" cy="-8" rx="24" ry="20" class="dark" />
+    <circle class="eyeW" cx="-26" cy="-8" r="9" />
+    <circle class="eyeW" cx="26" cy="-8" r="9" />
+    <circle class="eyeD" cx="-26" cy="-8" r="4.5" />
+    <circle class="eyeD" cx="26" cy="-8" r="4.5" />
+    <ellipse cx="0" cy="32" rx="34" ry="24" fill="#FFFFFF" />
+    <circle class="dark" cx="0" cy="24" r="9" />
+    <path d="M-16,44 Q0,54 16,44" fill="none" stroke="#1D3557" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+  <!-- Souris -->
+  <g transform="translate(375,875)">
+    <circle r="115" class="badge" />
+    <circle cx="-54" cy="-58" r="42" class="dark" />
+    <circle cx="54" cy="-58" r="42" class="dark" />
+    <circle cx="-54" cy="-58" r="24" fill="#FFFFFF" />
+    <circle cx="54" cy="-58" r="24" fill="#FFFFFF" />
+    <circle class="eyeD" cx="-20" cy="-4" r="8" />
+    <circle class="eyeD" cx="20" cy="-4" r="8" />
+    <circle class="eyeW" cx="-17" cy="-8" r="2.5" />
+    <circle class="eyeW" cx="23" cy="-8" r="2.5" />
+    <polygon points="-8,20 8,20 0,32" class="dark" />
+    <path d="M-16,22 L-58,10 M-14,28 L-56,30 M16,22 L58,10 M14,28 L56,30" stroke="#1D3557" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- Serpent -->
+  <g transform="translate(625,875)">
+    <circle r="115" class="badge" />
+    <path d="M-48,-35 Q0,-62 48,-35 Q44,25 0,55 Q-44,25 -48,-35 Z" class="dark" />
+    <ellipse class="eyeW" cx="-22" cy="-22" rx="9" ry="12" />
+    <ellipse class="eyeW" cx="22" cy="-22" rx="9" ry="12" />
+    <ellipse class="eyeD" cx="-22" cy="-20" rx="3" ry="9" />
+    <ellipse class="eyeD" cx="22" cy="-20" rx="3" ry="9" />
+    <path d="M0,50 L0,78 M0,78 L-16,102 M0,78 L16,102" fill="none" stroke="#1D3557" stroke-width="5" stroke-linecap="round" />
+  </g>
+
+  <!-- Araignée -->
+  <g transform="translate(875,875)">
+    <circle r="115" class="badge" />
+    <path d="M-30,-15 Q-70,-30 -100,-15" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <path d="M-32,0 Q-75,0 -102,15" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <path d="M-30,18 Q-68,35 -92,58" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <path d="M-24,34 Q-55,58 -72,88" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <path d="M30,-15 Q70,-30 100,-15" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <path d="M32,0 Q75,0 102,15" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <path d="M30,18 Q68,35 92,58" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <path d="M24,34 Q55,58 72,88" fill="none" stroke="#1D3557" stroke-width="8" stroke-linecap="round" />
+    <circle class="dark" cx="0" cy="30" r="46" />
+    <circle class="dark" cx="0" cy="-22" r="28" />
+    <circle class="eyeW" cx="-11" cy="-28" r="6" />
+    <circle class="eyeW" cx="11" cy="-28" r="6" />
+    <circle class="eyeW" cx="-18" cy="-16" r="4.5" />
+    <circle class="eyeW" cx="18" cy="-16" r="4.5" />
+    <circle class="eyeD" cx="-11" cy="-28" r="3" />
+    <circle class="eyeD" cx="11" cy="-28" r="3" />
+  </g>
+</svg>

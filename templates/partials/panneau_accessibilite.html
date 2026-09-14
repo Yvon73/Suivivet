@@ -1,0 +1,61 @@
+{% comment %}
+Panneau accessibilité, partagé entre templates/base.html (application, une
+fois connecté) et les pages publiques accueil/templates/accueil/*.html (qui
+n'étendent pas base.html). Logique de bascule + mémorisation dans
+static/js/accessibilite.js ; effets visuels dans static/css/style.css.
+
+Pour un compte connecté, les changements sont enregistrés côté serveur
+(PreferenceAccessibilite, via accueil:preferences_accessibilite) afin d'être
+réappliqués à chaque connexion sur n'importe quel navigateur ; pour un
+visiteur non connecté (accueil, connexion), ils ne sont mémorisés que dans le
+navigateur courant (localStorage) — cf. static/js/accessibilite.js.
+{% endcomment %}
+<div class="dropdown" id="panneauAccessibilite"
+     data-authentifie="{% if user.is_authenticated %}1{% else %}0{% endif %}"
+     data-url-maj="{% if user.is_authenticated %}{% url 'accueil:preferences_accessibilite' %}{% endif %}">
+    {% if user.is_authenticated %}{% csrf_token %}{% endif %}
+    <button type="button" id="boutonPanneauAccessibilite"
+            class="btn {{ bouton_classe|default:'btn-outline-light' }} dropdown-toggle"
+            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+        <i class="bi bi-universal-access" aria-hidden="true"></i>
+        Accessibilité
+    </button>
+    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 20rem;" aria-labelledby="boutonPanneauAccessibilite">
+        <h2 class="h6">Taille du texte</h2>
+        <div class="btn-group w-100 mb-3" role="group" aria-label="Taille du texte">
+            <button type="button" class="btn btn-outline-secondary" data-a11y-taille="normal">Normal</button>
+            <button type="button" class="btn btn-outline-secondary" data-a11y-taille="grand">Grand</button>
+            <button type="button" class="btn btn-outline-secondary" data-a11y-taille="tres-grand">Très grand</button>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="a11yContraste">
+            <label class="form-check-label" for="a11yContraste">Contraste élevé</label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="a11yPoliceLisible">
+            <label class="form-check-label" for="a11yPoliceLisible">Police plus lisible</label>
+        </div>
+
+        <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="a11yReduireAnimations">
+            <label class="form-check-label" for="a11yReduireAnimations">Réduire les animations</label>
+        </div>
+
+        <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" role="switch" id="a11yPaletteDaltonisme">
+            <label class="form-check-label" for="a11yPaletteDaltonisme">Palette adaptée daltonisme</label>
+        </div>
+
+        <hr>
+
+        <button type="button" id="a11yLireVoixHaute" class="btn btn-sm btn-outline-primary w-100">
+            <i class="bi bi-volume-up" aria-hidden="true"></i>
+            Lire cette page à voix haute
+        </button>
+        <p class="form-text mb-0 mt-2">
+            Utilise la synthèse vocale de ton navigateur pour lire le contenu principal de la page.
+        </p>
+    </div>
+</div>

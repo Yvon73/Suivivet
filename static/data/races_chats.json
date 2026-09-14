@@ -1,0 +1,2099 @@
+  // ===== CHATS =====
+{
+  "especes": [
+    {
+      "nom": "Chat",
+      "description": "Felis catus - Chats domestiques"
+    }
+  ],
+  "categories": [
+    {
+      "nom": "Poil court",
+      "description": "Chats à poil court"
+    },
+    {
+      "nom": "Poil mi-long",
+      "description": "Chats à poil mi-long"
+    },
+    {
+      "nom": "Poil long",
+      "description": "Chats à poil long"
+    },
+    {
+      "nom": "Sans poils",
+      "description": "Chats sans poils ou presque"
+    },
+    {
+      "nom": "Pattes courtes",
+      "description": "Chats avec la mutation Munchkin"
+    },
+    {
+      "nom": "Oreilles particulières",
+      "description": "Chats avec des oreilles recourbées, pliées ou grandes"
+    },
+    {
+      "nom": "Colorpoint",
+      "description": "Chats avec des extrémités plus foncées"
+    },
+    {
+      "nom": "Hybrides",
+      "description": "Croisements avec des chats sauvages"
+    },
+    {
+      "nom": "Rares/Expérimentaux",
+      "description": "Races rares ou en développement"
+    }
+  ],
+  "races": [
+
+    // Chats à poil court
+    {
+      "nom": "Abyssin",
+      "espece": "Chat",
+      "origine": "Éthiopie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat élégant et athlétique, connu pour son pelage tiqueté (agouti) et son tempérament actif."
+    },
+    {
+      "nom": "American Shorthair",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 7,
+      "esperance_vie": "15-20 ans",
+      "description": "Chat robuste et sain, connu pour son pelage court et son tempérament calme. Excellente pour les familles."
+    },
+    {
+      "nom": "American Wirehair",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 7,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat rare au pelage dur et cranté, issu d’une mutation naturelle."
+    },
+    {
+      "nom": "Bengal",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat hybride (croisement avec le chat-léopard asiatique), connu pour son pelage tacheté et son énergie."
+    },
+    {
+      "nom": "British Shorthair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 5,
+      "poids_max": 9,
+      "esperance_vie": "14-20 ans",
+      "description": "Chat trapu et musclé, connu pour son pelage dense et son visage rond. Très calme et affectueux."
+    },
+    {
+      "nom": "Burmese",
+      "espece": "Chat",
+      "origine": "Birmanie (Myanmar)",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "15-18 ans",
+      "description": "Chat de taille moyenne, connu pour son pelage court et soyeux et son tempérament sociable."
+    },
+    {
+      "nom": "Chartreux",
+      "espece": "Chat",
+      "origine": "France",
+      "poids_min": 5,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat français rare, connu pour son pelage bleu-gris et ses yeux dorés. Très silencieux."
+    },
+    {
+      "nom": "Cornish Rex",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat au pelage bouclé et fin, connu pour son apparence élégante et son tempérament joueur."
+    },
+    {
+      "nom": "Devon Rex",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat au pelage bouclé et aux grandes oreilles, connu pour son apparence de 'lutin'. Très affectueux."
+    },
+    {
+      "nom": "Egyptian Mau",
+      "espece": "Chat",
+      "origine": "Égypte",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Seul chat domestique naturel à avoir un pelage tacheté. Connu pour sa vitesse et son intelligence."
+    },
+    {
+      "nom": "European Shorthair",
+      "espece": "Chat",
+      "origine": "Europe",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-18 ans",
+      "description": "Chat robuste et sain, similaire au chat domestique commun. Très adaptable."
+    },
+    {
+      "nom": "Exotic Shorthair",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Version à poil court du Persan, connue pour son visage plat et son tempérament calme."
+    },
+    {
+      "nom": "German Rex",
+      "espece": "Chat",
+      "origine": "Allemagne",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans",
+      "description": "Chat au pelage bouclé, similaire au Devon Rex mais plus rare."
+    },
+    {
+      "nom": "Japanese Bobtail",
+      "espece": "Chat",
+      "origine": "Japon",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat connu pour sa queue courte et pomponnée. Symbole de chance au Japon."
+    },
+    {
+      "nom": "Korat",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "15-20 ans",
+      "description": "Chat thaïlandais rare, connu pour son pelage argenté et ses yeux verts. Considéré comme porte-bonheur."
+    },
+    {
+      "nom": "LaPerm",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage bouclé, issu d’une mutation naturelle. Très sociable."
+    },
+    {
+      "nom": "Manx",
+      "espece": "Chat",
+      "origine": "Île de Man (Royaume-Uni)",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat connu pour son absence de queue (ou queue très courte). Très agile et joueur."
+    },
+    {
+      "nom": "Ocicat",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage tacheté, ressemblant à un ocelot. Très énergique et sociable."
+    },
+    {
+      "nom": "Oriental Shorthair",
+      "espece": "Chat",
+      "origine": "Thaïlande/Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat élancé et athlétique, similaire au Siamois mais avec un pelage court. Très vocal."
+    },
+    {
+      "nom": "Russian Blue",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "15-20 ans",
+      "description": "Chat connu pour son pelage bleu-gris et ses yeux verts. Très timide et sensible."
+    },
+    {
+      "nom": "Scottish Fold",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "11-14 ans",
+      "description": "Chat connu pour ses oreilles pliées vers l’avant. Très calme et affectueux."
+    },
+    {
+      "nom": "Siamois",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat élégant et vocal, connu pour son pelage colorpoint (corps clair, extrémités foncées) et ses yeux bleus."
+    },
+    {
+      "nom": "Sphynx",
+      "espece": "Chat",
+      "origine": "Canada",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans",
+      "description": "Chat sans poils, connu pour son apparence unique et son tempérament affectueux. Nécessite une protection contre le froid."
+    },
+    {
+      "nom": "Tonkinese",
+      "espece": "Chat",
+      "origine": "Canada",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "15-16 ans",
+      "description": "Croisement entre un Siamois et un Burmese. Connu pour son pelage mi-long et son tempérament sociable."
+    },
+    {
+      "nom": "Abyssinien Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété de l'Abyssin avec un pelage bleu (gris). Même tempérament actif et joueur."
+    },
+    {
+      "nom": "American Shorthair Argenté",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 7,
+      "esperance_vie": "15-20 ans",
+      "description": "Variété de l'American Shorthair avec un pelage argenté. Robuste et calme."
+    },
+    {
+      "nom": "Asian Shorthair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat similaire au Burmese, mais avec une plus grande variété de couleurs de pelage."
+    },
+    {
+      "nom": "Australian Mist",
+      "espece": "Chat",
+      "origine": "Australie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat australien au pelage tacheté, connu pour son tempérament calme et sociable."
+    },
+    {
+      "nom": "Bambino",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans",
+      "description": "Croisement entre un Sphynx et un Munchkin. Chat sans poils et aux pattes courtes. Très affectueux."
+    },
+    {
+      "nom": "Bombay",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat noir comme l’encre, avec des yeux cuivrés. Connu pour son tempérament sociable et son apparence de 'panthère miniature'."
+    },
+    {
+      "nom": "Brazilian Shorthair",
+      "espece": "Chat",
+      "origine": "Brésil",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat brésilien robuste, connu pour son pelage court et son tempérament équilibré."
+    },
+    {
+      "nom": "British Shorthair Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 5,
+      "poids_max": 9,
+      "esperance_vie": "14-20 ans",
+      "description": "Variété du British Shorthair avec un pelage bleu-gris. Très calme et affectueux."
+    },
+    {
+      "nom": "British Shorthair Lilas",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 5,
+      "poids_max": 9,
+      "esperance_vie": "14-20 ans",
+      "description": "Variété du British Shorthair avec un pelage lilas (gris rosé). Très rare et élégant."
+    },
+    {
+      "nom": "Burman Européen",
+      "espece": "Chat",
+      "origine": "Europe",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "15-18 ans",
+      "description": "Variété européenne du Burmese, avec une plus grande diversité de couleurs."
+    },
+    {
+      "nom": "California Spangled",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage tacheté, similaire à l'Ocicat mais avec des motifs plus aléatoires. Très énergique."
+    },
+    {
+      "nom": "Chantilly-Tiffany",
+      "espece": "Chat",
+      "origine": "États-Unis/Canada",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat au pelage mi-long, mais parfois classé comme poil court. Connu pour son tempérament calme."
+    },
+    {
+      "nom": "Colorpoint Shorthair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage court et colorpoint (comme le Siamois), mais avec une plus grande variété de couleurs."
+    },
+    {
+      "nom": "Cornish Rex Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Cornish Rex avec un pelage bleu. Très joueur et affectueux."
+    },
+    {
+      "nom": "Devon Rex Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Devon Rex avec un pelage bleu. Très sociable et énergique."
+    },
+    {
+      "nom": "Donskoy",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat sans poils, similaire au Sphynx mais avec une origine russe. Très affectueux."
+    },
+    {
+      "nom": "Dwelf",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Sphynx, un Munchkin et un American Curl. Chat sans poils, aux pattes courtes et aux oreilles recourbées."
+    },
+    {
+      "nom": "Egyptian Mau Bleu",
+      "espece": "Chat",
+      "origine": "Égypte",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété rare de l'Egyptian Mau avec un pelage bleu. Très rapide et agile."
+    },
+    {
+      "nom": "European Shorthair Bleu",
+      "espece": "Chat",
+      "origine": "Europe",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-18 ans",
+      "description": "Variété du European Shorthair avec un pelage bleu. Robuste et adaptable."
+    },
+    {
+      "nom": "German Rex Bleu",
+      "espece": "Chat",
+      "origine": "Allemagne",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans",
+      "description": "Variété du German Rex avec un pelage bleu. Très rare."
+    },
+    {
+      "nom": "Havana Brown",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat de couleur chocolat, connu pour son tempérament sociable et son pelage court et brillant."
+    },
+    {
+      "nom": "Japanese Bobtail Bleu",
+      "espece": "Chat",
+      "origine": "Japon",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Japanese Bobtail avec un pelage bleu. Très sociable et joueur."
+    },
+    {
+      "nom": "Khao Manee",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat thaïlandais rare, connu pour son pelage blanc et ses yeux souvent hétérochromes (bleu et vert). Très affectueux."
+    },
+    {
+      "nom": "Korat Bleu",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "15-20 ans",
+      "description": "Variété rare du Korat avec un pelage bleu. Très intelligent et loyal."
+    },
+    {
+      "nom": "LaPerm Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du LaPerm avec un pelage bleu. Très sociable et affectueux."
+    },
+    {
+      "nom": "Manx Bleu",
+      "espece": "Chat",
+      "origine": "Île de Man",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Manx avec un pelage bleu. Connu pour son absence de queue."
+    },
+    {
+      "nom": "Minskin",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans",
+      "description": "Croisement entre un Sphynx et un Munchkin. Chat sans poils et aux pattes courtes. Très affectueux."
+    },
+    {
+      "nom": "Ocicat Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété de l'Ocicat avec un pelage bleu. Très énergique et sociable."
+    },
+    {
+      "nom": "Oriental Shorthair Bleu",
+      "espece": "Chat",
+      "origine": "Thaïlande/Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété de l'Oriental Shorthair avec un pelage bleu. Très vocal et sociable."
+    },
+    {
+      "nom": "Russian Blue Bleu",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "15-20 ans",
+      "description": "Variété classique du Russian Blue. Très timide et sensible."
+    },
+    {
+      "nom": "Scottish Fold Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "11-14 ans",
+      "description": "Variété du Scottish Fold avec un pelage bleu. Connu pour ses oreilles pliées."
+    },
+    {
+      "nom": "Serengeti",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage tacheté, créé pour ressembler à un serval. Très actif et intelligent."
+    },
+    {
+      "nom": "Sokoke",
+      "espece": "Chat",
+      "origine": "Kenya",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat africain rare, connu pour son pelage tacheté et son tempérament vif."
+    },
+    {
+      "nom": "Toyger",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat créé pour ressembler à un tigre miniature. Très sociable et joueur."
+    },
+    {
+      "nom": "Ukrainian Levkoy",
+      "espece": "Chat",
+      "origine": "Ukraine",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat sans poils, avec des oreilles pliées (comme le Scottish Fold). Très rare et affectueux."
+    },
+
+    // Chats à poil mi-long
+    {
+      "nom": "American Curl",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat connu pour ses oreilles recourbées vers l’arrière. Très affectueux."
+    },
+    {
+      "nom": "Balinais",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Version à poil mi-long du Siamois, connue pour son élégance et son tempérament vocal."
+    },
+    {
+      "nom": "Birman",
+      "espece": "Chat",
+      "origine": "Birmanie (Myanmar)",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat sacré de Birmanie, connu pour son pelage colorpoint et ses gants blancs. Très calme et affectueux."
+    },
+    {
+      "nom": "Javanese",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Version à poil mi-long de l’Oriental Shorthair, connue pour son élégance et son tempérament vocal."
+    },
+    {
+      "nom": "Maine Coon",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 11,
+      "esperance_vie": "12-15 ans",
+      "description": "Un des plus grands chats domestiques, connu pour son pelage long et sa queue en panache. Très sociable et joueur."
+    },
+    {
+      "nom": "Norvégien (Skogkatt)",
+      "espece": "Chat",
+      "origine": "Norvège",
+      "poids_min": 4,
+      "poids_max": 9,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat des forêts norvégiennes, connu pour son pelage épais et sa robustesse. Très agile."
+    },
+    {
+      "nom": "Ragdoll",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-17 ans",
+      "description": "Chat connu pour son tempérament calme et détendu (d’où son nom 'poupée de chiffon'). Connu pour son pelage colorpoint et ses yeux bleus."
+    },
+    {
+      "nom": "Sibérien",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-20 ans",
+      "description": "Chat russe à poil mi-long, connu pour son pelage hypoallergénique et sa robustesse."
+    },
+    {
+      "nom": "Turc de Van",
+      "espece": "Chat",
+      "origine": "Turquie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-17 ans",
+      "description": "Chat turc connu pour son pelage blanc et sa queue colorée. Aime l’eau et est très sociable."
+    },
+    {
+      "nom": "American Curl Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété à poil mi-long de l'American Curl. Connu pour ses oreilles recourbées."
+    },
+    {
+      "nom": "Asian Semi-Longhair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil mi-long de l'Asian Shorthair. Très sociable et élégant."
+    },
+    {
+      "nom": "Balinais Lilas",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Balinais avec un pelage lilas. Très vocal et affectueux."
+    },
+    {
+      "nom": "Birmans à Poil Long",
+      "espece": "Chat",
+      "origine": "Birmanie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété expérimentale du Birman avec un pelage plus long. Très rare."
+    },
+    {
+      "nom": "British Longhair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 5,
+      "poids_max": 9,
+      "esperance_vie": "14-20 ans",
+      "description": "Variété à poil long du British Shorthair. Très calme et affectueux."
+    },
+    {
+      "nom": "California Spangled Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil mi-long du California Spangled. Très énergique."
+    },
+    {
+      "nom": "Chantilly-Tiffany Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis/Canada",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété classique du Chantilly-Tiffany. Connu pour son pelage mi-long et son tempérament calme."
+    },
+    {
+      "nom": "Highlander",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Jungle Curl et un Desert Lynx. Connu pour ses oreilles recourbées et son pelage tacheté."
+    },
+    {
+      "nom": "Jungle Curl",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage tacheté et aux oreilles recourbées. Très rare et énergique."
+    },
+    {
+      "nom": "Khao Manee Mi-Long",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété expérimentale du Khao Manee avec un pelage mi-long. Très rare."
+    },
+    {
+      "nom": "LaPerm Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil mi-long du LaPerm. Très sociable et affectueux."
+    },
+    {
+      "nom": "Maine Coon Argenté",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 11,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Maine Coon avec un pelage argenté. Très grand et sociable."
+    },
+    {
+      "nom": "Maine Coon Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 11,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Maine Coon avec un pelage bleu. Très rare et élégant."
+    },
+    {
+      "nom": "Maine Coon Smoke",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 11,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Maine Coon avec un pelage 'smoke' (fumé). Très impressionnant."
+    },
+    {
+      "nom": "Norvégien Bleu",
+      "espece": "Chat",
+      "origine": "Norvège",
+      "poids_min": 4,
+      "poids_max": 9,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Norvégien (Skogkatt) avec un pelage bleu. Très robuste et agile."
+    },
+    {
+      "nom": "Ragamuffin",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 9,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Ragdoll avec un pelage plus long et plus dense. Très calme et affectueux."
+    },
+    {
+      "nom": "Ragdoll Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-17 ans",
+      "description": "Variété du Ragdoll avec un pelage bleu. Très calme et détendu."
+    },
+    {
+      "nom": "Ragdoll Lilas",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-17 ans",
+      "description": "Variété du Ragdoll avec un pelage lilas. Très rare et élégant."
+    },
+    {
+      "nom": "Savannah Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 10,
+      "esperance_vie": "12-20 ans",
+      "description": "Variété à poil mi-long de la Savannah (croisement avec un Serval). Très énergique et intelligent."
+    },
+    {
+      "nom": "Sibérien Bleu",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-20 ans",
+      "description": "Variété du Sibérien avec un pelage bleu. Très robuste et hypoallergénique."
+    },
+    {
+      "nom": "Turc de Van Mi-Long",
+      "espece": "Chat",
+      "origine": "Turquie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-17 ans",
+      "description": "Variété à poil mi-long du Turc de Van. Très rare et sociable."
+    },
+    {
+      "nom": "York Chocolate Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans",
+      "description": "Variété à poil mi-long du York Chocolate. Très affectueux et rare."
+    },
+
+    // Chats à poil long
+    {
+      "nom": "Himalayen",
+      "espece": "Chat",
+      "origine": "États-Unis/Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Persan et un Siamois. Connu pour son pelage long et son visage plat."
+    },
+    {
+      "nom": "Persan",
+      "espece": "Chat",
+      "origine": "Iran",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat connu pour son pelage long et son visage plat. Très calme et affectueux."
+    },
+    {
+      "nom": "Sacré de Birmanie",
+      "espece": "Chat",
+      "origine": "Birmanie (Myanmar)",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Autre nom pour le Birman."
+    },
+    {
+      "nom": "Somalien",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Version à poil long de l’Abyssin. Connu pour son pelage tiqueté et son tempérament actif."
+    },
+    {
+      "nom": "York Chocolate",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans",
+      "description": "Chat rare au pelage chocolat ou lavande. Très affectueux."
+    },
+    {
+      "nom": "Abyssinien Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété de l'Abyssin avec un pelage bleu (gris). Même tempérament actif et joueur."
+    },
+    {
+      "nom": "American Shorthair Argenté",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 7,
+      "esperance_vie": "15-20 ans",
+      "description": "Variété de l'American Shorthair avec un pelage argenté. Robuste et calme."
+    },
+    {
+      "nom": "Asian Shorthair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat similaire au Burmese, mais avec une plus grande variété de couleurs de pelage."
+    },
+    {
+      "nom": "Australian Mist",
+      "espece": "Chat",
+      "origine": "Australie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat australien au pelage tacheté, connu pour son tempérament calme et sociable."
+    },
+    {
+      "nom": "Bambino",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans",
+      "description": "Croisement entre un Sphynx et un Munchkin. Chat sans poils et aux pattes courtes. Très affectueux."
+    },
+    {
+      "nom": "Bombay",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat noir comme l’encre, avec des yeux cuivrés. Connu pour son tempérament sociable et son apparence de 'panthère miniature'."
+    },
+    {
+      "nom": "Brazilian Shorthair",
+      "espece": "Chat",
+      "origine": "Brésil",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat brésilien robuste, connu pour son pelage court et son tempérament équilibré."
+    },
+    {
+      "nom": "British Shorthair Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 5,
+      "poids_max": 9,
+      "esperance_vie": "14-20 ans",
+      "description": "Variété du British Shorthair avec un pelage bleu-gris. Très calme et affectueux."
+    },
+    {
+      "nom": "British Shorthair Lilas",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 5,
+      "poids_max": 9,
+      "esperance_vie": "14-20 ans",
+      "description": "Variété du British Shorthair avec un pelage lilas (gris rosé). Très rare et élégant."
+    },
+    {
+      "nom": "Burman Européen",
+      "espece": "Chat",
+      "origine": "Europe",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "15-18 ans",
+      "description": "Variété européenne du Burmese, avec une plus grande diversité de couleurs."
+    },
+    {
+      "nom": "California Spangled",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage tacheté, similaire à l'Ocicat mais avec des motifs plus aléatoires. Très énergique."
+    },
+    {
+      "nom": "Chantilly-Tiffany",
+      "espece": "Chat",
+      "origine": "États-Unis/Canada",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Chat au pelage mi-long, mais parfois classé comme poil court. Connu pour son tempérament calme."
+    },
+    {
+      "nom": "Colorpoint Shorthair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage court et colorpoint (comme le Siamois), mais avec une plus grande variété de couleurs."
+    },
+    {
+      "nom": "Cornish Rex Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Cornish Rex avec un pelage bleu. Très joueur et affectueux."
+    },
+    {
+      "nom": "Devon Rex Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Devon Rex avec un pelage bleu. Très sociable et énergique."
+    },
+    {
+      "nom": "Donskoy",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat sans poils, similaire au Sphynx mais avec une origine russe. Très affectueux."
+    },
+    {
+      "nom": "Dwelf",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Sphynx, un Munchkin et un American Curl. Chat sans poils, aux pattes courtes et aux oreilles recourbées."
+    },
+    {
+      "nom": "Egyptian Mau Bleu",
+      "espece": "Chat",
+      "origine": "Égypte",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété rare de l'Egyptian Mau avec un pelage bleu. Très rapide et agile."
+    },
+    {
+      "nom": "European Shorthair Bleu",
+      "espece": "Chat",
+      "origine": "Europe",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-18 ans",
+      "description": "Variété du European Shorthair avec un pelage bleu. Robuste et adaptable."
+    },
+    {
+      "nom": "German Rex Bleu",
+      "espece": "Chat",
+      "origine": "Allemagne",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans",
+      "description": "Variété du German Rex avec un pelage bleu. Très rare."
+    },
+    {
+      "nom": "Havana Brown",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat de couleur chocolat, connu pour son tempérament sociable et son pelage court et brillant."
+    },
+    {
+      "nom": "Japanese Bobtail Bleu",
+      "espece": "Chat",
+      "origine": "Japon",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Japanese Bobtail avec un pelage bleu. Très sociable et joueur."
+    },
+    {
+      "nom": "Khao Manee",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat thaïlandais rare, connu pour son pelage blanc et ses yeux souvent hétérochromes (bleu et vert). Très affectueux."
+    },
+    {
+      "nom": "Korat Bleu",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "15-20 ans",
+      "description": "Variété rare du Korat avec un pelage bleu. Très intelligent et loyal."
+    },
+    {
+      "nom": "LaPerm Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du LaPerm avec un pelage bleu. Très sociable et affectueux."
+    },
+    {
+      "nom": "Manx Bleu",
+      "espece": "Chat",
+      "origine": "Île de Man",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Manx avec un pelage bleu. Connu pour son absence de queue."
+    },
+    {
+      "nom": "Minskin",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans",
+      "description": "Croisement entre un Sphynx et un Munchkin. Chat sans poils et aux pattes courtes. Très affectueux."
+    },
+    {
+      "nom": "Ocicat Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété de l'Ocicat avec un pelage bleu. Très énergique et sociable."
+    },
+    {
+      "nom": "Oriental Shorthair Bleu",
+      "espece": "Chat",
+      "origine": "Thaïlande/Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété de l'Oriental Shorthair avec un pelage bleu. Très vocal et sociable."
+    },
+    {
+      "nom": "Russian Blue Bleu",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "15-20 ans",
+      "description": "Variété classique du Russian Blue. Très timide et sensible."
+    },
+    {
+      "nom": "Scottish Fold Bleu",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "11-14 ans",
+      "description": "Variété du Scottish Fold avec un pelage bleu. Connu pour ses oreilles pliées."
+    },
+    {
+      "nom": "Serengeti",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage tacheté, créé pour ressembler à un serval. Très actif et intelligent."
+    },
+    {
+      "nom": "Sokoke",
+      "espece": "Chat",
+      "origine": "Kenya",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat africain rare, connu pour son pelage tacheté et son tempérament vif."
+    },
+    {
+      "nom": "Toyger",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat créé pour ressembler à un tigre miniature. Très sociable et joueur."
+    },
+    {
+      "nom": "Ukrainian Levkoy",
+      "espece": "Chat",
+      "origine": "Ukraine",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat sans poils, avec des oreilles pliées (comme le Scottish Fold). Très rare et affectueux."
+    },
+    {
+      "nom": "American Curl Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété à poil mi-long de l'American Curl. Connu pour ses oreilles recourbées."
+    },
+    {
+      "nom": "Asian Semi-Longhair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil mi-long de l'Asian Shorthair. Très sociable et élégant."
+    },
+    {
+      "nom": "Balinais Lilas",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Balinais avec un pelage lilas. Très vocal et affectueux."
+    },
+    {
+      "nom": "Birmans à Poil Long",
+      "espece": "Chat",
+      "origine": "Birmanie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété expérimentale du Birman avec un pelage plus long. Très rare."
+    },
+    {
+      "nom": "British Longhair",
+      "espece": "Chat",
+      "origine": "Royaume-Uni",
+      "poids_min": 5,
+      "poids_max": 9,
+      "esperance_vie": "14-20 ans",
+      "description": "Variété à poil long du British Shorthair. Très calme et affectueux."
+    },
+    {
+      "nom": "California Spangled Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil mi-long du California Spangled. Très énergique."
+    },
+    {
+      "nom": "Chantilly-Tiffany Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis/Canada",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété classique du Chantilly-Tiffany. Connu pour son pelage mi-long et son tempérament calme."
+    },
+    {
+      "nom": "Highlander",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Jungle Curl et un Desert Lynx. Connu pour ses oreilles recourbées et son pelage tacheté."
+    },
+    {
+      "nom": "Jungle Curl",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat au pelage tacheté et aux oreilles recourbées. Très rare et énergique."
+    },
+    {
+      "nom": "Khao Manee Mi-Long",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété expérimentale du Khao Manee avec un pelage mi-long. Très rare."
+    },
+    {
+      "nom": "LaPerm Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil mi-long du LaPerm. Très sociable et affectueux."
+    },
+    {
+      "nom": "Maine Coon Argenté",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 11,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Maine Coon avec un pelage argenté. Très grand et sociable."
+    },
+    {
+      "nom": "Maine Coon Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 11,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Maine Coon avec un pelage bleu. Très rare et élégant."
+    },
+    {
+      "nom": "Maine Coon Smoke",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 11,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Maine Coon avec un pelage 'smoke' (fumé). Très impressionnant."
+    },
+    {
+      "nom": "Norvégien Bleu",
+      "espece": "Chat",
+      "origine": "Norvège",
+      "poids_min": 4,
+      "poids_max": 9,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Norvégien (Skogkatt) avec un pelage bleu. Très robuste et agile."
+    },
+    {
+      "nom": "Ragamuffin",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 9,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété du Ragdoll avec un pelage plus long et plus dense. Très calme et affectueux."
+    },
+    {
+      "nom": "Ragdoll Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-17 ans",
+      "description": "Variété du Ragdoll avec un pelage bleu. Très calme et détendu."
+    },
+    {
+      "nom": "Ragdoll Lilas",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-17 ans",
+      "description": "Variété du Ragdoll avec un pelage lilas. Très rare et élégant."
+    },
+    {
+      "nom": "Savannah Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 10,
+      "esperance_vie": "12-20 ans",
+      "description": "Variété à poil mi-long de la Savannah (croisement avec un Serval). Très énergique et intelligent."
+    },
+    {
+      "nom": "Sibérien Bleu",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-20 ans",
+      "description": "Variété du Sibérien avec un pelage bleu. Très robuste et hypoallergénique."
+    },
+    {
+      "nom": "Turc de Van Mi-Long",
+      "espece": "Chat",
+      "origine": "Turquie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-17 ans",
+      "description": "Variété à poil mi-long du Turc de Van. Très rare et sociable."
+    },
+    {
+      "nom": "York Chocolate Mi-Long",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans",
+      "description": "Variété à poil mi-long du York Chocolate. Très affectueux et rare."
+    },
+
+    // === Chats hybrides ===
+    {
+      "nom": "Bengal (F1-F3)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 6,
+      "poids_max": 10,
+      "esperance_vie": "10-15 ans",
+      "description": "Générations F1 à F3 du Bengal (plus proches du chat-léopard asiatique). Très énergique et nécessite une attention particulière."
+    },
+    {
+      "nom": "Bengal (F4 et +)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans",
+      "description": "Générations F4 et ultérieures du Bengal (plus domestiquées). Très sociable et joueur."
+    },
+    {
+      "nom": "Caracal",
+      "espece": "Chat",
+      "origine": "Afrique/Asie",
+      "poids_min": 10,
+      "poids_max": 20,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat sauvage parfois apprivoisé. Connu pour ses oreilles noires avec des touffes de poils. **Non domestique** (nécessite une autorisation spéciale dans de nombreux pays)."
+    },
+    {
+      "nom": "Chausie",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 12,
+      "esperance_vie": "12-14 ans",
+      "description": "Croisement entre un chat domestique et un Chat des marais (Felis chaus). Très grand et énergique. Nécessite beaucoup d’espace."
+    },
+    {
+      "nom": "Highlander Lynx",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 6,
+      "poids_max": 12,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Jungle Curl et un Desert Lynx. Connu pour ses oreilles recourbées et son apparence de lynx."
+    },
+    {
+      "nom": "Jungle Cat Hybrid",
+      "espece": "Chat",
+      "origine": "Asie",
+      "poids_min": 8,
+      "poids_max": 15,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement avec le Chat-léopard de Chine (Felis bengalensis). Très rare et énergique. **Non domestique** dans de nombreux pays."
+    },
+    {
+      "nom": "Savannah (F1)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 8,
+      "poids_max": 15,
+      "esperance_vie": "10-15 ans",
+      "description": "Première génération de Savannah (50% Serval). Très grand, énergique et nécessite une autorisation dans de nombreux pays."
+    },
+    {
+      "nom": "Savannah (F2-F3)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 6,
+      "poids_max": 12,
+      "esperance_vie": "12-15 ans",
+      "description": "Deuxième et troisième générations de Savannah (25-37% Serval). Très énergique et sociable."
+    },
+    {
+      "nom": "Savannah (F4 et +)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 10,
+      "esperance_vie": "12-20 ans",
+      "description": "Générations F4 et ultérieures de Savannah (moins de 25% Serval). Plus adaptées à la vie domestique. Très sociable et intelligente."
+    },
+    {
+      "nom": "Serengeti Cat",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Bengal et un Oriental Shorthair, créé pour ressembler à un Serval. Très énergique et intelligent."
+    },
+    {
+      "nom": "Toyger (Early Generation)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 8,
+      "esperance_vie": "10-15 ans",
+      "description": "Générations précoces du Toyger, avec une plus grande proportion de gènes de chat sauvage. Très rare."
+    },
+    {
+      "nom": "Ussuri Cat",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 6,
+      "poids_max": 10,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement avec le Chat-léopard de l’Amour (Felis euptilura). Très rare et énergique."
+    },
+
+      // === Chats rares et expérimentaux ===
+    {
+      "nom": "Aegean Cat",
+      "espece": "Chat",
+      "origine": "Grèce",
+      "poids_min": 4,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat grec naturel, rare en dehors de la Grèce. Connu pour son pelage mi-long et son tempérament sociable."
+    },
+    {
+      "nom": "Alpine Lynx",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 6,
+      "poids_max": 12,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement expérimental entre un Maine Coon et un Serval. Très grand et énergique."
+    },
+    {
+      "nom": "Ashara",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 8,
+      "esperance_vie": "12-15 ans",
+      "description": "Race expérimentale, croisement entre un Savannah, un Oriental Shorthair et un American Curl. Très rare."
+    },
+    {
+      "nom": "Bambino (Longhair)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans",
+      "description": "Variété à poil long du Bambino (croisement Sphynx x Munchkin). Très rare."
+    },
+    {
+      "nom": "California Spangled (Longhair)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil long du California Spangled. Très rare."
+    },
+    {
+      "nom": "Desert Lynx",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 10,
+      "esperance_vie": "12-15 ans",
+      "description": "Race expérimentale, croisement entre un Maine Coon, un Pixiebob et un American Lynx. Très rare."
+    },
+    {
+      "nom": "Dwelf (Longhair)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil long du Dwelf (Sphynx x Munchkin x American Curl). Extrêmement rare."
+    },
+    {
+      "nom": "Genetta",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 8,
+      "esperance_vie": "12-15 ans",
+      "description": "Race expérimentale, croisement entre un Bengal et un Savannah. Très rare et énergique."
+    },
+    {
+      "nom": "Khao Manee (Longhair)",
+      "espece": "Chat",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété expérimentale du Khao Manee avec un pelage long. Très rare."
+    },
+    {
+      "nom": "Lambkin",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans",
+      "description": "Croisement entre un Munchkin et un Selkirk Rex. Chat aux pattes courtes et au pelage bouclé. Très rare."
+    },
+    {
+      "nom": "Minskin (Longhair)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans",
+      "description": "Variété à poil long du Minskin (Sphynx x Munchkin). Très rare."
+    },
+    {
+      "nom": "Pixiebob (Longhair)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 8,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil long du Pixiebob. Très rare et ressemblant à un lynx."
+    },
+    {
+      "nom": "Ragamuffin (Longhair)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 9,
+      "esperance_vie": "12-16 ans",
+      "description": "Variété à poil long du Ragamuffin. Très rare et affectueux."
+    },
+    {
+      "nom": "Savannah (Snow)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 10,
+      "esperance_vie": "12-20 ans",
+      "description": "Variété du Savannah avec un pelage 'snow' (blanc ou très clair). Très rare."
+    },
+    {
+      "nom": "Selkirk Rex Bleu",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété du Selkirk Rex avec un pelage bleu. Très rare et doux."
+    },
+    {
+      "nom": "Selkirk Rex Longhair",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil long du Selkirk Rex. Très rare et affectueux."
+    },
+    {
+      "nom": "Serengeti (Longhair)",
+      "espece": "Chat",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 8,
+      "esperance_vie": "12-15 ans",
+      "description": "Variété à poil long du Serengeti. Très rare et énergique."
+    },
+    {
+      "nom": "Toybob",
+      "espece": "Chat",
+      "origine": "Russie",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans",
+      "description": "Race naturelle russe, connue pour sa petite taille et son pelage court. Très rare en dehors de la Russie."
+    },
+
+    // ==== Chats sans poils ====
+    {
+      "nom": "Bambino",
+      "espece": "Chat",
+      "categorie": "Sans poils",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans"
+    },
+    {
+      "nom": "Donskoy",
+      "espece": "Chat",
+      "categorie": "Sans poils",
+      "origine": "Russie",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Minskin",
+      "espece": "Chat",
+      "categorie": "Sans poils",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans"
+    },
+    {
+      "nom": "Peterbald",
+      "espece": "Chat",
+      "categorie": "Sans poils",
+      "origine": "Russie",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Chat russe sans poils, similaire au Sphynx mais avec une origine différente."
+    },
+    {
+      "nom": "Sphynx",
+      "espece": "Chat",
+      "categorie": "Sans poils",
+      "origine": "Canada",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans"
+    },
+    {
+      "nom": "Ukrainian Levkoy",
+      "espece": "Chat",
+      "categorie": "Sans poils",
+      "origine": "Ukraine",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+
+    // ==== Chats à poils bouclés =====
+    {
+      "nom": "American Wirehair",
+      "espece": "Chat",
+      "categorie": "Poils bouclés",
+      "origine": "États-Unis",
+      "poids_min": 5,
+      "poids_max": 7,
+      "esperance_vie": "12-16 ans"
+    },
+    {
+      "nom": "Cornish Rex",
+      "espece": "Chat",
+      "categorie": "Poils bouclés",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans"
+    },
+    {
+      "nom": "Devon Rex",
+      "espece": "Chat",
+      "categorie": "Poils bouclés",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans"
+    },
+    {
+      "nom": "German Rex",
+      "espece": "Chat",
+      "categorie": "Poils bouclés",
+      "origine": "Allemagne",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans"
+    },
+    {
+      "nom": "LaPerm",
+      "espece": "Chat",
+      "categorie": "Poils bouclés",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Selkirk Rex",
+      "espece": "Chat",
+      "categorie": "Poils bouclés",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Tennessee Rex",
+      "espece": "Chat",
+      "categorie": "Poils bouclés",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Race rare de chat à poils bouclés, similaire au Devon Rex."
+    },
+
+    // ====Chats à pattes courtes ====
+    {
+      "nom": "Bambino",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans"
+    },
+    {
+      "nom": "Dwelf",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Lambkin",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans"
+    },
+    {
+      "nom": "Minskin",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-14 ans"
+    },
+    {
+      "nom": "Munchkin",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans",
+      "description": "Race fondatrice des chats à pattes courtes. Très sociable et joueur."
+    },
+    {
+      "nom": "Munchkin Longhair",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Napoleon",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Munchkin et un Persan. Chat à pattes courtes et à poil long."
+    },
+    {
+      "nom": "Skookum",
+      "espece": "Chat",
+      "categorie": "Pattes courtes",
+      "origine": "États-Unis",
+      "poids_min": 2,
+      "poids_max": 4,
+      "esperance_vie": "12-15 ans",
+      "description": "Croisement entre un Munchkin et un LaPerm. Chat à pattes courtes et à poils bouclés."
+    },
+
+    // ==== Chats à oreille particulière ====
+    {
+      "nom": "American Curl",
+      "espece": "Chat",
+      "categorie": "Oreilles recourbées",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans"
+    },
+    {
+      "nom": "American Curl Longhair",
+      "espece": "Chat",
+      "categorie": "Oreilles recourbées",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans"
+    },
+    {
+      "nom": "Highlander",
+      "espece": "Chat",
+      "categorie": "Oreilles recourbées",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 8,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Jungle Curl",
+      "espece": "Chat",
+      "categorie": "Oreilles recourbées",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Scottish Fold",
+      "espece": "Chat",
+      "categorie": "Oreilles pliées",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "11-14 ans"
+    },
+    {
+      "nom": "Scottish Fold Longhair",
+      "espece": "Chat",
+      "categorie": "Oreilles pliées",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "11-14 ans"
+    },
+    {
+      "nom": "Ukrainian Levkoy",
+      "espece": "Chat",
+      "categorie": "Oreilles pliées",
+      "origine": "Ukraine",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Abyssin",
+      "espece": "Chat",
+      "categorie": "Grandes oreilles",
+      "origine": "Éthiopie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Devon Rex",
+      "espece": "Chat",
+      "categorie": "Grandes oreilles",
+      "origine": "Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-16 ans"
+    },
+    {
+      "nom": "Oriental Shorthair",
+      "espece": "Chat",
+      "categorie": "Grandes oreilles",
+      "origine": "Thaïlande/Royaume-Uni",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Savannah",
+      "espece": "Chat",
+      "categorie": "Grandes oreilles",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 10,
+      "esperance_vie": "12-20 ans"
+    },
+    {
+      "nom": "Siamois",
+      "espece": "Chat",
+      "categorie": "Grandes oreilles",
+      "origine": "Thaïlande",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans"
+    },
+
+    // ====Chats colorpoint ====
+    {
+      "nom": "Balinais",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Birman",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "Birmanie",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-16 ans"
+    },
+    {
+      "nom": "Colorpoint Shorthair",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Himalayen",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "États-Unis/Royaume-Uni",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Javanese",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Khao Manee",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "Thaïlande",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Ragdoll",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "États-Unis",
+      "poids_min": 4,
+      "poids_max": 7,
+      "esperance_vie": "12-17 ans"
+    },
+    {
+      "nom": "Siamois",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "Thaïlande",
+      "poids_min": 4,
+      "poids_max": 6,
+      "esperance_vie": "12-15 ans"
+    },
+    {
+      "nom": "Tonkinese",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "Canada",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "15-16 ans"
+    },
+    {
+      "nom": "York Chocolate",
+      "espece": "Chat",
+      "categorie": "Colorpoint",
+      "origine": "États-Unis",
+      "poids_min": 3,
+      "poids_max": 5,
+      "esperance_vie": "12-14 ans"
+    }
+  ]
+}
