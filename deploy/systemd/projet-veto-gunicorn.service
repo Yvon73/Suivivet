@@ -1,0 +1,31 @@
+[Unit]
+Description=Gunicorn - Projet_veto (application Django)
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=projetveto
+Group=www-data
+UMask=0007
+WorkingDirectory=/opt/projet_veto
+RuntimeDirectory=projet-veto
+RuntimeDirectoryMode=0750
+# Charge Projet_veto/.env lui-meme (django-environ) : pas besoin
+# d'EnvironmentFile ici, tant que ce fichier existe a cet emplacement.
+ExecStart=/opt/projet_veto/.venv/bin/gunicorn \
+    --workers 3 \
+    --bind unix:/run/projet-veto/gunicorn.sock \
+    Projet_veto.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+# Durcissement minimal
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/projet_veto/media /opt/projet_veto/logs /opt/projet_veto/staticfiles
+
+[Install]
+WantedBy=multi-user.target

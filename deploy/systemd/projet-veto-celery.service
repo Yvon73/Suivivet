@@ -1,0 +1,22 @@
+[Unit]
+Description=Celery worker - Projet_veto (rappels de consultation par email)
+After=network.target redis-server.service postgresql.service
+Wants=redis-server.service postgresql.service
+
+[Service]
+Type=simple
+User=projetveto
+Group=projetveto
+WorkingDirectory=/opt/projet_veto
+# Charge Projet_veto/.env lui-meme (django-environ), comme le service gunicorn.
+ExecStart=/opt/projet_veto/.venv/bin/celery -A Projet_veto worker -l info
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/projet_veto/media /opt/projet_veto/logs
+
+[Install]
+WantedBy=multi-user.target
