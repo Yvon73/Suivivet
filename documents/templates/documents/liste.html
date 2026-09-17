@@ -44,10 +44,6 @@
                             <a href="{% url 'documents:document_delete' document.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
                         </td>
                     </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center">Aucun document enregistré.</td>
-                    </tr>
                 {% endfor %}
             </tbody>
         </table>
