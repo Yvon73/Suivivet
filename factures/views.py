@@ -45,7 +45,7 @@ class FactureListView(LoginRequiredMixin, ListView):
     ordering = ['-date']
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('animal')
+        queryset = super().get_queryset().filter(utilisateur=self.request.user).select_related('animal')
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
             queryset = queryset.filter(animal_id=animal_id)
@@ -55,14 +55,15 @@ class FactureListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         annee = datetime.now().year
         mois = datetime.now().month
+        utilisateur = self.request.user
 
         # Calcul des dépenses mensuelles et annuelles
         context['annee'] = annee
         context['mois_courant'] = datetime(annee, mois, 1)
-        context['depenses_mensuelles_veterinaires'] = Facture.depenses_mensuelles(annee, mois, 'VETERINAIRE')
-        context['depenses_mensuelles_alimentaires'] = Facture.depenses_mensuelles(annee, mois, 'ALIMENTAIRE')
-        context['depenses_annuelles_veterinaires'] = Facture.depenses_annuelles(annee, 'VETERINAIRE')
-        context['depenses_annuelles_alimentaires'] = Facture.depenses_annuelles(annee, 'ALIMENTAIRE')
+        context['depenses_mensuelles_veterinaires'] = Facture.depenses_mensuelles(utilisateur, annee, mois, 'VETERINAIRE')
+        context['depenses_mensuelles_alimentaires'] = Facture.depenses_mensuelles(utilisateur, annee, mois, 'ALIMENTAIRE')
+        context['depenses_annuelles_veterinaires'] = Facture.depenses_annuelles(utilisateur, annee, 'VETERINAIRE')
+        context['depenses_annuelles_alimentaires'] = Facture.depenses_annuelles(utilisateur, annee, 'ALIMENTAIRE')
 
         return context
 
@@ -70,6 +71,9 @@ class FactureDetailView(LoginRequiredMixin, DetailView):
     model = Facture
     template_name = 'factures/detail.html'
     context_object_name = 'facture'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -93,11 +97,14 @@ class VentilationFactureMixin:
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
         kwargs['verrouillee'] = self._verrouillee()
         return kwargs
 
     def get_formset(self, data=None):
-        return LigneFactureFormSet(data, instance=getattr(self, 'object', None))
+        return LigneFactureFormSet(
+            data, instance=getattr(self, 'object', None), form_kwargs={'user': self.request.user},
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -157,7 +164,7 @@ class FactureCreateView(VentilationFactureMixin, LoginRequiredMixin, CreateView)
         initial = super().get_initial()
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
-            initial['animal'] = get_object_or_404(Animal, pk=animal_id)
+            initial['animal'] = get_object_or_404(Animal, pk=animal_id, utilisateur=self.request.user)
         return initial
 
     def get_success_url(self):
@@ -170,7 +177,13 @@ class FactureUpdateView(VentilationFactureMixin, LoginRequiredMixin, UpdateView)
     model = Facture
     success_url = reverse_lazy('factures:facture_list')
 
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
+
 class FactureDeleteView(LoginRequiredMixin, DeleteView):
     model = Facture
     template_name = 'factures/confirm_delete.html'
     success_url = reverse_lazy('factures:facture_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)

@@ -4,22 +4,27 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Animal, AnimalIdentification, Poids, Espece, Robe, Race, Proprietaire
 from datetime import date
-from .forms import AnimalForm
+from .forms import AnimalForm, ProprietaireForm
 
 
-def _creer_proprietaire_test(email, nom='Test', prenom=''):
-    """Crée un Proprietaire de test (catalogue partagé, cf. Proprietaire)."""
-    return Proprietaire.objects.create(nom=nom, prenom=prenom, email=email)
+def _creer_proprietaire_test(email, nom='Test', prenom='', utilisateur=None):
+    """Crée un Proprietaire de test, rattaché à `utilisateur` (ou à un
+    utilisateur de test créé à la volée si non fourni) — cf.
+    Proprietaire.utilisateur."""
+    if utilisateur is None:
+        utilisateur = User.objects.create_user(username=f'u_{User.objects.count()}', password='p')
+    return Proprietaire.objects.create(nom=nom, prenom=prenom, email=email, utilisateur=utilisateur)
 
 class AnimalModelTest(TestCase):
     """Tests pour le modèle Animal."""
 
     def setUp(self):
         """Créer des données de test."""
+        self.user = User.objects.create_user(username='testuser_model', password='p')
         self.chien = Espece.objects.get(code='CHIEN')
         self.noir = Robe.objects.get(code='NOIR')
         self.race_chien = Race.objects.filter(espece=self.chien).first()
-        self.proprietaire = _creer_proprietaire_test("jean.dupont@example.com", nom="Dupont", prenom="Jean")
+        self.proprietaire = _creer_proprietaire_test("jean.dupont@example.com", nom="Dupont", prenom="Jean", utilisateur=self.user)
         self.animal = Animal.objects.create(
             nom="Rex",
             race=self.race_chien,
@@ -27,6 +32,7 @@ class AnimalModelTest(TestCase):
             date_naissance=date(2020, 1, 1),
             proprietaire=self.proprietaire,
             robe=self.noir,
+            utilisateur=self.user,
         )
         AnimalIdentification.objects.create(animal=self.animal, identification="123456")
 
@@ -60,8 +66,9 @@ class AnimalModelTest(TestCase):
             race=self.race_chien,
             espece=self.chien,
             date_naissance=date(2021, 1, 1),
-            proprietaire=_creer_proprietaire_test("marie.martin@example.com", nom="Martin", prenom="Marie"),
+            proprietaire=_creer_proprietaire_test("marie.martin@example.com", nom="Martin", prenom="Marie", utilisateur=self.user),
             robe=self.noir,
+            utilisateur=self.user,
         )
         with self.assertRaises(Exception):
             AnimalIdentification.objects.create(
@@ -73,6 +80,7 @@ class PoidsModelTest(TestCase):
     """Tests pour le modèle Poids."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username='testuser_poids', password='p')
         chat = Espece.objects.get(code='CHAT')
         robe = Robe.objects.get(code='AUTRE')
         race_chat = Race.objects.filter(espece=chat).first()
@@ -81,8 +89,9 @@ class PoidsModelTest(TestCase):
             race=race_chat,
             espece=chat,
             date_naissance=date(2019, 5, 15),
-            proprietaire=_creer_proprietaire_test("pierre.martin@example.com", nom="Martin", prenom="Pierre"),
+            proprietaire=_creer_proprietaire_test("pierre.martin@example.com", nom="Martin", prenom="Pierre", utilisateur=self.user),
             robe=robe,
+            utilisateur=self.user,
         )
         self.poids = Poids.objects.create(
             animal=self.animal,
@@ -107,10 +116,11 @@ class AnimalFormTest(TestCase):
     """Tests pour le formulaire AnimalForm."""
 
     def setUp(self):
+        self.user = User.objects.create_user(username='testuser_form', password='p')
         self.chat = Espece.objects.get(code='CHAT')
         self.blanc = Robe.objects.get(code='BLANC')
         self.race_chat = Race.objects.filter(espece=self.chat).first()
-        self.proprietaire = _creer_proprietaire_test("sophie.laurent@example.com", nom="Laurent", prenom="Sophie")
+        self.proprietaire = _creer_proprietaire_test("sophie.laurent@example.com", nom="Laurent", prenom="Sophie", utilisateur=self.user)
 
     def test_valid_form(self):
         """Test d'un formulaire valide."""
@@ -122,7 +132,7 @@ class AnimalFormTest(TestCase):
             'proprietaire': self.proprietaire.pk,
             'robe': self.blanc.pk,
         }
-        form = AnimalForm(data=form_data)
+        form = AnimalForm(data=form_data, user=self.user)
         self.assertTrue(form.is_valid())
 
     def test_invalid_form(self):
@@ -133,9 +143,28 @@ class AnimalFormTest(TestCase):
             'espece': self.chat.pk,
             'date_naissance': date(2021, 3, 10),
         }
-        form = AnimalForm(data=form_data)
+        form = AnimalForm(data=form_data, user=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn('nom', form.errors)
+
+class ProprietaireFormTest(TestCase):
+    """Tests pour le formulaire ProprietaireForm, notamment l'unicité de
+    l'email par compte (cf. Proprietaire.Meta.constraints)."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='proprio_user', password='p')
+        self.autre_user = User.objects.create_user(username='proprio_autre', password='p')
+        _creer_proprietaire_test('deja.pris@example.com', utilisateur=self.user)
+
+    def test_email_deja_utilise_par_le_meme_compte_est_refuse(self):
+        form = ProprietaireForm(data={'nom': 'Doublon', 'email': 'deja.pris@example.com'}, user=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+
+    def test_meme_email_autorise_pour_un_autre_compte(self):
+        form = ProprietaireForm(data={'nom': 'Doublon', 'email': 'deja.pris@example.com'}, user=self.autre_user)
+        self.assertTrue(form.is_valid())
+
 
 class AnimalViewTest(TestCase):
     """Tests pour les vues de l'application animaux."""
@@ -152,7 +181,7 @@ class AnimalViewTest(TestCase):
         self.noir = Robe.objects.get(code='NOIR')
         self.race_chien = Race.objects.filter(espece=self.chien).first()
         self.race_chat = Race.objects.filter(espece=self.chat).first()
-        self.proprietaire = _creer_proprietaire_test("test.user@example.com")
+        self.proprietaire = _creer_proprietaire_test("test.user@example.com", utilisateur=self.user)
         self.animal = Animal.objects.create(
             nom="Test",
             race=self.race_chien,
@@ -160,6 +189,7 @@ class AnimalViewTest(TestCase):
             date_naissance=date(2020, 1, 1),
             proprietaire=self.proprietaire,
             robe=self.noir,
+            utilisateur=self.user,
         )
         AnimalIdentification.objects.create(animal=self.animal, identification="000000")
 
@@ -260,8 +290,9 @@ class AnimalViewTest(TestCase):
             race=self.race_chat,
             espece=self.chat,
             date_naissance=date(2021, 1, 1),
-            proprietaire=_creer_proprietaire_test("autre.user@example.com"),
+            proprietaire=_creer_proprietaire_test("autre.user@example.com", utilisateur=self.user),
             robe=self.noir,
+            utilisateur=self.user,
         )
         AnimalIdentification.objects.create(animal=autre, identification="222222")
         # Recherche par nom
@@ -299,6 +330,33 @@ class AnimalViewTest(TestCase):
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         self.assertIn('attachment', response['Content-Disposition'])
+
+    def test_animal_liste_isole_par_compte(self):
+        """Un compte ne voit jamais les animaux d'un autre compte (cf.
+        Animal.utilisateur)."""
+        autre_user = User.objects.create_user(username='autre_compte', password='p')
+        autre_proprietaire = _creer_proprietaire_test("autre.compte@example.com", utilisateur=autre_user)
+        Animal.objects.create(
+            nom="PasVisible", race=self.race_chien, espece=self.chien,
+            date_naissance=date(2020, 1, 1), proprietaire=autre_proprietaire,
+            robe=self.noir, utilisateur=autre_user,
+        )
+        response = self.client.get(reverse('animaux:animal_list'))
+        self.assertContains(response, "Test")
+        self.assertNotContains(response, "PasVisible")
+
+    def test_animal_detail_isole_par_compte(self):
+        """Accéder à la fiche d'un animal d'un autre compte renvoie 404, pas
+        les données de cet animal."""
+        autre_user = User.objects.create_user(username='autre_compte2', password='p')
+        autre_proprietaire = _creer_proprietaire_test("autre.compte2@example.com", utilisateur=autre_user)
+        autre_animal = Animal.objects.create(
+            nom="InterditAcces", race=self.race_chien, espece=self.chien,
+            date_naissance=date(2020, 1, 1), proprietaire=autre_proprietaire,
+            robe=self.noir, utilisateur=autre_user,
+        )
+        response = self.client.get(reverse('animaux:animal_detail', args=[autre_animal.pk]))
+        self.assertEqual(response.status_code, 404)
 
     def test_import_csv(self):
         """Test de l'import CSV des animaux."""

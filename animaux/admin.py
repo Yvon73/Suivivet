@@ -1,6 +1,11 @@
 from django.contrib import admin
-from .forms import AnimalIdentificationForm
-from .models import Animal, AnimalIdentification, Espece, Robe, Race, Organisme, Proprietaire
+from .models import Espece, Robe, Race, Organisme
+
+# Animal, AnimalIdentification et Proprietaire ne sont volontairement PAS
+# enregistrés ici : ce sont des données saisies par les comptes utilisateurs
+# (isolées par compte, cf. Animal.utilisateur/Proprietaire.utilisateur), pas
+# des catalogues de reference — l'Admin gere les comptes et les catalogues
+# partages, jamais les donnees personnelles saisies par les utilisateurs.
 
 
 @admin.register(Espece)
@@ -29,22 +34,3 @@ class RaceAdmin(admin.ModelAdmin):
     search_fields = ('nom', 'nom_scientifique', 'origine')
 
 
-@admin.register(Proprietaire)
-class ProprietaireAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'prenom', 'email', 'telephone', 'code_postal', 'ville', 'actif')
-    list_filter = ('actif',)
-    search_fields = ('nom', 'prenom', 'email', 'code_postal', 'ville')
-
-
-class AnimalIdentificationInline(admin.TabularInline):
-    model = AnimalIdentification
-    form = AnimalIdentificationForm
-    extra = 1
-
-
-@admin.register(Animal)
-class AnimalAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'espece', 'race', 'robe', 'identifications_display', 'proprietaire')
-    list_filter = ('espece', 'robe')
-    search_fields = ('nom', 'identifications__identification', 'proprietaire__nom', 'proprietaire__email')
-    inlines = [AnimalIdentificationInline]

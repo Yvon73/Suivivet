@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Consultation, Veterinaire
+from .models import Veterinaire
+
+# Consultation n'est volontairement PAS enregistrée ici : c'est une donnée
+# saisie par un compte utilisateur (isolée par animal, cf.
+# Animal.utilisateur), pas un catalogue de référence.
 
 
 @admin.register(Veterinaire)
@@ -7,10 +11,3 @@ class VeterinaireAdmin(admin.ModelAdmin):
     list_display = ('nom', 'prenom', 'email', 'telephone', 'actif')
     list_filter = ('actif',)
     search_fields = ('nom', 'prenom', 'email')
-
-
-@admin.register(Consultation)
-class ConsultationAdmin(admin.ModelAdmin):
-    list_display = ('animal', 'date', 'motif', 'veterinaire')
-    list_filter = ('veterinaire',)
-    search_fields = ('animal__nom', 'motif', 'veterinaire__nom')

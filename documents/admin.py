@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Document, TypeDocument
+from .models import TypeDocument
+
+# Document n'est volontairement PAS enregistré ici : c'est une donnée saisie
+# par un compte utilisateur (isolée par animal, cf. Animal.utilisateur), pas
+# un catalogue de référence.
 
 
 @admin.register(TypeDocument)
@@ -7,11 +11,3 @@ class TypeDocumentAdmin(admin.ModelAdmin):
     list_display = ('nom',)
     search_fields = ('nom',)
     ordering = ('nom',)
-
-
-@admin.register(Document)
-class DocumentAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'animal', 'type_document', 'date_ajout')
-    list_filter = ('type_document',)
-    search_fields = ('titre', 'animal__nom')
-    date_hierarchy = 'date_ajout'

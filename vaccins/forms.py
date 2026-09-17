@@ -1,4 +1,5 @@
 from django import forms
+from animaux.models import Animal
 from .models import SuiviVaccinTraitement, Vaccin, Traitement
 
 class VaccinForm(forms.ModelForm):
@@ -86,8 +87,11 @@ class SuiviVaccinTraitementForm(forms.ModelForm):
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
+        self.fields['animal'].queryset = Animal.objects.filter(utilisateur=user)
 
         # --- Liste « Vaccin(s) » : ligne vide (pour pouvoir tout désélectionner
         # d'un clic) + catalogue.

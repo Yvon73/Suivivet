@@ -23,14 +23,14 @@ class VentilationFactureTest(TestCase):
         chien = Espece.objects.get(code='CHIEN')
         robe = Robe.objects.filter(code='AUTRE').first() or Robe.objects.first()
         race = Race.objects.filter(espece=chien).first()
-        proprietaire = Proprietaire.objects.create(nom='TEST_TEMP', email='test_temp2@example.com')
+        proprietaire = Proprietaire.objects.create(nom='TEST_TEMP', email='test_temp2@example.com', utilisateur=self.user)
         self.animal1 = Animal.objects.create(
             nom='TEST_TEMP_1', race=race, espece=chien,
-            date_naissance=date(2020, 1, 1), robe=robe, proprietaire=proprietaire,
+            date_naissance=date(2020, 1, 1), robe=robe, proprietaire=proprietaire, utilisateur=self.user,
         )
         self.animal2 = Animal.objects.create(
             nom='TEST_TEMP_2', race=race, espece=chien,
-            date_naissance=date(2020, 1, 1), robe=robe, proprietaire=proprietaire,
+            date_naissance=date(2020, 1, 1), robe=robe, proprietaire=proprietaire, utilisateur=self.user,
         )
         self.designation = Designation.objects.create(nom='TEST_Consultation')
 
@@ -208,7 +208,7 @@ class VentilationFactureTest(TestCase):
         cout2 = Facture.cout_revient_animal(self.animal2, annee)
         self.assertEqual(cout2, Decimal('2.50'))
 
-        couts = Facture.couts_revient_annuels(annee)
+        couts = Facture.couts_revient_annuels(self.user, annee)
         self.assertEqual(couts[self.animal1.pk], Decimal('22.50'))
         self.assertEqual(couts[self.animal2.pk], Decimal('2.50'))
 
@@ -222,9 +222,39 @@ class VentilationFactureTest(TestCase):
         self.assertEqual(cout1, Decimal('30.00'))
         self.assertEqual(cout2, Decimal('0'))
 
+    def test_cout_revient_isole_par_compte(self):
+        """Le cout de revient d'un animal ne doit jamais inclure les factures
+        (ni la part de facture partagee) d'un autre compte."""
+        autre_user = User.objects.create_user(username='autre_facture_user', password='p')
+        chien = Espece.objects.get(code='CHIEN')
+        robe = Robe.objects.filter(code='AUTRE').first() or Robe.objects.first()
+        race = Race.objects.filter(espece=chien).first()
+        autre_proprietaire = Proprietaire.objects.create(
+            nom='AUTRE', email='autre_facture@example.com', utilisateur=autre_user,
+        )
+        autre_animal = Animal.objects.create(
+            nom='AUTRE_ANIMAL', race=race, espece=chien,
+            date_naissance=date(2020, 1, 1), robe=robe, proprietaire=autre_proprietaire,
+            utilisateur=autre_user,
+        )
+        # Grosse facture partagee (sans animal) chez l'autre compte : ne doit
+        # jamais impacter le cout de revient de self.animal1.
+        Facture.objects.create(
+            animal=None, utilisateur=autre_user, type_depense='ALIMENTAIRE', titre='Fuite',
+            montant=Decimal('1000.00'), date=date(2026, 8, 1), fichier=_fichier_test(),
+        )
+        Facture.objects.create(
+            animal=self.animal1, type_depense='VETERINAIRE', titre='Simple',
+            montant=Decimal('30.00'), date=date(2026, 8, 1), fichier=_fichier_test(),
+        )
+        self.assertEqual(Facture.cout_revient_animal(self.animal1, 2026), Decimal('30.00'))
+        self.assertEqual(Facture.cout_revient_animal(autre_animal, 2026), Decimal('1000.00'))
+        couts = Facture.couts_revient_annuels(self.user, 2026)
+        self.assertNotIn(autre_animal.pk, couts)
+
     def test_facture_non_ventilee_sans_animal_partagee(self):
         Facture.objects.create(
-            animal=None, type_depense='ALIMENTAIRE', titre='Generale',
+            animal=None, utilisateur=self.user, type_depense='ALIMENTAIRE', titre='Generale',
             montant=Decimal('10.00'), date=date(2026, 8, 1), fichier=_fichier_test(),
         )
         cout1 = Facture.cout_revient_animal(self.animal1, 2026)

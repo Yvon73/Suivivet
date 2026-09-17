@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Vaccin, Traitement, SuiviVaccinTraitement
+from .models import Vaccin, Traitement
+
+# SuiviVaccinTraitement n'est volontairement PAS enregistré ici : c'est une
+# donnée saisie par un compte utilisateur (isolée par animal, cf.
+# Animal.utilisateur), pas un catalogue de référence.
 
 
 @admin.register(Vaccin)
@@ -16,8 +20,3 @@ class TraitementAdmin(admin.ModelAdmin):
     search_fields = ('nom',)
 
 
-@admin.register(SuiviVaccinTraitement)
-class SuiviVaccinTraitementAdmin(admin.ModelAdmin):
-    list_display = ('animal', 'vaccin', 'traitement', 'date', 'date_prochaine_dose')
-    list_filter = ('vaccin', 'traitement')
-    search_fields = ('animal__nom',)

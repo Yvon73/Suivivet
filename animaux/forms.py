@@ -56,14 +56,18 @@ class AnimalForm(forms.ModelForm):
             'photo': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
 
-        # Propriétaires actifs uniquement (catalogue partagé, cf. Proprietaire) :
+        # Propriétaires actifs du compte connecté uniquement (chaque compte a
+        # ses propres fiches Proprietaire, cf. Proprietaire.utilisateur) :
         # une fiche « supprimée » (Proprietaire.actif=False) n'est plus proposée
         # pour un nouvel animal, mais reste sélectionnée si c'est déjà la valeur
         # de l'animal en cours de modification (pour ne pas casser l'édition).
-        self.fields['proprietaire'].queryset = self._queryset_actifs_ou_valeur_actuelle(Proprietaire, 'proprietaire')
+        self.fields['proprietaire'].queryset = self._queryset_actifs_ou_valeur_actuelle(
+            Proprietaire.objects.filter(utilisateur=user), 'proprietaire'
+        )
 
         # Espèce/robe : masque l'entrée générique « Autre » du catalogue,
         # remplacée par le bouton « + » qui crée une vraie nouvelle entrée
@@ -119,15 +123,17 @@ class AnimalForm(forms.ModelForm):
             )
         return queryset
 
-    def _queryset_actifs_ou_valeur_actuelle(self, model, champ_instance):
-        """Queryset de `model` (Proprietaire, Veterinaire...) limité aux fiches
-        actives, sauf si c'est déjà la valeur actuelle de l'instance en cours
-        de modification (fiche « supprimée » mais conservée en base, pour ne
-        pas casser l'édition d'une fiche existante qui la référence encore)."""
-        queryset = model.objects.filter(actif=True)
+    def _queryset_actifs_ou_valeur_actuelle(self, base_queryset, champ_instance):
+        """Restreint `base_queryset` (Proprietaire d'un compte donné...) aux
+        fiches actives, sauf si c'est déjà la valeur actuelle de l'instance en
+        cours de modification (fiche « supprimée » mais conservée en base,
+        pour ne pas casser l'édition d'une fiche existante qui la référence
+        encore)."""
+        model = base_queryset.model
+        queryset = base_queryset.filter(actif=True)
         valeur_id = getattr(self.instance, f'{champ_instance}_id', None)
         if valeur_id and not queryset.filter(pk=valeur_id).exists():
-            queryset = model.objects.filter(Q(actif=True) | Q(pk=valeur_id))
+            queryset = base_queryset.filter(Q(actif=True) | Q(pk=valeur_id))
         return queryset
 
     @staticmethod
@@ -304,6 +310,28 @@ class ProprietaireForm(forms.ModelForm):
             'telephone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        # `utilisateur` n'est pas un champ du formulaire : Django exclut donc
+        # automatiquement ce champ (et toute contrainte d'unicité qui le
+        # mentionne, cf. Proprietaire.Meta.constraints) de la validation
+        # d'unicité automatique du ModelForm — d'où la vérification manuelle
+        # dans clean_email() ci-dessous. On le pose quand même sur l'instance
+        # pour que save() fonctionne sans argument supplémentaire.
+        if user is not None:
+            self.instance.utilisateur = user
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if self.user is not None:
+            doublon = Proprietaire.objects.filter(utilisateur=self.user, email__iexact=email)
+            if self.instance.pk:
+                doublon = doublon.exclude(pk=self.instance.pk)
+            if doublon.exists():
+                raise forms.ValidationError("Un propriétaire avec cet email existe déjà dans ton compte.")
+        return email
 
 
 class RobeQuickAddForm(forms.Form):

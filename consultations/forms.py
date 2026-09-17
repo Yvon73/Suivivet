@@ -1,6 +1,7 @@
 from django import forms
 from django.db.models import Q
 from django.utils import timezone
+from animaux.models import Animal
 from .models import Consultation, Veterinaire
 
 class ConsultationForm(forms.ModelForm):
@@ -15,8 +16,11 @@ class ConsultationForm(forms.ModelForm):
             'veterinaire': forms.Select(attrs={'class': 'form-select'}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
+        self.fields['animal'].queryset = Animal.objects.filter(utilisateur=user)
 
         # Vétérinaires actifs uniquement (catalogue partagé, cf. Veterinaire) :
         # une fiche « supprimée » (Veterinaire.actif=False) n'est plus proposée

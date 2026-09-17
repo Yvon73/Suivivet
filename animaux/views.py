@@ -34,22 +34,23 @@ def _sanitize_spreadsheet_value(value):
     return value
 
 
-def _proprietaire_depuis_email(email):
-    """Retrouve (ou crée) le Proprietaire correspondant à l'email d'une ligne
-    importée (colonne « Propriétaire » du CSV, historiquement un simple
-    email) : dédoublonnage par email, nom dérivé de la partie locale de
-    l'adresse à défaut de mieux (ex. « jean.dupont@... » -> « Jean Dupont »),
-    à compléter ensuite via la fiche propriétaire."""
+def _proprietaire_depuis_email(email, utilisateur):
+    """Retrouve (ou crée) le Proprietaire du compte `utilisateur` correspondant
+    à l'email d'une ligne importée (colonne « Propriétaire » du CSV,
+    historiquement un simple email) : dédoublonnage par email au sein de ce
+    compte uniquement, nom dérivé de la partie locale de l'adresse à défaut
+    de mieux (ex. « jean.dupont@... » -> « Jean Dupont »), à compléter ensuite
+    via la fiche propriétaire."""
     email = (email or '').strip()
     if not email or email.lower() == 'nan':
         email = 'inconnu@exemple.invalid'
-    proprietaire = Proprietaire.objects.filter(email__iexact=email).first()
+    proprietaire = Proprietaire.objects.filter(utilisateur=utilisateur, email__iexact=email).first()
     if proprietaire:
         return proprietaire
     partie_locale = email.split('@', 1)[0]
     mots = [mot for mot in partie_locale.replace('_', '.').replace('+', '.').split('.') if mot]
     nom = ' '.join(mot.capitalize() for mot in mots) or email
-    return Proprietaire.objects.create(nom=nom, email=email)
+    return Proprietaire.objects.create(nom=nom, email=email, utilisateur=utilisateur)
 
 matplotlib.use('Agg')  # Pour générer des graphiques sans interface graphique
 
@@ -57,6 +58,9 @@ class AnimalDetailView(LoginRequiredMixin, DetailView):
     model = Animal
     template_name = 'animaux/detail.html'
     context_object_name = 'animal'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -128,16 +132,36 @@ class AnimalCreateView(LoginRequiredMixin, AnimalFormContextMixin, AnimalIdentif
     template_name = 'animaux/form.html'
     success_url = reverse_lazy('animaux:animal_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.utilisateur = self.request.user
+        return super().form_valid(form)
+
 class AnimalUpdateView(LoginRequiredMixin, AnimalFormContextMixin, AnimalIdentificationsFormsetMixin, UpdateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'animaux/form.html'
     success_url = reverse_lazy('animaux:animal_list')
 
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 class AnimalDeleteView(LoginRequiredMixin, DeleteView):
     model = Animal
     template_name = 'animaux/confirm_delete.html'
     success_url = reverse_lazy('animaux:animal_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
 
 @login_required
 @require_POST
@@ -208,7 +232,7 @@ def ajouter_proprietaire_ajax(request):
     """Crée un nouveau propriétaire depuis la modale du formulaire animal, et
     le renvoie en JSON pour l'insérer directement dans le menu déroulant côté
     client (même principe que ajouter_organisme_ajax)."""
-    form = ProprietaireForm(request.POST)
+    form = ProprietaireForm(request.POST, user=request.user)
     if form.is_valid():
         proprietaire = form.save()
         return JsonResponse({'success': True, 'id': proprietaire.pk, 'nom': str(proprietaire)})
@@ -221,12 +245,15 @@ class ProprietaireListView(LoginRequiredMixin, ListView):
     ordering = ['nom', 'prenom']
 
     def get_queryset(self):
-        return super().get_queryset().filter(actif=True)
+        return super().get_queryset().filter(utilisateur=self.request.user, actif=True)
 
 class ProprietaireDetailView(LoginRequiredMixin, DetailView):
     model = Proprietaire
     template_name = 'animaux/proprietaire_detail.html'
     context_object_name = 'proprietaire'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
 
 class ProprietaireCreateView(LoginRequiredMixin, CreateView):
     model = Proprietaire
@@ -234,11 +261,24 @@ class ProprietaireCreateView(LoginRequiredMixin, CreateView):
     template_name = 'animaux/proprietaire_form.html'
     success_url = reverse_lazy('animaux:proprietaire_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 class ProprietaireUpdateView(LoginRequiredMixin, UpdateView):
     model = Proprietaire
     form_class = ProprietaireForm
     template_name = 'animaux/proprietaire_form.html'
     success_url = reverse_lazy('animaux:proprietaire_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
 class ProprietaireDeleteView(LoginRequiredMixin, DeleteView):
     """« Suppression » douce : la fiche est conservée en base (les animaux
@@ -248,6 +288,9 @@ class ProprietaireDeleteView(LoginRequiredMixin, DeleteView):
     model = Proprietaire
     template_name = 'animaux/proprietaire_confirm_delete.html'
     success_url = reverse_lazy('animaux:proprietaire_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(utilisateur=self.request.user)
 
     def form_valid(self, form):
         self.object.actif = False
@@ -261,11 +304,11 @@ class PoidsCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['animal'] = get_object_or_404(Animal, pk=self.kwargs['animal_id'])
+        context['animal'] = get_object_or_404(Animal, pk=self.kwargs['animal_id'], utilisateur=self.request.user)
         return context
 
     def form_valid(self, form):
-        form.instance.animal = get_object_or_404(Animal, pk=self.kwargs['animal_id'])
+        form.instance.animal = get_object_or_404(Animal, pk=self.kwargs['animal_id'], utilisateur=self.request.user)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -273,7 +316,7 @@ class PoidsCreateView(LoginRequiredMixin, CreateView):
 
 @login_required
 def graphique_poids(request, animal_id):
-    animal = get_object_or_404(Animal, pk=animal_id)
+    animal = get_object_or_404(Animal, pk=animal_id, utilisateur=request.user)
     poids_list = animal.poids.all().order_by('date')
 
     # Préparation des données pour le graphique
@@ -306,7 +349,7 @@ def graphique_poids(request, animal_id):
 
 @login_required
 def generer_pdf_fiche_animal(request, animal_id):
-    animal = get_object_or_404(Animal, pk=animal_id)
+    animal = get_object_or_404(Animal, pk=animal_id, utilisateur=request.user)
     poids_list = animal.poids.all().order_by('date')
     vaccins = animal.suivi_vaccins_traitements.filter(vaccin__isnull=False).order_by('-date')
     traitements = animal.suivi_vaccins_traitements.filter(traitement__isnull=False).order_by('-date')
@@ -336,7 +379,7 @@ class AnimalListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related(
+        queryset = super().get_queryset().filter(utilisateur=self.request.user).select_related(
             'espece', 'race', 'proprietaire'
         ).prefetch_related('identifications__organisme')
         form = AnimalSearchForm(self.request.GET)
@@ -376,7 +419,7 @@ class AnimalListView(LoginRequiredMixin, ListView):
         # liste globale — pas de détail mensuel ici (cf. AnimalDetailView
         # pour le détail mensuel+annuel sur la fiche d'un animal).
         from factures.models import Facture
-        couts = Facture.couts_revient_annuels(date.today().year)
+        couts = Facture.couts_revient_annuels(self.request.user, date.today().year)
         for animal in context['animaux']:
             animal.cout_revient_annuel = couts.get(animal.pk, 0)
 
@@ -388,7 +431,7 @@ class AnimalListView(LoginRequiredMixin, ListView):
 
 @login_required
 def exporter_animaux_csv(request):
-    animaux = Animal.objects.all().select_related('espece', 'race', 'robe', 'proprietaire').prefetch_related('identifications__organisme')
+    animaux = Animal.objects.filter(utilisateur=request.user).select_related('espece', 'race', 'robe', 'proprietaire').prefetch_related('identifications__organisme')
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="animaux.csv"'
@@ -413,7 +456,7 @@ def exporter_animaux_csv(request):
 
 @login_required
 def exporter_animaux_excel(request):
-    animaux = Animal.objects.all().select_related('espece', 'race', 'robe', 'proprietaire').prefetch_related('identifications__organisme')
+    animaux = Animal.objects.filter(utilisateur=request.user).select_related('espece', 'race', 'robe', 'proprietaire').prefetch_related('identifications__organisme')
 
     df = pd.DataFrame([
         {
@@ -512,14 +555,19 @@ def importer_animaux_csv(request):
                     'race': race_obj,
                     'espece': espece_obj,
                     'date_naissance': pd.to_datetime(row['Date de Naissance']).date(),
-                    'proprietaire': _proprietaire_depuis_email(str(row.get('Propriétaire', ''))),
+                    'proprietaire': _proprietaire_depuis_email(str(row.get('Propriétaire', '')), request.user),
                     'robe': robe_obj,
+                    'utilisateur': request.user,
                 }
 
                 if identification:
-                    # Dédoublonnage par identification uniquement quand elle est renseignée.
+                    # Dédoublonnage par identification, parmi les animaux du
+                    # compte connecté uniquement (même si l'identification en
+                    # tant que numéro de puce est globalement unique, un
+                    # import ne doit jamais mettre à jour la fiche d'un autre
+                    # compte).
                     animal_identification = AnimalIdentification.objects.filter(
-                        identification=identification
+                        identification=identification, animal__utilisateur=request.user,
                     ).select_related('animal').first()
                     if animal_identification:
                         # Animal déjà connu (retrouvé par son identification) : on

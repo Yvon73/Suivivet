@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.core.validators import MinValueValidator
@@ -244,16 +245,22 @@ class Organisme(models.Model):
 
 class Proprietaire(models.Model):
     """Fiche complète d'un propriétaire d'animal (nom, coordonnées), réutilisable
-    d'un animal à l'autre (catalogue partagé, comme Organisme) : un même foyer
-    ayant plusieurs animaux n'est saisi qu'une fois."""
+    d'un animal à l'autre pour un même compte (un même foyer ayant plusieurs
+    animaux n'est saisi qu'une fois) — mais propre à ce compte : deux comptes
+    distincts sur la même installation ne voient jamais les fiches l'un de
+    l'autre (cf. `utilisateur`)."""
 
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='proprietaires',
+        verbose_name="Compte",
+    )
     nom = models.CharField(max_length=100, verbose_name="Nom")
     prenom = models.CharField(max_length=100, blank=True, verbose_name="Prénom")
     adresse = models.CharField(max_length=255, blank=True, verbose_name="Adresse")
     code_postal = models.CharField(max_length=10, blank=True, verbose_name="Code postal")
     ville = models.CharField(max_length=100, blank=True, verbose_name="Ville")
     telephone = models.CharField(max_length=14, blank=True, verbose_name="Téléphone")
-    email = models.EmailField(unique=True, verbose_name="Email")
+    email = models.EmailField(verbose_name="Email")
     actif = models.BooleanField(
         default=True, verbose_name="Actif",
         help_text=(
@@ -273,9 +280,17 @@ class Proprietaire(models.Model):
         verbose_name = "Propriétaire"
         verbose_name_plural = "Propriétaires"
         ordering = ['nom', 'prenom']
+        constraints = [
+            models.UniqueConstraint(fields=['utilisateur', 'email'], name='proprietaire_unique_email_par_compte')
+        ]
 
 
 class Animal(models.Model):
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='animaux',
+        verbose_name="Compte",
+        help_text="Compte auquel appartient cette fiche : chaque compte ne voit que ses propres animaux.",
+    )
     nom = models.CharField(max_length=100, verbose_name="Nom de l'animal")
     race = models.ForeignKey(Race, on_delete=models.PROTECT, related_name='animaux', verbose_name="Race")
     espece = models.ForeignKey(Espece, on_delete=models.PROTECT, related_name='animaux', verbose_name="Espèce")

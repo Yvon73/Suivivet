@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -56,6 +57,16 @@ class Facture(models.Model):
         ('ALIMENTAIRE', 'Alimentaire'),
     ]
 
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='factures',
+        verbose_name="Compte",
+        help_text=(
+            "Compte auquel appartient cette facture : chaque compte ne voit que ses "
+            "propres factures. Déduit automatiquement du propriétaire de l'animal "
+            "concerné quand il y en a un (cf. save()) ; obligatoire à préciser "
+            "explicitement pour une facture partagée sans animal renseigné."
+        ),
+    )
     numero = models.CharField(
         max_length=50, blank=True, verbose_name="N° de facture",
     )
@@ -109,30 +120,18 @@ class Facture(models.Model):
         Facture.objects.filter(pk=self.pk).update(montant=total)
 
     @classmethod
-    def depenses_mensuelles(cls, annee, mois, type_depense=None):
+    def depenses_mensuelles(cls, utilisateur, annee, mois, type_depense=None):
+        filtre = {'utilisateur': utilisateur, 'date__year': annee, 'date__month': mois}
         if type_depense:
-            return cls.objects.filter(
-                date__year=annee,
-                date__month=mois,
-                type_depense=type_depense
-            ).aggregate(Sum('montant'))['montant__sum'] or 0
-        else:
-            return cls.objects.filter(
-                date__year=annee,
-                date__month=mois
-            ).aggregate(Sum('montant'))['montant__sum'] or 0
+            filtre['type_depense'] = type_depense
+        return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or 0
 
     @classmethod
-    def depenses_annuelles(cls, annee, type_depense=None):
+    def depenses_annuelles(cls, utilisateur, annee, type_depense=None):
+        filtre = {'utilisateur': utilisateur, 'date__year': annee}
         if type_depense:
-            return cls.objects.filter(
-                date__year=annee,
-                type_depense=type_depense
-            ).aggregate(Sum('montant'))['montant__sum'] or 0
-        else:
-            return cls.objects.filter(
-                date__year=annee
-            ).aggregate(Sum('montant'))['montant__sum'] or 0
+            filtre['type_depense'] = type_depense
+        return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or 0
 
     @classmethod
     def cout_revient_animal(cls, animal, annee, mois=None):
@@ -140,16 +139,19 @@ class Facture(models.Model):
         d'une année si `mois` est fourni) :
         - la totalité des lignes de ventilation qui lui sont attribuées,
         - + la totalité des factures non ventilées où il est l'animal renseigné,
-        - + une part égale (÷ nombre d'animaux enregistrés) des coûts
+        - + une part égale (÷ nombre d'animaux du même compte) des coûts
           « partagés » : les lignes ventilées marquées « Tous les animaux »,
-          et les factures non ventilées sans aucun animal renseigné.
+          et les factures non ventilées sans aucun animal renseigné — toujours
+          au sein du seul compte propriétaire de `animal` (jamais mélangé
+          avec les animaux d'un autre compte).
         """
-        nb_animaux = Animal.objects.count()
+        utilisateur = animal.utilisateur
+        nb_animaux = Animal.objects.filter(utilisateur=utilisateur).count()
         if not nb_animaux:
             return Decimal('0')
 
-        filtre_lignes = {'facture__date__year': annee}
-        filtre_factures = {'date__year': annee}
+        filtre_lignes = {'facture__date__year': annee, 'facture__utilisateur': utilisateur}
+        filtre_factures = {'date__year': annee, 'utilisateur': utilisateur}
         if mois:
             filtre_lignes['facture__date__month'] = mois
             filtre_factures['date__month'] = mois
@@ -175,28 +177,29 @@ class Facture(models.Model):
         return total_lignes_animal + total_factures_animal + part_partagee
 
     @classmethod
-    def couts_revient_annuels(cls, annee):
-        """Coût de revient annuel de chaque animal enregistré, en une seule
-        passe (peu de requêtes, indépendant du nombre d'animaux) — pour la
-        colonne « Coût de revient » de la liste globale des animaux."""
-        animaux_ids = list(Animal.objects.values_list('pk', flat=True))
+    def couts_revient_annuels(cls, utilisateur, annee):
+        """Coût de revient annuel de chaque animal du compte `utilisateur`, en
+        une seule passe (peu de requêtes, indépendant du nombre d'animaux) —
+        pour la colonne « Coût de revient » de la liste globale des animaux."""
+        animaux_ids = list(Animal.objects.filter(utilisateur=utilisateur).values_list('pk', flat=True))
         nb_animaux = len(animaux_ids)
         if not nb_animaux:
             return {}
 
         par_animal_lignes = dict(
-            LigneFacture.objects.filter(animal__isnull=False, facture__date__year=annee)
-            .values('animal').annotate(total=Sum('prix_total')).values_list('animal', 'total')
+            LigneFacture.objects.filter(
+                animal__isnull=False, facture__utilisateur=utilisateur, facture__date__year=annee
+            ).values('animal').annotate(total=Sum('prix_total')).values_list('animal', 'total')
         )
         par_animal_factures = dict(
-            cls.objects.filter(animal__isnull=False, lignes__isnull=True, date__year=annee)
+            cls.objects.filter(animal__isnull=False, utilisateur=utilisateur, lignes__isnull=True, date__year=annee)
             .values('animal').annotate(total=Sum('montant')).values_list('animal', 'total')
         )
         total_lignes_partagees = LigneFacture.objects.filter(
-            pour_tous_les_animaux=True, facture__date__year=annee
+            pour_tous_les_animaux=True, facture__utilisateur=utilisateur, facture__date__year=annee
         ).aggregate(Sum('prix_total'))['prix_total__sum'] or Decimal('0')
         total_factures_partagees = cls.objects.filter(
-            animal__isnull=True, lignes__isnull=True, date__year=annee
+            animal__isnull=True, utilisateur=utilisateur, lignes__isnull=True, date__year=annee
         ).aggregate(Sum('montant'))['montant__sum'] or Decimal('0')
         part_partagee = (total_lignes_partagees + total_factures_partagees) / nb_animaux
 
@@ -209,6 +212,8 @@ class Facture(models.Model):
 
     def save(self, *args, **kwargs):
         is_new = not self.pk
+        if not self.utilisateur_id and self.animal_id:
+            self.utilisateur_id = self.animal.utilisateur_id
         super().save(*args, **kwargs)
 
         if is_new and self.animal and self.animal.proprietaire.email:

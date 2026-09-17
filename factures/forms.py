@@ -26,8 +26,17 @@ class FactureForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
-    def __init__(self, *args, verrouillee=False, **kwargs):
+    def __init__(self, *args, user=None, verrouillee=False, **kwargs):
         super().__init__(*args, **kwargs)
+        # Posé sur l'instance avant save() (cf. VentilationFactureMixin.post,
+        # qui appelle form.save() directement plutôt que le form_valid par
+        # défaut) : nécessaire notamment pour une facture partagée sans
+        # animal renseigné, où Facture.save() ne peut pas déduire le compte
+        # depuis un animal absent.
+        if user is not None:
+            self.instance.utilisateur = user
+        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
+        self.fields['animal'].queryset = Animal.objects.filter(utilisateur=user)
         # Le champ vide signifie « facture partagée entre tous les animaux »
         # dans le calcul du coût de revient (cf. Facture.cout_revient_animal)
         # — on le dit explicitement plutôt que de laisser l'option vide
@@ -72,12 +81,13 @@ class LigneFactureForm(forms.ModelForm):
             'prix_unitaire': forms.NumberInput(attrs={'class': 'form-control ligne-prix-unitaire', 'step': '0.01', 'min': '0'}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['cible'].widget.attrs['class'] = 'form-select ligne-cible'
+        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
         self.fields['cible'].choices = (
             [(self.TOUS_LES_ANIMAUX, 'Tous les animaux')]
-            + [(str(a.pk), a.nom) for a in Animal.objects.all()]
+            + [(str(a.pk), a.nom) for a in Animal.objects.filter(utilisateur=user)]
         )
 
         if self.instance.pk:

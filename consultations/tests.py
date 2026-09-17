@@ -8,13 +8,17 @@ from .models import Consultation, Veterinaire
 from .forms import ConsultationForm
 
 
-def _creer_animal_test(nom, identification, proprietaire_email, date_naissance=date(2020, 1, 1)):
-    """Crée un Animal de test rattaché à un chien du catalogue de référence."""
+def _creer_animal_test(nom, identification, proprietaire_email, date_naissance=date(2020, 1, 1), utilisateur=None):
+    """Crée un Animal de test rattaché à un chien du catalogue de référence,
+    pour `utilisateur` (ou un utilisateur de test créé à la volée si non
+    fourni) — cf. Animal.utilisateur."""
+    if utilisateur is None:
+        utilisateur = User.objects.create_user(username=f'u_{User.objects.count()}', password='p')
     chien = Espece.objects.get(code='CHIEN')
     robe = Robe.objects.get(code='AUTRE')
     race = Race.objects.filter(espece=chien).first()
     proprietaire, _ = Proprietaire.objects.get_or_create(
-        email=proprietaire_email, defaults={'nom': 'Test'},
+        utilisateur=utilisateur, email=proprietaire_email, defaults={'nom': 'Test'},
     )
     animal = Animal.objects.create(
         nom=nom,
@@ -23,6 +27,7 @@ def _creer_animal_test(nom, identification, proprietaire_email, date_naissance=d
         date_naissance=date_naissance,
         proprietaire=proprietaire,
         robe=robe,
+        utilisateur=utilisateur,
     )
     if identification:
         AnimalIdentification.objects.create(animal=animal, identification=identification)
@@ -57,26 +62,28 @@ class ConsultationFormTest(TestCase):
 
     def test_valid_form(self):
         """Test d'un formulaire valide."""
-        animal = _creer_animal_test("Test", "000000", "test.user@example.com")
+        user = User.objects.create_user(username='form_valid_user', password='p')
+        animal = _creer_animal_test("Test", "000000", "test.user@example.com", utilisateur=user)
         form_data = {
             'animal': animal.pk,
             'date': timezone.now() + timedelta(days=1),
             'motif': 'Vaccination',
             'veterinaire': _creer_veterinaire_test().pk,
         }
-        form = ConsultationForm(data=form_data)
+        form = ConsultationForm(data=form_data, user=user)
         self.assertTrue(form.is_valid())
 
     def test_invalid_form(self):
         """Test d'un formulaire invalide (date dans le passé)."""
-        animal = _creer_animal_test("Test", "000000", "test.user@example.com")
+        user = User.objects.create_user(username='form_invalid_user', password='p')
+        animal = _creer_animal_test("Test", "000000", "test.user@example.com", utilisateur=user)
         form_data = {
             'animal': animal.pk,
             'date': timezone.now() - timedelta(days=1),  # Date dans le passé
             'motif': 'Vaccination',
             'veterinaire': _creer_veterinaire_test().pk,
         }
-        form = ConsultationForm(data=form_data)
+        form = ConsultationForm(data=form_data, user=user)
         self.assertFalse(form.is_valid())
 
 class ConsultationViewTest(TestCase):
@@ -89,7 +96,7 @@ class ConsultationViewTest(TestCase):
             password='testpass123',
         )
         self.client.login(username='testuser', password='testpass123')
-        self.animal = _creer_animal_test("Test", "000000", "test@example.com")
+        self.animal = _creer_animal_test("Test", "000000", "test@example.com", utilisateur=self.user)
         self.consultation = Consultation.objects.create(
             animal=self.animal,
             date=timezone.now() + timedelta(days=5),

@@ -125,7 +125,9 @@ class SuiviListView(LoginRequiredMixin, ListView):
     context_object_name = 'suivis'
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('animal', 'vaccin', 'traitement')
+        queryset = super().get_queryset().filter(
+            animal__utilisateur=self.request.user
+        ).select_related('animal', 'vaccin', 'traitement')
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
             queryset = queryset.filter(animal_id=animal_id)
@@ -149,8 +151,13 @@ class SuiviCreateView(LoginRequiredMixin, TraitementClasseContextMixin, SuiviSav
         initial = super().get_initial()
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
-            initial['animal'] = get_object_or_404(Animal, pk=animal_id)
+            initial['animal'] = get_object_or_404(Animal, pk=animal_id, utilisateur=self.request.user)
         return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_success_url(self):
         return reverse_lazy('animaux:animal_detail', kwargs={'pk': self.object.animal.pk})
@@ -161,7 +168,18 @@ class SuiviUpdateView(LoginRequiredMixin, TraitementClasseContextMixin, SuiviSav
     template_name = 'vaccins/form.html'
     success_url = reverse_lazy('vaccins:suivi_list')
 
+    def get_queryset(self):
+        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
 class SuiviDeleteView(LoginRequiredMixin, DeleteView):
     model = SuiviVaccinTraitement
     template_name = 'vaccins/confirm_delete.html'
     success_url = reverse_lazy('vaccins:suivi_list')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(animal__utilisateur=self.request.user)

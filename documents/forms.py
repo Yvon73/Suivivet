@@ -1,4 +1,5 @@
 from django import forms
+from animaux.models import Animal
 from .models import Document, TypeDocument
 
 class DocumentForm(forms.ModelForm):
@@ -25,8 +26,10 @@ class DocumentForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
+        self.fields['animal'].queryset = Animal.objects.filter(utilisateur=user)
         self.fields['type_document'].required = False
         self.fields['type_document'].help_text = (
             "Absent de la liste ? Laissez ce champ vide et saisissez le nouveau type ci-dessous."
