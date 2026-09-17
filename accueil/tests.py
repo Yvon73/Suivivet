@@ -20,6 +20,7 @@ class AccueilViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['premier_lancement'])
         self.assertNotContains(response, 'Créer le premier compte')
+        self.assertContains(response, reverse('accueil:inscription'))
 
     def test_affiche_les_informations_legales(self):
         response = self.client.get(reverse('accueil:accueil'))
@@ -107,6 +108,52 @@ class PremierUtilisateurCreateViewTest(TestCase):
         response = self.client.get(reverse('animaux:animal_list'))
         self.assertContains(response, 'a11y-contraste')
         self.assertContains(response, 'a11y-palette-daltonisme')
+
+
+class InscriptionCreateViewTest(TestCase):
+    """Tests de la création d'un compte « classique » (self-service, à la
+    différence du tout premier compte administrateur)."""
+
+    def test_cree_un_compte_non_administrateur_meme_si_un_compte_existe_deja(self):
+        User.objects.create_user(username='dejainscrit', password='motdepasse123')
+
+        response = self.client.post(reverse('accueil:inscription'), {
+            'username': 'nouveau',
+            'email': 'nouveau@example.com',
+            'password1': 'un-mot-de-passe-solide-42',
+            'password2': 'un-mot-de-passe-solide-42',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        utilisateur = User.objects.get(username='nouveau')
+        self.assertFalse(utilisateur.is_staff)
+        self.assertFalse(utilisateur.is_superuser)
+        self.assertEqual(int(self.client.session['_auth_user_id']), utilisateur.pk)
+
+
+class AdministrationRestreinteAuxDonneesTest(TestCase):
+    """Le site admin Django ne doit exposer que des comptes/catalogues, jamais
+    les données personnelles saisies par un compte utilisateur."""
+
+    def test_les_modeles_de_donnees_utilisateur_ne_sont_pas_enregistres(self):
+        from django.contrib import admin
+        from animaux.models import Animal, Proprietaire
+        from consultations.models import Consultation
+        from documents.models import Document
+        from vaccins.models import SuiviVaccinTraitement
+
+        for model in (Animal, Proprietaire, Consultation, Document, SuiviVaccinTraitement):
+            self.assertNotIn(model, admin.site._registry, f"{model.__name__} ne doit pas être dans l'admin")
+
+    def test_les_catalogues_restent_enregistres(self):
+        from django.contrib import admin
+        from animaux.models import Espece, Race, Robe, Organisme
+        from vaccins.models import Vaccin, Traitement
+        from consultations.models import Veterinaire
+        from documents.models import TypeDocument
+
+        for model in (Espece, Race, Robe, Organisme, Vaccin, Traitement, Veterinaire, TypeDocument):
+            self.assertIn(model, admin.site._registry, f"{model.__name__} devrait rester dans l'admin")
 
 
 class PreferencesAccessibiliteViewTest(TestCase):

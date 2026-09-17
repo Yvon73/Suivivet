@@ -72,6 +72,28 @@ class PremierUtilisateurCreateView(CreateView):
         return reponse
 
 
+class InscriptionCreateView(CreateView):
+    """Création d'un compte utilisateur « classique » (par opposition au tout
+    premier compte, administrateur — cf. PremierUtilisateurCreateView) :
+    ouverte à tout visiteur, sans validation de l'Admin. Chaque compte a ses
+    propres animaux/consultations/factures/documents, invisibles des autres
+    comptes (cf. Animal.utilisateur et les querysets filtrés dans les vues des
+    apps animaux/vaccins/consultations/factures/documents) — un nouveau
+    compte auto-créé n'obtient donc jamais accès aux données de quelqu'un
+    d'autre, juste son propre espace vide au départ."""
+
+    form_class = PremierUtilisateurForm
+    template_name = 'accueil/inscription.html'
+    success_url = reverse_lazy('animaux:animal_list')
+
+    def form_valid(self, form):
+        reponse = super().form_valid(form)
+        form.creer_preferences_accessibilite(self.object)
+        login(self.request, self.object)
+        messages.success(self.request, f"Bienvenue {self.object.username}, ton compte a été créé.")
+        return reponse
+
+
 @login_required
 @require_POST
 def mettre_a_jour_preferences_accessibilite(request):

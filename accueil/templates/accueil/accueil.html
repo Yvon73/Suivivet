@@ -153,12 +153,14 @@
                             <i class="bi bi-person-plus" aria-hidden="true"></i> Créer le premier compte
                         </a>
                     {% else %}
-                        <p class="mb-0">
-                            Un compte existe déjà sur cette installation. Si tu n'as pas encore
-                            d'identifiants, demande à la personne qui l'a mise en place (administratrice
-                            ou administrateur) de t'en créer un depuis l'
-                            <a href="{% url 'admin:index' %}">administration</a>.
+                        <p>
+                            Un compte existe déjà sur cette installation, mais tu peux créer le tien :
+                            chaque compte est privé, tes données ne sont jamais visibles par les autres
+                            comptes.
                         </p>
+                        <a href="{% url 'accueil:inscription' %}" class="btn btn-success">
+                            <i class="bi bi-person-plus" aria-hidden="true"></i> Créer un compte
+                        </a>
                     {% endif %}
                 </div>
             </div>
