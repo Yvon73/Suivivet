@@ -18,7 +18,7 @@ class FactureForm(forms.ModelForm):
             'type_depense': forms.Select(attrs={'class': 'form-select'}),
             'titre': forms.TextInput(attrs={'class': 'form-control'}),
             'montant': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'fichier': forms.ClearableFileInput(attrs={
                 'class': 'form-control',
                 'accept': '.pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx',

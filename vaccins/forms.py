@@ -72,9 +72,9 @@ class SuiviVaccinTraitementForm(forms.ModelForm):
         ]
         widgets = {
             'animal': forms.Select(attrs={'class': 'form-select'}),
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'numero_lot': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex : LOT-2026-0142'}),
-            'date_prochaine_dose': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date_prochaine_dose': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'duree_traitement': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex : 7 jours'}),
             'prise_matin': forms.CheckboxInput(attrs={'class': 'btn-check'}),
             'prise_midi': forms.CheckboxInput(attrs={'class': 'btn-check'}),

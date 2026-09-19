@@ -10,7 +10,7 @@ class ConsultationForm(forms.ModelForm):
         fields = ['animal', 'date', 'motif', 'compte_rendu', 'veterinaire']
         widgets = {
             'animal': forms.Select(attrs={'class': 'form-select'}),
-            'date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'date': forms.DateTimeInput(format='%Y-%m-%dT%H:%M', attrs={'type': 'datetime-local', 'class': 'form-control'}),
             'motif': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'compte_rendu': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'veterinaire': forms.Select(attrs={'class': 'form-select'}),

@@ -46,8 +46,8 @@ class AnimalForm(forms.ModelForm):
             'date_naissance', 'date_deces', 'robe', 'proprietaire'
         ]
         widgets = {
-            'date_naissance': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'date_deces': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date_naissance': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
+            'date_deces': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'espece': forms.Select(attrs={'class': 'form-select'}),
             'race': RaceSelect(attrs={'class': 'form-select'}),
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
@@ -362,7 +362,7 @@ class PoidsForm(forms.ModelForm):
         model = Poids
         fields = ['date', 'valeur']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'date': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'valeur': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
         }
 
