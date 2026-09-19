@@ -22,7 +22,9 @@ class NoIndexMiddleware:
 # domaine ici que si une ressource du projet le charge réellement.
 _CSP_ORIGINES_JS = "https://cdn.jsdelivr.net https://code.jquery.com https://cdn.datatables.net"
 _CSP_ORIGINES_CSS = "https://cdn.jsdelivr.net https://cdn.datatables.net https://fonts.googleapis.com"
-_CSP_ORIGINES_FONTS = "https://cdn.jsdelivr.net https://fonts.gstatic.com"
+# data: pour les polices d'icônes (Bootstrap Icons/FullCalendar embarquent un
+# fallback de police encodé en base64 directement dans leur CSS).
+_CSP_ORIGINES_FONTS = "https://cdn.jsdelivr.net https://fonts.gstatic.com data:"
 
 CONTENT_SECURITY_POLICY = "; ".join([
     "default-src 'self'",
@@ -32,7 +34,10 @@ CONTENT_SECURITY_POLICY = "; ".join([
     # data: pour la courbe de poids (PNG généré par matplotlib, encodé en
     # base64 directement dans l'attribut src — cf. animaux/views.py).
     "img-src 'self' data: https://cdn.datatables.net",
-    "connect-src 'self'",
+    # DataTables charge sa traduction française en AJAX depuis ce CDN (cf.
+    # `language: {url: 'https://cdn.datatables.net/plug-ins/.../fr-FR.json'}`
+    # dans animaux/factures/documents/consultations liste.html).
+    "connect-src 'self' https://cdn.datatables.net",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
