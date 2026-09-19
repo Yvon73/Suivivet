@@ -108,13 +108,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Projet_veto.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
 DATABASES = {
-    'default': env.db("DB_URL")  # {
-    # 'ENGINE': 'django.db.backends.postgresql',
-    # }
+    'default': env.db("DB_URL")
 }
 # Connexions persistantes (évite de rouvrir une connexion Postgres à chaque
 # requête sous gunicorn) : désactivé par défaut en dev (chaque requête garde
@@ -165,11 +160,7 @@ STORAGES = {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        # Compression (gzip/brotli) + noms de fichiers hashés (cache navigateur
-        # cassé à chaque déploiement) via WhiteNoise, mais seulement une fois
-        # `collectstatic` exécuté (production) : le manifeste qu'elle lit
-        # n'existe pas tant qu'il ne l'a pas été, donc on garde le stockage
-        # standard en dev pour ne rien changer au workflow local.
+        # Compression (gzip/brotli)
         'BACKEND': (
             'whitenoise.storage.CompressedManifestStaticFilesStorage' if not DEBUG
             else 'django.contrib.staticfiles.storage.StaticFilesStorage'
@@ -253,9 +244,9 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 # avant mise en service : les valeurs par défaut ci-dessous sont des
 # placeholders, pas des informations réelles.
 EDITEUR_NOM = env('EDITEUR_NOM', default="[Ton nom ou pseudonyme]")
-EDITEUR_ADRESSE = env('EDITEUR_ADRESSE', default='')
+EDITEUR_ADRESSE = env('EDITEUR_ADRESSE', default='En France')
 EDITEUR_EMAIL = env('EDITEUR_EMAIL', default=env('EMAIL_HOST_USER', default="[Email de contact à renseigner]"))
-EDITEUR_TELEPHONE = env('EDITEUR_TELEPHONE', default='')
+EDITEUR_TELEPHONE = env('EDITEUR_TELEPHONE', default='0123456789')
 HEBERGEUR_NOM = env('HEBERGEUR_NOM', default="[Nom de l'hébergeur à renseigner]")
 HEBERGEUR_ADRESSE = env('HEBERGEUR_ADRESSE', default="[Adresse de l'hébergeur à renseigner]")
 
