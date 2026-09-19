@@ -3,14 +3,23 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, TemplateView
 
+from Projet_veto import throttling
 from .forms import PremierUtilisateurForm
 from .models import PreferenceAccessibilite
+
+
+def robots_txt(request):
+    """Interdit le crawl à tout robot respectueux de robots.txt : outil
+    personnel non destiné à être indexé ou aspiré (cf. NoIndexMiddleware,
+    qui couvre en plus les robots qui ne lisent que les en-têtes HTTP)."""
+    contenu = "User-agent: *\nDisallow: /\n"
+    return HttpResponse(contenu, content_type='text/plain')
 
 
 class AccueilView(TemplateView):
@@ -85,6 +94,18 @@ class InscriptionCreateView(CreateView):
     form_class = PremierUtilisateurForm
     template_name = 'accueil/inscription.html'
     success_url = reverse_lazy('animaux:animal_list')
+
+    def post(self, request, *args, **kwargs):
+        # Limite à 3 tentatives (réussies ou non) par adresse — 15 min la 1ère
+        # fois, 1h en cas de récidive, définitivement à partir de la 3e (cf.
+        # Projet_veto.throttling) — pas de remise à zéro sur succès,
+        # contrairement à la connexion : un compte créé n'indique pas ici
+        # qu'il ne s'agit pas d'un robot.
+        if throttling.est_bloque('inscription', request):
+            messages.error(request, throttling.message_blocage('inscription', request))
+            return redirect('accueil:inscription')
+        throttling.enregistrer_tentative('inscription', request)
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         reponse = super().form_valid(form)

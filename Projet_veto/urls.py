@@ -18,8 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from django.conf import settings
-from django.conf.urls.static import static
+
+from .views import LoginThrottleView
 
 # L'appli n'a qu'un seul "Admin" (le tout premier compte cree via
 # PremierUtilisateurCreateView, is_staff=is_superuser=True) - d'autres comptes
@@ -33,7 +33,7 @@ admin.site.has_permission = lambda request: (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('accounts/login/', LoginThrottleView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('accounts/password_reset/', auth_views.PasswordResetView.as_view(
         template_name='registration/password_reset_form.html',

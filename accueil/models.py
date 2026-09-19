@@ -2,6 +2,32 @@ from django.conf import settings
 from django.db import models
 
 
+class BlocageAdresse(models.Model):
+    """Historique de blocage par adresse IP pour un formulaire public sensible
+    au bourrage de robots (`prefixe` = 'login' ou 'inscription', cf.
+    Projet_veto.throttling) : persiste en base, contrairement au compteur de
+    tentatives (en cache, donc volatil), pour escalader la durée de blocage en
+    cas de récidive même après expiration du cache ou redémarrage du process
+    — 15 min la 1ère fois, 1h la 2e, blocage définitif à partir de la 3e."""
+
+    prefixe = models.CharField(max_length=50, verbose_name="Formulaire concerné")
+    adresse_ip = models.GenericIPAddressField(verbose_name="Adresse IP")
+    nombre_blocages = models.PositiveIntegerField(default=0, verbose_name="Nombre de blocages")
+    bloque_definitivement = models.BooleanField(default=False, verbose_name="Bloqué définitivement")
+    derniere_maj = models.DateTimeField(auto_now=True, verbose_name="Dernière mise à jour")
+
+    class Meta:
+        verbose_name = "Blocage d'adresse"
+        verbose_name_plural = "Blocages d'adresse"
+        constraints = [
+            models.UniqueConstraint(fields=['prefixe', 'adresse_ip'], name='blocage_unique_prefixe_ip')
+        ]
+
+    def __str__(self):
+        etat = "bloqué définitivement" if self.bloque_definitivement else f"{self.nombre_blocages} blocage(s)"
+        return f"{self.prefixe} / {self.adresse_ip} ({etat})"
+
+
 class PreferenceAccessibilite(models.Model):
     """Préférences d'accessibilité d'un compte utilisateur : cochées à la
     création du compte (cf. PremierUtilisateurForm/CreateView) ou modifiées
