@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
+import sys
 import environ
 from pathlib import Path
 
@@ -18,6 +19,13 @@ from django.contrib import staticfiles
 # Initialise environ
 env = environ.Env()
 environ.Env.read_env()
+
+# `manage.py test` recree une base Postgres jetable a chaque run (cf.
+# CLAUDE.md), mais pas le cache Redis (process externe, partage avec le
+# dev/prod) : sans ce garde-fou, les compteurs de Projet_veto.throttling
+# (limitation de tentatives login/inscription) s'accumuleraient d'un run de
+# tests a l'autre et pourraient finir par bloquer 127.0.0.1 pour de vrai.
+TESTING = 'test' in sys.argv or 'pytest' in sys.modules
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -180,10 +188,24 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
+# Cache partagé (Projet_veto.throttling : limitation de tentatives sur les
+# formulaires de connexion/inscription) — sur Redis (base 1, distincte du
+# broker Celery en base 0) plutôt que le LocMemCache par défaut de Django, qui
+# est propre à chaque process : avec plusieurs workers gunicorn, un cache en
+# mémoire locale donnerait une limite réelle de MAX_TENTATIVES x nb_workers
+# au lieu de MAX_TENTATIVES. Redis est déjà une dépendance obligatoire du
+# projet (cf. CELERY_BROKER_URL ci-dessus).
+CACHES = {
+    'default': (
+        {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'} if TESTING
+        else env.cache('CACHE_URL', default='redis://localhost:6379/1')
+    ),
+}
+
 # Configuration pour l'envoi d'emails
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = 465
+EMAIL_PORT = env('EMAIL_PORT')
 
 EMAIL_USE_SSL = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
