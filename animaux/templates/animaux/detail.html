@@ -11,7 +11,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-3">
                         {% if animal.photo %}
-                            <img src="{{ animal.photo.url }}" alt="Photo de {{ animal.nom }}"
+                            <img src="{% url 'animaux:animal_photo' animal.pk %}" alt="Photo de {{ animal.nom }}"
                                  class="rounded-circle border border-light" style="width: 64px; height: 64px; object-fit: cover;">
                         {% else %}
                             <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
@@ -412,7 +412,7 @@
                                             <td>{{ facture.montant }} €</td>
                                             <td>
                                                 {% if facture.fichier %}
-                                                    <a href="{{ facture.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <a href="{% url 'factures:facture_fichier' facture.pk %}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                         <i class="bi bi-download"></i>
                                                     </a>
                                                 {% else %}
@@ -461,7 +461,7 @@
                                             <td>{{ document.titre }}</td>
                                             <td>{{ document.date_ajout|date:"d/m/Y" }}</td>
                                             <td>
-                                                <a href="{{ document.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <a href="{% url 'documents:document_fichier' document.pk %}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                     <i class="bi bi-download"></i>
                                                 </a>
                                             </td>

@@ -23,7 +23,7 @@
             <p>
                 <strong>Fichier :</strong>
                 {% if facture.fichier %}
-                    <a href="{{ facture.fichier.url }}" target="_blank">
+                    <a href="{% url 'factures:facture_fichier' facture.pk %}" target="_blank">
                         <i class="bi bi-file-earmark-pdf"></i> Voir le fichier
                     </a>
                 {% else %}

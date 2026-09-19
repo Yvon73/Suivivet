@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_GET, require_POST
@@ -36,6 +36,16 @@ def dernier_prix_designation_ajax(request, pk):
     return JsonResponse({
         'dernier_prix': str(dernier_prix) if dernier_prix is not None else None,
     })
+
+
+@login_required
+def fichier_facture(request, pk):
+    """Sert le fichier scanné après vérification du propriétaire — jamais
+    exposé via une URL /media/ statique (cf. Projet_veto/urls.py)."""
+    facture = get_object_or_404(Facture, pk=pk, utilisateur=request.user)
+    if not facture.fichier:
+        raise Http404
+    return FileResponse(facture.fichier.open('rb'))
 
 
 class FactureListView(LoginRequiredMixin, ListView):

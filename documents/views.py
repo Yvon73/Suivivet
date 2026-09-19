@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -5,6 +7,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from animaux.models import Animal
 from .models import Document
 from .forms import DocumentForm
+
+
+@login_required
+def fichier_document(request, pk):
+    """Sert le fichier après vérification du propriétaire (via l'animal) —
+    jamais exposé via une URL /media/ statique (cf. Projet_veto/urls.py)."""
+    document = get_object_or_404(Document, pk=pk, animal__utilisateur=request.user)
+    if not document.fichier:
+        raise Http404
+    return FileResponse(document.fichier.open('rb'))
+
 
 class DocumentListView(LoginRequiredMixin, ListView):
     model = Document

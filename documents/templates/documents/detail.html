@@ -17,7 +17,7 @@
             <p>
                 <strong>Fichier :</strong>
                 {% if document.fichier %}
-                    <a href="{{ document.fichier.url }}" target="_blank">
+                    <a href="{% url 'documents:document_fichier' document.pk %}" target="_blank">
                         <i class="bi bi-file-earmark"></i> Voir le fichier
                     </a>
                 {% else %}

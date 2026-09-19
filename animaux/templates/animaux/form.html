@@ -36,7 +36,7 @@
                     <!-- Photo -->
                     <div class="col-md-3 text-center mb-3">
                         <img id="apercuPhoto"
-                             src="{% if object.photo %}{{ object.photo.url }}{% endif %}"
+                             src="{% if object.photo %}{% url 'animaux:animal_photo' object.pk %}{% endif %}"
                              alt="Photo de l'animal"
                              class="img-fluid rounded mb-2 border {% if not object.photo %}d-none{% endif %}"
                              style="max-height: 160px; object-fit: cover;">

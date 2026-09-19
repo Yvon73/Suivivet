@@ -31,7 +31,7 @@
                         <td>{{ document.date_ajout|date:"d/m/Y" }}</td>
                         <td>
                             {% if document.fichier %}
-                                <a href="{{ document.fichier.url }}" target="_blank" class="btn btn-sm btn-info">
+                                <a href="{% url 'documents:document_fichier' document.pk %}" target="_blank" class="btn btn-sm btn-info">
                                     <i class="bi bi-file-earmark"></i> Voir
                                 </a>
                             {% else %}

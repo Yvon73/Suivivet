@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from weasyprint import HTML, CSS
@@ -313,6 +313,16 @@ class PoidsCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('animaux:animal_detail', kwargs={'pk': self.kwargs['animal_id']})
+
+@login_required
+def photo_animal(request, animal_id):
+    """Sert la photo de l'animal après vérification du propriétaire — la
+    photo n'est jamais exposée via une URL /media/ statique (cf. urls.py),
+    pour ne pas contourner cette même vérification."""
+    animal = get_object_or_404(Animal, pk=animal_id, utilisateur=request.user)
+    if not animal.photo:
+        raise Http404
+    return FileResponse(animal.photo.open('rb'))
 
 @login_required
 def graphique_poids(request, animal_id):
