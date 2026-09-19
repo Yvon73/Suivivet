@@ -109,6 +109,23 @@ tail -f /opt/projet_veto/logs/app.log /opt/projet_veto/logs/erreurs.log
 tail -f /var/log/ispconfig/httpd/suivivet.fr/error.log
 ```
 
+## Mettre à jour une installation déjà déployée
+
+```bash
+cd /opt/projet_veto
+sudo -u web2 git pull
+sudo -u web2 .venv/bin/pip install -r requirements.txt
+sudo -u web2 .venv/bin/python manage.py migrate
+sudo -u web2 .venv/bin/python manage.py collectstatic --noinput
+sudo systemctl restart projet-veto-gunicorn projet-veto-celery
+```
+
+Si `deploy/apache/ispconfig-directives.conf` a changé (comme lors du retrait
+de l'Alias `/media/`, cf. avertissement dans ce fichier), recopie son contenu
+dans ISPConfig (Sites > suivivet.fr > Options > Apache Directives >
+Enregistrer) — un `git pull` seul ne suffit pas, ISPConfig ne lit pas ce
+fichier directement.
+
 ## À faire avant un vrai lancement public
 
 - **HTTPS** : activer le Let's Encrypt ISPConfig dès que le DNS de
@@ -117,7 +134,3 @@ tail -f /var/log/ispconfig/httpd/suivivet.fr/error.log
   `True` et `BEHIND_REVERSE_PROXY` à `True` dans `Projet_veto/.env`.
 - **Mention légale RGPD** : `EDITEUR_ADRESSE`/`EDITEUR_TELEPHONE` restent à
   compléter dans `.env` quand tu sors du mode test.
-- **Fichiers `/media/`** : servis sans authentification par Apache (cf.
-  commentaire dans `ispconfig-directives.conf`) — à revoir si des
-  documents/factures sensibles ne doivent pas être accessibles par URL
-  directe.
