@@ -273,6 +273,9 @@ LOGGING = {
         # mêmes messages sur deux sorties console à la fois (cf. handlers).
         'require_debug_false': {'()': 'django.utils.log.RequireDebugFalse'},
         'require_debug_true': {'()': 'django.utils.log.RequireDebugTrue'},
+        # Cf. Projet_veto/log_filters.py : évite un email par scan de bot sur
+        # un Host usurpé (des centaines/jour sur un VPS à IP publique).
+        'skip_disallowed_host': {'()': 'Projet_veto.log_filters.SkipDisallowedHost'},
     },
     'formatters': {
         'verbose': {
@@ -330,7 +333,7 @@ LOGGING = {
             # dev où la trace complète s'affiche déjà à l'écran. Sans ADMINS
             # configuré, ce handler ne fait simplement rien.
             'level': 'ERROR',
-            'filters': ['require_debug_false'],
+            'filters': ['require_debug_false', 'skip_disallowed_host'],
             'class': 'django.utils.log.AdminEmailHandler',
         },
     },
