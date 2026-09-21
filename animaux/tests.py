@@ -2,6 +2,7 @@ import io
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
+from accueil.models import Foyer, MembreFoyer
 from .models import Animal, AnimalIdentification, Poids, Espece, Robe, Race, Proprietaire
 from datetime import date
 from .forms import AnimalForm, ProprietaireForm
@@ -164,6 +165,17 @@ class ProprietaireFormTest(TestCase):
     def test_meme_email_autorise_pour_un_autre_compte(self):
         form = ProprietaireForm(data={'nom': 'Doublon', 'email': 'deja.pris@example.com'}, user=self.autre_user)
         self.assertTrue(form.is_valid())
+
+    def test_email_deja_utilise_par_un_membre_du_foyer_est_refuse(self):
+        """Pas de fusion automatique (cf. décision produit) : la création
+        d'un doublon inter-foyer est bloquée, pas fusionnée."""
+        foyer = Foyer.objects.create()
+        MembreFoyer.objects.create(utilisateur=self.user, foyer=foyer, invite_par=None)
+        MembreFoyer.objects.create(utilisateur=self.autre_user, foyer=foyer, invite_par=self.user)
+
+        form = ProprietaireForm(data={'nom': 'Doublon', 'email': 'deja.pris@example.com'}, user=self.autre_user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
 
 
 class AnimalViewTest(TestCase):
@@ -376,3 +388,62 @@ class AnimalViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)  # Redirection après import
         self.assertTrue(Animal.objects.filter(nom='NouvelAnimal').exists())
+
+
+class PartageFoyerVisibiliteTest(TestCase):
+    """Un membre du foyer voit et modifie les animaux des autres membres ; un
+    compte tiers, hors foyer, n'y a toujours pas accès (cf.
+    accueil.utils.comptes_accessibles)."""
+
+    def setUp(self):
+        self.chien = Espece.objects.get(code='CHIEN')
+        self.noir = Robe.objects.get(code='NOIR')
+        self.race_chien = Race.objects.filter(espece=self.chien).first()
+
+        self.alex = User.objects.create_user(username='alex', password='p')
+        self.sam = User.objects.create_user(username='sam', password='p')
+        self.tiers = User.objects.create_user(username='tiers', password='p')
+
+        foyer = Foyer.objects.create()
+        MembreFoyer.objects.create(utilisateur=self.alex, foyer=foyer, invite_par=None)
+        MembreFoyer.objects.create(utilisateur=self.sam, foyer=foyer, invite_par=self.alex)
+
+        self.proprietaire_alex = _creer_proprietaire_test("alex.animal@example.com", utilisateur=self.alex)
+        self.animal_alex = Animal.objects.create(
+            nom="AnimalDAlex", race=self.race_chien, espece=self.chien,
+            date_naissance=date(2020, 1, 1), proprietaire=self.proprietaire_alex,
+            robe=self.noir, utilisateur=self.alex,
+        )
+
+    def test_membre_du_foyer_voit_l_animal_de_l_autre_membre(self):
+        self.client.login(username='sam', password='p')
+        response = self.client.get(reverse('animaux:animal_detail', args=[self.animal_alex.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "AnimalDAlex")
+
+    def test_membre_du_foyer_peut_modifier_l_animal_de_l_autre_membre(self):
+        self.client.login(username='sam', password='p')
+        response = self.client.post(
+            reverse('animaux:animal_update', args=[self.animal_alex.pk]),
+            {
+                'nom': 'AnimalRenommeParSam', 'espece': self.chien.pk, 'race': self.race_chien.pk,
+                'date_naissance': '2020-01-01', 'robe': self.noir.pk, 'proprietaire': self.proprietaire_alex.pk,
+                'identifications-TOTAL_FORMS': '0', 'identifications-INITIAL_FORMS': '0',
+                'identifications-MIN_NUM_FORMS': '0', 'identifications-MAX_NUM_FORMS': '1000',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.animal_alex.refresh_from_db()
+        self.assertEqual(self.animal_alex.nom, 'AnimalRenommeParSam')
+
+    def test_compte_tiers_hors_foyer_ne_voit_toujours_pas_l_animal(self):
+        """Régression de sécurité : un compte qui ne partage aucun foyer reste
+        invisible, même après l'introduction du partage de compte."""
+        self.client.login(username='tiers', password='p')
+        response = self.client.get(reverse('animaux:animal_detail', args=[self.animal_alex.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_compte_tiers_hors_foyer_absent_de_la_liste(self):
+        self.client.login(username='tiers', password='p')
+        response = self.client.get(reverse('animaux:animal_list'))
+        self.assertNotContains(response, "AnimalDAlex")

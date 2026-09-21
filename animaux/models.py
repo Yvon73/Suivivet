@@ -246,9 +246,13 @@ class Organisme(models.Model):
 class Proprietaire(models.Model):
     """Fiche complète d'un propriétaire d'animal (nom, coordonnées), réutilisable
     d'un animal à l'autre pour un même compte (un même foyer ayant plusieurs
-    animaux n'est saisi qu'une fois) — mais propre à ce compte : deux comptes
-    distincts sur la même installation ne voient jamais les fiches l'un de
-    l'autre (cf. `utilisateur`)."""
+    animaux n'est saisi qu'une fois). Rattachée à son compte créateur
+    (`utilisateur`), mais visible par tout le foyer partagé de ce compte le
+    cas échéant (cf. `accueil.models.Foyer`/`accueil.utils.comptes_accessibles`)
+    — deux comptes qui ne partagent pas de foyer ne voient en revanche jamais
+    les fiches l'un de l'autre. `ProprietaireForm.clean_email` empêche la
+    création d'un doublon (même email) au sein d'un même foyer, mais ne
+    fusionne jamais deux fiches déjà existantes."""
 
     utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='proprietaires',
@@ -289,7 +293,10 @@ class Animal(models.Model):
     utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='animaux',
         verbose_name="Compte",
-        help_text="Compte auquel appartient cette fiche : chaque compte ne voit que ses propres animaux.",
+        help_text=(
+            "Compte auquel appartient cette fiche (créateur) : visible par ce compte et, le cas "
+            "échéant, les autres membres de son foyer partagé (cf. accueil.utils.comptes_accessibles)."
+        ),
     )
     nom = models.CharField(max_length=100, verbose_name="Nom de l'animal")
     race = models.ForeignKey(Race, on_delete=models.PROTECT, related_name='animaux', verbose_name="Race")

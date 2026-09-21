@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from accueil.utils import comptes_accessibles
 from animaux.models import Animal
 from vaccins.models import SuiviVaccinTraitement, Vaccin
 from .models import Consultation, Veterinaire
@@ -72,7 +73,7 @@ class ConsultationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(
-            animal__utilisateur=self.request.user
+            animal__utilisateur__in=comptes_accessibles(self.request.user)
         ).select_related('animal', 'veterinaire')
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
@@ -85,7 +86,7 @@ class ConsultationDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'consultation'
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))
 
 class ConsultationCreateView(LoginRequiredMixin, CreateView):
     model = Consultation
@@ -96,7 +97,9 @@ class ConsultationCreateView(LoginRequiredMixin, CreateView):
         initial = super().get_initial()
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
-            initial['animal'] = get_object_or_404(Animal, pk=animal_id, utilisateur=self.request.user)
+            initial['animal'] = get_object_or_404(
+                Animal, pk=animal_id, utilisateur__in=comptes_accessibles(self.request.user)
+            )
         return initial
 
     def get_form_kwargs(self):
@@ -114,7 +117,7 @@ class ConsultationUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('consultations:consultation_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -127,19 +130,19 @@ class ConsultationDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('consultations:consultation_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))
 
 class CalendrierView(LoginRequiredMixin, TemplateView):
     template_name = 'consultations/calendrier.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['animaux'] = Animal.objects.filter(utilisateur=self.request.user)
+        context['animaux'] = Animal.objects.filter(utilisateur__in=comptes_accessibles(self.request.user))
         context['vaccins_reference'] = Vaccin.objects.all()
         context['prochains_rappels_vaccins'] = (
             SuiviVaccinTraitement.objects
             .filter(
-                animal__utilisateur=self.request.user,
+                animal__utilisateur__in=comptes_accessibles(self.request.user),
                 vaccin__isnull=False, date_prochaine_dose__isnull=False,
             )
             .select_related('animal', 'vaccin')
@@ -150,7 +153,7 @@ class CalendrierView(LoginRequiredMixin, TemplateView):
 @login_required
 def get_consultations_json(request):
     consultations = Consultation.objects.filter(
-        animal__utilisateur=request.user,
+        animal__utilisateur__in=comptes_accessibles(request.user),
         date__gte=timezone.now()
     ).select_related('animal')
 
@@ -169,7 +172,7 @@ def get_consultations_json(request):
 
     # Ajouter les rappels (consultations dans 2 jours)
     rappels = Consultation.objects.filter(
-        animal__utilisateur=request.user,
+        animal__utilisateur__in=comptes_accessibles(request.user),
         date__gte=timezone.now(),
         date__lte=timezone.now() + timezone.timedelta(days=2)
     ).select_related('animal')
@@ -185,7 +188,7 @@ def get_consultations_json(request):
 
     # Ajouter les rappels de vaccins à venir (date de la prochaine dose)
     rappels_vaccins = SuiviVaccinTraitement.objects.filter(
-        animal__utilisateur=request.user,
+        animal__utilisateur__in=comptes_accessibles(request.user),
         vaccin__isnull=False,
         date_prochaine_dose__isnull=False,
     ).select_related('animal', 'vaccin')

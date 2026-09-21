@@ -1,0 +1,7 @@
+Bonjour,
+
+Un rappel pour vous informer que {{ animal_nom }} a une consultation prévue le {{ date_consultation }}.
+Motif : {{ motif }}
+
+Cordialement,
+Votre application de suivi vétérinaire

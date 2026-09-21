@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
 
+from accueil.models import Foyer, MembreFoyer
 from animaux.models import Animal, Espece, Robe, Race, Proprietaire
 from .models import Facture, Designation, LigneFacture
 
@@ -261,3 +262,50 @@ class VentilationFactureTest(TestCase):
         cout2 = Facture.cout_revient_animal(self.animal2, 2026)
         self.assertEqual(cout1, Decimal('5.00'))
         self.assertEqual(cout2, Decimal('5.00'))
+
+
+class FacturePartageFoyerTest(TestCase):
+    """Un membre du foyer voit les factures des autres membres, et le coût de
+    revient se répartit sur tout le foyer ; un compte tiers, hors foyer,
+    reste sans accès ni impact sur le calcul (régression de sécurité)."""
+
+    def setUp(self):
+        self.alex = User.objects.create_user(username='alex', password='p')
+        self.sam = User.objects.create_user(username='sam', password='p')
+        self.tiers = User.objects.create_user(username='tiers', password='p')
+        foyer = Foyer.objects.create()
+        MembreFoyer.objects.create(utilisateur=self.alex, foyer=foyer, invite_par=None)
+        MembreFoyer.objects.create(utilisateur=self.sam, foyer=foyer, invite_par=self.alex)
+
+        chien = Espece.objects.get(code='CHIEN')
+        robe = Robe.objects.filter(code='AUTRE').first() or Robe.objects.first()
+        race = Race.objects.filter(espece=chien).first()
+        proprietaire_alex = Proprietaire.objects.create(nom='Alex', email='alex.f@example.com', utilisateur=self.alex)
+        self.animal_alex = Animal.objects.create(
+            nom='AnimalAlex', race=race, espece=chien,
+            date_naissance=date(2020, 1, 1), robe=robe, proprietaire=proprietaire_alex, utilisateur=self.alex,
+        )
+        self.facture = Facture.objects.create(
+            animal=self.animal_alex, type_depense='VETERINAIRE', titre='Vaccin',
+            montant=Decimal('40.00'), date=date(2026, 8, 1), fichier=_fichier_test(),
+        )
+
+    def test_membre_du_foyer_voit_la_facture(self):
+        self.client.login(username='sam', password='p')
+        response = self.client.get(reverse('factures:facture_detail', args=[self.facture.pk]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_compte_tiers_hors_foyer_ne_voit_pas_la_facture(self):
+        self.client.login(username='tiers', password='p')
+        response = self.client.get(reverse('factures:facture_detail', args=[self.facture.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_cout_de_revient_se_repartit_sur_tout_le_foyer(self):
+        """Le compte de Sam (sans animal propre) doit quand même retrouver le
+        coût de revient de l'animal d'Alex, puisqu'ils partagent un foyer."""
+        couts = Facture.couts_revient_annuels(self.sam, 2026)
+        self.assertEqual(couts.get(self.animal_alex.pk), Decimal('40.00'))
+
+    def test_cout_de_revient_ignore_un_compte_tiers_hors_foyer(self):
+        couts = Facture.couts_revient_annuels(self.tiers, 2026)
+        self.assertNotIn(self.animal_alex.pk, couts)

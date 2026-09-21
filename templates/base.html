@@ -167,6 +167,11 @@ pas besoin d'un script de préchargement basé sur localStorage.
                                     </li>
                                 {% endif %}
                                 <li>
+                                    <a class="dropdown-item" href="{% url 'accueil:partage_compte' %}">
+                                        <i class="bi bi-house-heart"></i> Partage de compte
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="dropdown-item" href="{% url 'password_change' %}">
                                         <i class="bi bi-key"></i> Changer mon mot de passe
                                     </a>

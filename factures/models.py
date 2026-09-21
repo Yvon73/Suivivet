@@ -8,6 +8,7 @@ from django.urls import reverse
 from animaux.models import Animal
 from django.db.models import Sum
 
+from accueil.utils import comptes_accessibles
 from notifications.models import Notification
 from notifications.utils import resoudre_utilisateur
 from Projet_veto.validators import validate_file_extension, validate_file_size
@@ -61,8 +62,9 @@ class Facture(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='factures',
         verbose_name="Compte",
         help_text=(
-            "Compte auquel appartient cette facture : chaque compte ne voit que ses "
-            "propres factures. Déduit automatiquement du propriétaire de l'animal "
+            "Compte auquel appartient cette facture (créateur) : visible par ce compte et, le "
+            "cas échéant, les autres membres de son foyer partagé (cf. accueil.utils."
+            "comptes_accessibles). Déduit automatiquement du propriétaire de l'animal "
             "concerné quand il y en a un (cf. save()) ; obligatoire à préciser "
             "explicitement pour une facture partagée sans animal renseigné."
         ),
@@ -121,14 +123,14 @@ class Facture(models.Model):
 
     @classmethod
     def depenses_mensuelles(cls, utilisateur, annee, mois, type_depense=None):
-        filtre = {'utilisateur': utilisateur, 'date__year': annee, 'date__month': mois}
+        filtre = {'utilisateur__in': comptes_accessibles(utilisateur), 'date__year': annee, 'date__month': mois}
         if type_depense:
             filtre['type_depense'] = type_depense
         return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or 0
 
     @classmethod
     def depenses_annuelles(cls, utilisateur, annee, type_depense=None):
-        filtre = {'utilisateur': utilisateur, 'date__year': annee}
+        filtre = {'utilisateur__in': comptes_accessibles(utilisateur), 'date__year': annee}
         if type_depense:
             filtre['type_depense'] = type_depense
         return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or 0
@@ -139,19 +141,21 @@ class Facture(models.Model):
         d'une année si `mois` est fourni) :
         - la totalité des lignes de ventilation qui lui sont attribuées,
         - + la totalité des factures non ventilées où il est l'animal renseigné,
-        - + une part égale (÷ nombre d'animaux du même compte) des coûts
+        - + une part égale (÷ nombre d'animaux visibles) des coûts
           « partagés » : les lignes ventilées marquées « Tous les animaux »,
-          et les factures non ventilées sans aucun animal renseigné — toujours
-          au sein du seul compte propriétaire de `animal` (jamais mélangé
-          avec les animaux d'un autre compte).
+          et les factures non ventilées sans aucun animal renseigné — au sein
+          des comptes accessibles au propriétaire de `animal` (lui-même, plus
+          les autres membres de son foyer partagé le cas échéant — cf.
+          accueil.utils.comptes_accessibles —, jamais mélangé avec les
+          animaux d'un compte hors foyer).
         """
-        utilisateur = animal.utilisateur
-        nb_animaux = Animal.objects.filter(utilisateur=utilisateur).count()
+        comptes = comptes_accessibles(animal.utilisateur)
+        nb_animaux = Animal.objects.filter(utilisateur__in=comptes).count()
         if not nb_animaux:
             return Decimal('0')
 
-        filtre_lignes = {'facture__date__year': annee, 'facture__utilisateur': utilisateur}
-        filtre_factures = {'date__year': annee, 'utilisateur': utilisateur}
+        filtre_lignes = {'facture__date__year': annee, 'facture__utilisateur__in': comptes}
+        filtre_factures = {'date__year': annee, 'utilisateur__in': comptes}
         if mois:
             filtre_lignes['facture__date__month'] = mois
             filtre_factures['date__month'] = mois
@@ -178,28 +182,31 @@ class Facture(models.Model):
 
     @classmethod
     def couts_revient_annuels(cls, utilisateur, annee):
-        """Coût de revient annuel de chaque animal du compte `utilisateur`, en
-        une seule passe (peu de requêtes, indépendant du nombre d'animaux) —
-        pour la colonne « Coût de revient » de la liste globale des animaux."""
-        animaux_ids = list(Animal.objects.filter(utilisateur=utilisateur).values_list('pk', flat=True))
+        """Coût de revient annuel de chaque animal visible de `utilisateur`
+        (lui-même, plus les autres membres de son foyer partagé le cas
+        échéant), en une seule passe (peu de requêtes, indépendant du nombre
+        d'animaux) — pour la colonne « Coût de revient » de la liste globale
+        des animaux."""
+        comptes = comptes_accessibles(utilisateur)
+        animaux_ids = list(Animal.objects.filter(utilisateur__in=comptes).values_list('pk', flat=True))
         nb_animaux = len(animaux_ids)
         if not nb_animaux:
             return {}
 
         par_animal_lignes = dict(
             LigneFacture.objects.filter(
-                animal__isnull=False, facture__utilisateur=utilisateur, facture__date__year=annee
+                animal__isnull=False, facture__utilisateur__in=comptes, facture__date__year=annee
             ).values('animal').annotate(total=Sum('prix_total')).values_list('animal', 'total')
         )
         par_animal_factures = dict(
-            cls.objects.filter(animal__isnull=False, utilisateur=utilisateur, lignes__isnull=True, date__year=annee)
+            cls.objects.filter(animal__isnull=False, utilisateur__in=comptes, lignes__isnull=True, date__year=annee)
             .values('animal').annotate(total=Sum('montant')).values_list('animal', 'total')
         )
         total_lignes_partagees = LigneFacture.objects.filter(
-            pour_tous_les_animaux=True, facture__utilisateur=utilisateur, facture__date__year=annee
+            pour_tous_les_animaux=True, facture__utilisateur__in=comptes, facture__date__year=annee
         ).aggregate(Sum('prix_total'))['prix_total__sum'] or Decimal('0')
         total_factures_partagees = cls.objects.filter(
-            animal__isnull=True, utilisateur=utilisateur, lignes__isnull=True, date__year=annee
+            animal__isnull=True, utilisateur__in=comptes, lignes__isnull=True, date__year=annee
         ).aggregate(Sum('montant'))['montant__sum'] or Decimal('0')
         part_partagee = (total_lignes_partagees + total_factures_partagees) / nb_animaux
 

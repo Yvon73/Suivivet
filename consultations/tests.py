@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import date, timedelta
+from accueil.models import Foyer, MembreFoyer
 from animaux.models import Animal, AnimalIdentification, Espece, Robe, Race, Proprietaire
 from .models import Consultation, Veterinaire
 from .forms import ConsultationForm
@@ -142,3 +143,34 @@ class ConsultationViewTest(TestCase):
         response = self.client.get(reverse('consultations:calendrier_json'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/json')
+
+
+class ConsultationPartageFoyerTest(TestCase):
+    """Un membre du foyer voit les consultations des autres membres ; un
+    compte tiers, hors foyer, reste sans accès (régression de sécurité)."""
+
+    def setUp(self):
+        self.alex = User.objects.create_user(username='alex', password='p')
+        self.tiers = User.objects.create_user(username='tiers', password='p')
+        foyer = Foyer.objects.create()
+        MembreFoyer.objects.create(utilisateur=self.alex, foyer=foyer, invite_par=None)
+        self.sam = User.objects.create_user(username='sam', password='p')
+        MembreFoyer.objects.create(utilisateur=self.sam, foyer=foyer, invite_par=self.alex)
+
+        self.animal = _creer_animal_test("AnimalAlex", "111111", "alex.p@example.com", utilisateur=self.alex)
+        self.consultation = Consultation.objects.create(
+            animal=self.animal,
+            date=timezone.now() + timedelta(days=5),
+            motif="Vaccination",
+            veterinaire=_creer_veterinaire_test(),
+        )
+
+    def test_membre_du_foyer_voit_la_consultation(self):
+        self.client.login(username='sam', password='p')
+        response = self.client.get(reverse('consultations:consultation_detail', args=[self.consultation.pk]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_compte_tiers_hors_foyer_ne_voit_pas_la_consultation(self):
+        self.client.login(username='tiers', password='p')
+        response = self.client.get(reverse('consultations:consultation_detail', args=[self.consultation.pk]))
+        self.assertEqual(response.status_code, 404)

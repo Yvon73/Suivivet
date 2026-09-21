@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Partage de compte{% endblock %}
+
+{% block content %}
+    <h1>Partage de compte</h1>
+    <p class="text-muted">
+        Partage l'accès à ton compte (animaux, vaccins/traitements, consultations, factures,
+        documents, fiches propriétaire) avec un autre compte existant. Chaque membre garde son
+        propre compte de connexion — aucune fusion n'a lieu, seule la visibilité des données est
+        élargie. Tu peux quitter le foyer à tout moment.
+    </p>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-house-heart"></i> Membres du foyer
+        </div>
+        <div class="card-body">
+            {% if membre_foyer %}
+                <ul class="list-group mb-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><strong>{{ request.user.username }}</strong> (toi)</span>
+                        <form method="post" action="{% url 'accueil:partage_quitter' %}"
+                              onsubmit="return confirm('Quitter le foyer partagé ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Quitter le foyer
+                            </button>
+                        </form>
+                    </li>
+                    {% for membre in autres_membres %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ membre.utilisateur.username }}</span>
+                            {% if membre.invite_par_id == request.user.id %}
+                                <form method="post" action="{% url 'accueil:partage_retirer_membre' membre.pk %}"
+                                      onsubmit="return confirm('Retirer {{ membre.utilisateur.username }} du foyer ?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Retirer
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p class="text-muted small mb-0">
+                    Seul le compte qui a invité un membre peut le retirer ; chacun peut se retirer
+                    lui-même à tout moment.
+                </p>
+            {% else %}
+                <p class="mb-0">Tu ne partages ton compte avec personne pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-envelope-paper"></i> Inviter un compte à partager le tien
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'accueil:partage_inviter' %}" class="row g-2 align-items-end">
+                {% csrf_token %}
+                <div class="col-auto flex-grow-1">
+                    {{ formulaire_invitation.email.label_tag }}
+                    {{ formulaire_invitation.email }}
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Envoyer l'invitation</button>
+                </div>
+            </form>
+            <p class="text-muted small mt-2 mb-0">
+                L'email doit correspondre à un compte déjà existant sur cette installation.
+            </p>
+        </div>
+    </div>
+
+    {% if invitations_recues %}
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-envelope-open"></i> Invitations reçues
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for invitation in invitations_recues %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ invitation.invite_par.username }} t'invite à partager son compte.</span>
+                            <span>
+                                <form method="post"
+                                      action="{% url 'accueil:partage_accepter' invitation.token %}"
+                                      class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success">Accepter</button>
+                                </form>
+                                <form method="post"
+                                      action="{% url 'accueil:partage_refuser' invitation.token %}"
+                                      class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Refuser</button>
+                                </form>
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if invitations_envoyees %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-send"></i> Invitations envoyées en attente
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for invitation in invitations_envoyees %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ invitation.email_invite }}</span>
+                            <form method="post" action="{% url 'accueil:partage_annuler' invitation.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Annuler</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

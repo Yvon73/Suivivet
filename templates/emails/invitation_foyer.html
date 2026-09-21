@@ -1,0 +1,28 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Invitation à partager un compte{% endblock %}
+
+{% block contenu %}
+<h1 style="font-size:20px; color:#2c3e50; margin:0 0 16px;">🏠 Invitation à partager un compte</h1>
+<p style="margin:0 0 16px;">Bonjour,</p>
+<p style="margin:0 0 20px;">
+    <strong>{{ nom_invitant }}</strong> vous invite à partager l'accès à son compte
+    (animaux, consultations, factures, documents).
+</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+<tr>
+<td style="border-radius:6px; background-color:#3498db;">
+<a href="{{ lien }}" style="display:inline-block; padding:13px 28px; font-size:15px; font-weight:600; color:#ffffff; text-decoration:none;">
+    Répondre à l'invitation
+</a>
+</td>
+</tr>
+</table>
+<p style="margin:0 0 16px; font-size:13px; color:#7f8c8d;">
+    Si le bouton ne fonctionne pas, copiez-collez ce lien dans votre navigateur :<br>
+    <a href="{{ lien }}" style="color:#3498db; word-break:break-all;">{{ lien }}</a>
+</p>
+<p style="margin:0; font-size:13px; color:#7f8c8d;">
+    Si vous ne connaissez pas cette personne, vous pouvez ignorer cet email en toute sécurité.
+</p>
+{% endblock %}

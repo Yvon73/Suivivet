@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.http import require_POST
+from accueil.utils import comptes_accessibles
 from animaux.models import Animal
 from .models import SuiviVaccinTraitement, Vaccin, Traitement
 from .forms import SuiviVaccinTraitementForm, VaccinForm, TraitementForm
@@ -126,7 +127,7 @@ class SuiviListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(
-            animal__utilisateur=self.request.user
+            animal__utilisateur__in=comptes_accessibles(self.request.user)
         ).select_related('animal', 'vaccin', 'traitement')
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
@@ -151,7 +152,9 @@ class SuiviCreateView(LoginRequiredMixin, TraitementClasseContextMixin, SuiviSav
         initial = super().get_initial()
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
-            initial['animal'] = get_object_or_404(Animal, pk=animal_id, utilisateur=self.request.user)
+            initial['animal'] = get_object_or_404(
+                Animal, pk=animal_id, utilisateur__in=comptes_accessibles(self.request.user)
+            )
         return initial
 
     def get_form_kwargs(self):
@@ -169,7 +172,7 @@ class SuiviUpdateView(LoginRequiredMixin, TraitementClasseContextMixin, SuiviSav
     success_url = reverse_lazy('vaccins:suivi_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -182,4 +185,4 @@ class SuiviDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('vaccins:suivi_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))

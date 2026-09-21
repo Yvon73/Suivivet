@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import PreferenceAccessibilite
+from .models import Foyer, InvitationFoyer, MembreFoyer, PreferenceAccessibilite
+from .utils import comptes_accessibles
 
 
 class AccueilViewTest(TestCase):
@@ -193,3 +195,115 @@ class PreferencesAccessibiliteViewTest(TestCase):
             'champ': 'est_admin', 'valeur': '1',
         })
         self.assertEqual(response.status_code, 400)
+
+
+class PartageCompteTest(TestCase):
+    """Tests du partage de compte entre propriétaires (« foyer »)."""
+
+    def setUp(self):
+        self.alex = User.objects.create_user(username='alex', email='alex@example.com', password='motdepasse123')
+        self.sam = User.objects.create_user(username='sam', email='sam@example.com', password='motdepasse123')
+        self.tiers = User.objects.create_user(username='tiers', email='tiers@example.com', password='motdepasse123')
+
+    def _inviter_sam_depuis_alex(self):
+        self.client.login(username='alex', password='motdepasse123')
+        self.client.post(reverse('accueil:partage_inviter'), {'email': 'sam@example.com'})
+        self.client.logout()
+        return InvitationFoyer.objects.get(email_invite='sam@example.com')
+
+    def test_invitation_creation_et_acceptation_partage_les_comptes(self):
+        invitation = self._inviter_sam_depuis_alex()
+        self.assertEqual(invitation.statut, InvitationFoyer.Statut.EN_ATTENTE)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('sam@example.com', mail.outbox[0].to)
+
+        self.client.login(username='sam', password='motdepasse123')
+        response = self.client.post(reverse('accueil:partage_accepter', args=[invitation.token]))
+        self.assertRedirects(response, reverse('accueil:partage_compte'))
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.statut, InvitationFoyer.Statut.ACCEPTEE)
+
+        self.assertEqual(
+            set(comptes_accessibles(self.alex).values_list('pk', flat=True)), {self.alex.pk, self.sam.pk},
+        )
+        self.assertEqual(
+            set(comptes_accessibles(self.sam).values_list('pk', flat=True)), {self.alex.pk, self.sam.pk},
+        )
+        # Un compte tiers, hors foyer, ne fait jamais partie des comptes
+        # accessibles de personne (régression de sécurité la plus critique).
+        self.assertEqual(set(comptes_accessibles(self.tiers).values_list('pk', flat=True)), {self.tiers.pk})
+
+    def test_refus_invitation_ne_partage_rien(self):
+        invitation = self._inviter_sam_depuis_alex()
+        self.client.login(username='sam', password='motdepasse123')
+        self.client.post(reverse('accueil:partage_refuser', args=[invitation.token]))
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.statut, InvitationFoyer.Statut.REFUSEE)
+        self.assertFalse(MembreFoyer.objects.filter(utilisateur=self.sam).exists())
+        self.assertEqual(set(comptes_accessibles(self.sam).values_list('pk', flat=True)), {self.sam.pk})
+
+    def test_impossible_d_inviter_un_email_sans_compte(self):
+        self.client.login(username='alex', password='motdepasse123')
+        response = self.client.post(reverse('accueil:partage_inviter'), {'email': 'personne@example.com'})
+        self.assertRedirects(response, reverse('accueil:partage_compte'))
+        self.assertFalse(InvitationFoyer.objects.exists())
+
+    def test_impossible_d_inviter_quelqu_un_deja_dans_un_foyer(self):
+        foyer = Foyer.objects.create()
+        MembreFoyer.objects.create(utilisateur=self.sam, foyer=foyer, invite_par=None)
+
+        self.client.login(username='alex', password='motdepasse123')
+        response = self.client.post(reverse('accueil:partage_inviter'), {'email': 'sam@example.com'})
+        self.assertRedirects(response, reverse('accueil:partage_compte'))
+        self.assertFalse(InvitationFoyer.objects.exists())
+
+    def test_seul_l_inviteur_peut_retirer_le_membre_qu_il_a_invite(self):
+        invitation = self._inviter_sam_depuis_alex()
+        self.client.login(username='sam', password='motdepasse123')
+        self.client.post(reverse('accueil:partage_accepter', args=[invitation.token]))
+        membre_sam = MembreFoyer.objects.get(utilisateur=self.sam)
+
+        # Sam n'est l'inviteur de personne : cette action lui est fermée,
+        # y compris pour se retirer lui-même (réservée à quitter_foyer).
+        response = self.client.post(reverse('accueil:partage_retirer_membre', args=[membre_sam.pk]))
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(MembreFoyer.objects.filter(pk=membre_sam.pk).exists())
+
+        self.client.login(username='alex', password='motdepasse123')
+        response = self.client.post(reverse('accueil:partage_retirer_membre', args=[membre_sam.pk]))
+        self.assertRedirects(response, reverse('accueil:partage_compte'))
+        self.assertFalse(MembreFoyer.objects.filter(pk=membre_sam.pk).exists())
+
+    def test_un_membre_peut_toujours_quitter_le_foyer_lui_meme(self):
+        invitation = self._inviter_sam_depuis_alex()
+        self.client.login(username='sam', password='motdepasse123')
+        self.client.post(reverse('accueil:partage_accepter', args=[invitation.token]))
+
+        response = self.client.post(reverse('accueil:partage_quitter'))
+        self.assertRedirects(response, reverse('accueil:partage_compte'))
+        self.assertFalse(MembreFoyer.objects.filter(utilisateur=self.sam).exists())
+
+    def test_acceptation_echoue_proprement_si_deja_dans_un_autre_foyer_entretemps(self):
+        """Course : Sam rejoint un autre foyer entre l'envoi de l'invitation
+        d'Alex et son acceptation — doit échouer proprement (message d'erreur,
+        redirection), pas planter avec une transaction avortée."""
+        invitation = self._inviter_sam_depuis_alex()
+
+        autre_foyer = Foyer.objects.create()
+        MembreFoyer.objects.create(utilisateur=self.sam, foyer=autre_foyer, invite_par=None)
+
+        self.client.login(username='sam', password='motdepasse123')
+        response = self.client.post(reverse('accueil:partage_accepter', args=[invitation.token]))
+        self.assertRedirects(response, reverse('accueil:partage_compte'))
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.statut, InvitationFoyer.Statut.EN_ATTENTE)
+        # Sam doit rester dans son foyer d'origine, pas celui d'Alex.
+        self.assertEqual(MembreFoyer.objects.get(utilisateur=self.sam).foyer, autre_foyer)
+
+    def test_seul_l_invite_peut_repondre_a_son_invitation(self):
+        invitation = self._inviter_sam_depuis_alex()
+        self.client.login(username='tiers', password='motdepasse123')
+        response = self.client.post(reverse('accueil:partage_accepter', args=[invitation.token]))
+        self.assertEqual(response.status_code, 404)
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.statut, InvitationFoyer.Statut.EN_ATTENTE)

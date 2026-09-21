@@ -3,15 +3,19 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError, transaction
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, TemplateView
 
 from Projet_veto import throttling
-from .forms import PremierUtilisateurForm
-from .models import PreferenceAccessibilite
+from Projet_veto.emailing import envoyer_email
+from .forms import InvitationFoyerForm, PremierUtilisateurForm
+from .models import Foyer, InvitationFoyer, MembreFoyer, PreferenceAccessibilite
 
 
 def robots_txt(request):
@@ -84,12 +88,14 @@ class PremierUtilisateurCreateView(CreateView):
 class InscriptionCreateView(CreateView):
     """Création d'un compte utilisateur « classique » (par opposition au tout
     premier compte, administrateur — cf. PremierUtilisateurCreateView) :
-    ouverte à tout visiteur, sans validation de l'Admin. Chaque compte a ses
-    propres animaux/consultations/factures/documents, invisibles des autres
-    comptes (cf. Animal.utilisateur et les querysets filtrés dans les vues des
-    apps animaux/vaccins/consultations/factures/documents) — un nouveau
-    compte auto-créé n'obtient donc jamais accès aux données de quelqu'un
-    d'autre, juste son propre espace vide au départ."""
+    ouverte à tout visiteur, sans validation de l'Admin. Par défaut, chaque
+    compte a ses propres animaux/consultations/factures/documents, invisibles
+    des autres comptes (cf. Animal.utilisateur et les querysets filtrés dans
+    les vues des apps animaux/vaccins/consultations/factures/documents, tous
+    élargis via accueil.utils.comptes_accessibles) — un nouveau compte
+    auto-créé n'obtient donc jamais accès aux données de quelqu'un d'autre,
+    juste son propre espace vide au départ, sauf s'il accepte ensuite une
+    invitation à rejoindre un foyer partagé (cf. accueil.models.Foyer)."""
 
     form_class = PremierUtilisateurForm
     template_name = 'accueil/inscription.html'
@@ -140,3 +146,172 @@ def mettre_a_jour_preferences_accessibilite(request):
 
     prefs.save()
     return JsonResponse({'success': True})
+
+
+def _foyer_ou_creation(utilisateur):
+    """Foyer du compte connecté, créé à la volée (avec ce compte comme membre
+    fondateur, `invite_par=None`) s'il n'en a pas encore — la toute première
+    invitation envoyée par un compte solo fait ainsi automatiquement de lui
+    le fondateur de son foyer."""
+    try:
+        return utilisateur.membre_foyer.foyer
+    except MembreFoyer.DoesNotExist:
+        foyer = Foyer.objects.create()
+        MembreFoyer.objects.create(utilisateur=utilisateur, foyer=foyer, invite_par=None)
+        return foyer
+
+
+class PartageCompteView(LoginRequiredMixin, TemplateView):
+    """Page de gestion du partage de compte (« foyer ») : membres actuels,
+    invitations envoyées/reçues en attente, formulaire d'invitation."""
+
+    template_name = 'accueil/partage_compte.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        utilisateur = self.request.user
+        membre = MembreFoyer.objects.filter(utilisateur=utilisateur).select_related('foyer', 'invite_par').first()
+        context['membre_foyer'] = membre
+        if membre:
+            context['autres_membres'] = (
+                MembreFoyer.objects.filter(foyer=membre.foyer)
+                .exclude(utilisateur=utilisateur)
+                .select_related('utilisateur', 'invite_par')
+            )
+        else:
+            context['autres_membres'] = MembreFoyer.objects.none()
+        context['invitations_envoyees'] = InvitationFoyer.objects.filter(
+            invite_par=utilisateur, statut=InvitationFoyer.Statut.EN_ATTENTE,
+        )
+        context['invitations_recues'] = (
+            InvitationFoyer.objects.filter(
+                email_invite__iexact=utilisateur.email, statut=InvitationFoyer.Statut.EN_ATTENTE,
+            )
+            if utilisateur.email else InvitationFoyer.objects.none()
+        )
+        context['formulaire_invitation'] = InvitationFoyerForm(utilisateur=utilisateur)
+        return context
+
+
+@login_required
+@require_POST
+def envoyer_invitation_foyer(request):
+    """Envoie une invitation à partager le compte connecté avec un autre
+    compte existant (cf. InvitationFoyerForm) — crée le foyer du compte
+    connecté à la volée s'il n'en a pas encore (membre fondateur)."""
+    form = InvitationFoyerForm(request.POST, utilisateur=request.user)
+    if not form.is_valid():
+        for erreurs in form.errors.values():
+            for erreur in erreurs:
+                messages.error(request, erreur)
+        return redirect('accueil:partage_compte')
+
+    foyer = _foyer_ou_creation(request.user)
+    invitation = InvitationFoyer.objects.create(
+        foyer=foyer, invite_par=request.user, email_invite=form.cleaned_data['email'],
+    )
+
+    # Pas de lien GET direct vers l'acceptation/le refus (actions en POST,
+    # protégées CSRF) : le lien mène à la page de gestion du partage, où
+    # l'invitation apparaît avec ses deux boutons une fois connecté.
+    lien = request.build_absolute_uri(reverse('accueil:partage_compte'))
+    envoyer_email(
+        'invitation_foyer',
+        {'nom_invitant': request.user.username, 'lien': lien},
+        "Invitation à partager un compte - Suivi Vétérinaire",
+        [form.cleaned_data['email']],
+    )
+
+    from notifications.models import Notification
+    Notification.objects.create(
+        utilisateur=form.invite,
+        type='INVITATION_FOYER',
+        titre="Invitation à partager un compte",
+        message=f"{request.user.username} t'invite à partager l'accès à son compte.",
+        lien=lien,
+    )
+
+    messages.success(request, f"Invitation envoyée à {form.cleaned_data['email']}.")
+    return redirect('accueil:partage_compte')
+
+
+def _invitation_pour_repondre(request, token):
+    invitation = get_object_or_404(InvitationFoyer, token=token, statut=InvitationFoyer.Statut.EN_ATTENTE)
+    if not request.user.email or invitation.email_invite.lower() != request.user.email.lower():
+        raise Http404
+    return invitation
+
+
+@login_required
+@require_POST
+def accepter_invitation_foyer(request, token):
+    invitation = _invitation_pour_repondre(request, token)
+    try:
+        with transaction.atomic():
+            # Le savepoint créé par atomic() permet à IntegrityError d'être
+            # rattrapée proprement (sous PostgreSQL, une erreur non isolée
+            # dans un savepoint avorte toute la transaction en cours — gênant
+            # notamment sous TestCase, qui enveloppe chaque test dans une
+            # transaction).
+            MembreFoyer.objects.create(
+                utilisateur=request.user, foyer=invitation.foyer, invite_par=invitation.invite_par,
+            )
+    except IntegrityError:
+        messages.error(request, "Tu appartiens déjà à un foyer : quitte-le avant d'en rejoindre un autre.")
+        return redirect('accueil:partage_compte')
+    invitation.statut = InvitationFoyer.Statut.ACCEPTEE
+    invitation.date_reponse = timezone.now()
+    invitation.save(update_fields=['statut', 'date_reponse'])
+    messages.success(request, f"Tu partages désormais le compte de {invitation.invite_par.username}.")
+    return redirect('accueil:partage_compte')
+
+
+@login_required
+@require_POST
+def refuser_invitation_foyer(request, token):
+    invitation = _invitation_pour_repondre(request, token)
+    invitation.statut = InvitationFoyer.Statut.REFUSEE
+    invitation.date_reponse = timezone.now()
+    invitation.save(update_fields=['statut', 'date_reponse'])
+    messages.info(request, "Invitation refusée.")
+    return redirect('accueil:partage_compte')
+
+
+@login_required
+@require_POST
+def annuler_invitation_foyer(request, pk):
+    """Annule une invitation encore en attente — réservé à celui qui l'a
+    envoyée (cf. InvitationFoyer.invite_par)."""
+    invitation = get_object_or_404(
+        InvitationFoyer, pk=pk, invite_par=request.user, statut=InvitationFoyer.Statut.EN_ATTENTE,
+    )
+    invitation.statut = InvitationFoyer.Statut.ANNULEE
+    invitation.date_reponse = timezone.now()
+    invitation.save(update_fields=['statut', 'date_reponse'])
+    messages.info(request, "Invitation annulée.")
+    return redirect('accueil:partage_compte')
+
+
+@login_required
+@require_POST
+def retirer_membre_foyer(request, pk):
+    """Retire un membre du foyer — réservé à celui qui l'a invité (cf.
+    MembreFoyer.invite_par) ; le membre fondateur (invite_par=None) ne peut
+    être retiré par personne, seulement se retirer lui-même (cf.
+    quitter_foyer)."""
+    membre = get_object_or_404(MembreFoyer, pk=pk, invite_par=request.user)
+    nom = membre.utilisateur.username
+    membre.delete()
+    messages.info(request, f"{nom} a été retiré du foyer.")
+    return redirect('accueil:partage_compte')
+
+
+@login_required
+@require_POST
+def quitter_foyer(request):
+    """Un membre peut toujours se retirer lui-même du foyer, à tout moment,
+    sans condition (contrairement à retirer_membre_foyer)."""
+    membre = get_object_or_404(MembreFoyer, utilisateur=request.user)
+    membre.delete()
+    messages.info(request, "Tu as quitté le foyer partagé.")
+    return redirect('accueil:partage_compte')

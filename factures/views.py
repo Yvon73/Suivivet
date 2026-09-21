@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from datetime import datetime
+from accueil.utils import comptes_accessibles
 from animaux.models import Animal
 from .models import Facture, Designation
 from .forms import FactureForm, DesignationForm, LigneFactureFormSet
@@ -42,7 +43,7 @@ def dernier_prix_designation_ajax(request, pk):
 def fichier_facture(request, pk):
     """Sert le fichier scanné après vérification du propriétaire — jamais
     exposé via une URL /media/ statique (cf. Projet_veto/urls.py)."""
-    facture = get_object_or_404(Facture, pk=pk, utilisateur=request.user)
+    facture = get_object_or_404(Facture, pk=pk, utilisateur__in=comptes_accessibles(request.user))
     if not facture.fichier:
         raise Http404
     return FileResponse(facture.fichier.open('rb'))
@@ -55,7 +56,9 @@ class FactureListView(LoginRequiredMixin, ListView):
     ordering = ['-date']
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(utilisateur=self.request.user).select_related('animal')
+        queryset = super().get_queryset().filter(
+            utilisateur__in=comptes_accessibles(self.request.user)
+        ).select_related('animal')
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
             queryset = queryset.filter(animal_id=animal_id)
@@ -83,7 +86,7 @@ class FactureDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'facture'
 
     def get_queryset(self):
-        return super().get_queryset().filter(utilisateur=self.request.user)
+        return super().get_queryset().filter(utilisateur__in=comptes_accessibles(self.request.user))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -174,7 +177,9 @@ class FactureCreateView(VentilationFactureMixin, LoginRequiredMixin, CreateView)
         initial = super().get_initial()
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
-            initial['animal'] = get_object_or_404(Animal, pk=animal_id, utilisateur=self.request.user)
+            initial['animal'] = get_object_or_404(
+                Animal, pk=animal_id, utilisateur__in=comptes_accessibles(self.request.user)
+            )
         return initial
 
     def get_success_url(self):
@@ -188,7 +193,7 @@ class FactureUpdateView(VentilationFactureMixin, LoginRequiredMixin, UpdateView)
     success_url = reverse_lazy('factures:facture_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(utilisateur=self.request.user)
+        return super().get_queryset().filter(utilisateur__in=comptes_accessibles(self.request.user))
 
 class FactureDeleteView(LoginRequiredMixin, DeleteView):
     model = Facture
@@ -196,4 +201,4 @@ class FactureDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('factures:facture_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(utilisateur=self.request.user)
+        return super().get_queryset().filter(utilisateur__in=comptes_accessibles(self.request.user))

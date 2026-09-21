@@ -1,4 +1,5 @@
 from django import forms
+from accueil.utils import comptes_accessibles
 from animaux.models import Animal
 from .models import SuiviVaccinTraitement, Vaccin, Traitement
 
@@ -90,8 +91,9 @@ class SuiviVaccinTraitementForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
-        self.fields['animal'].queryset = Animal.objects.filter(utilisateur=user)
+        # Animaux visibles du compte connecté (lui-même, plus les autres
+        # membres de son foyer partagé le cas échéant).
+        self.fields['animal'].queryset = Animal.objects.filter(utilisateur__in=comptes_accessibles(user))
 
         # --- Liste « Vaccin(s) » : ligne vide (pour pouvoir tout désélectionner
         # d'un clic) + catalogue.

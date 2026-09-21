@@ -1,11 +1,10 @@
 from django.db import models
 from animaux.models import Animal
-from django.core.mail import send_mail
-from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from notifications.models import Notification
+from Projet_veto.emailing import envoyer_email
 
 
 class Veterinaire(models.Model):
@@ -111,25 +110,19 @@ class Consultation(models.Model):
         return super().delete(*args, **kwargs)
 
     def envoyer_rappel(self):
-        """Envoie un rappel par email et crée une notification in-app."""
-        sujet = f"Rappel : Consultation pour {self.animal.nom} dans 2 jours"
-        message = (
-            f"Bonjour,\n\n"
-            f"Un rappel pour vous informer que {self.animal.nom} a une consultation prévue "
-            f"le {self.date.strftime('%d/%m/%Y à %H:%M')}.\n"
-            f"Motif : {self.motif}\n\n"
-            f"Cordialement,\n"
-            f"Votre application de suivi vétérinaire"
-        )
-
+        """Envoie un rappel par email (HTML soigné, cf. Projet_veto.emailing)
+        et crée une notification in-app."""
         # Envoi de l'email
         if self.animal.proprietaire.email:
-            send_mail(
-                sujet,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
+            envoyer_email(
+                'rappel_consultation',
+                {
+                    'animal_nom': self.animal.nom,
+                    'date_consultation': self.date.strftime('%d/%m/%Y à %H:%M'),
+                    'motif': self.motif,
+                },
+                f"Rappel : Consultation pour {self.animal.nom} dans 2 jours",
                 [self.animal.proprietaire.email],
-                fail_silently=False,
             )
 
         # Création d'une notification in-app (si un compte utilisateur correspond au propriétaire)

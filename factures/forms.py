@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 
+from accueil.utils import comptes_accessibles
 from animaux.models import Animal
 from .models import Facture, Designation, LigneFacture
 
@@ -35,8 +36,10 @@ class FactureForm(forms.ModelForm):
         # depuis un animal absent.
         if user is not None:
             self.instance.utilisateur = user
-        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
-        self.fields['animal'].queryset = Animal.objects.filter(utilisateur=user)
+        # Animaux visibles du compte connecté (lui-même, plus les autres
+        # membres de son foyer partagé le cas échéant — cf.
+        # accueil.utils.comptes_accessibles).
+        self.fields['animal'].queryset = Animal.objects.filter(utilisateur__in=comptes_accessibles(user))
         # Le champ vide signifie « facture partagée entre tous les animaux »
         # dans le calcul du coût de revient (cf. Facture.cout_revient_animal)
         # — on le dit explicitement plutôt que de laisser l'option vide
@@ -84,10 +87,11 @@ class LigneFactureForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['cible'].widget.attrs['class'] = 'form-select ligne-cible'
-        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
+        # Animaux visibles du compte connecté (lui-même, plus les autres
+        # membres de son foyer partagé le cas échéant).
         self.fields['cible'].choices = (
             [(self.TOUS_LES_ANIMAUX, 'Tous les animaux')]
-            + [(str(a.pk), a.nom) for a in Animal.objects.filter(utilisateur=user)]
+            + [(str(a.pk), a.nom) for a in Animal.objects.filter(utilisateur__in=comptes_accessibles(user))]
         )
 
         if self.instance.pk:

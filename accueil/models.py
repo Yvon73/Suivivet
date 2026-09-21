@@ -1,3 +1,5 @@
+import secrets
+
 from django.conf import settings
 from django.db import models
 
@@ -85,3 +87,93 @@ class PreferenceAccessibilite(models.Model):
     class Meta:
         verbose_name = "Préférence d'accessibilité"
         verbose_name_plural = "Préférences d'accessibilité"
+
+
+class Foyer(models.Model):
+    """Regroupe plusieurs comptes qui partagent l'accès à toutes leurs données
+    (animaux, vaccins/traitements, consultations, factures, documents, fiches
+    propriétaire) — cf. `accueil.utils.comptes_accessibles`, seul point
+    d'entrée utilisé par les vues des apps métier pour élargir leurs filtres
+    `utilisateur=...` en `utilisateur__in=...`. Un compte n'appartient jamais
+    à plus d'un foyer à la fois (cf. MembreFoyer.utilisateur, OneToOne). Ce
+    partage n'est jamais une fusion de comptes : chaque donnée reste rattachée
+    à son créateur d'origine (cf. Animal.utilisateur etc.), seule la
+    visibilité est élargie."""
+
+    nom = models.CharField(max_length=100, blank=True, verbose_name="Nom du foyer")
+    date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+
+    def __str__(self):
+        return self.nom or f"Foyer #{self.pk}"
+
+    class Meta:
+        verbose_name = "Foyer"
+        verbose_name_plural = "Foyers"
+
+
+class MembreFoyer(models.Model):
+    """Appartenance d'un compte à un foyer. `utilisateur` en OneToOneField
+    (et non ForeignKey) : garantit au niveau base qu'un compte n'appartient
+    jamais à plus d'un foyer à la fois."""
+
+    utilisateur = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='membre_foyer',
+        verbose_name="Compte",
+    )
+    foyer = models.ForeignKey(Foyer, on_delete=models.CASCADE, related_name='membres', verbose_name="Foyer")
+    invite_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='membres_invites', verbose_name="Invité par",
+        help_text=(
+            "Compte à l'origine de l'invitation ayant fait entrer ce membre dans le foyer — "
+            "vide pour le membre fondateur (n'a été invité par personne). Seul ce compte peut "
+            "retirer ce membre du foyer (cf. accueil.views.retirer_membre_foyer) ; le membre "
+            "peut toujours se retirer lui-même (cf. accueil.views.quitter_foyer), sans condition."
+        ),
+    )
+    date_adhesion = models.DateTimeField(auto_now_add=True, verbose_name="Date d'adhésion")
+
+    def __str__(self):
+        return f"{self.utilisateur} dans {self.foyer}"
+
+    class Meta:
+        verbose_name = "Membre de foyer"
+        verbose_name_plural = "Membres de foyer"
+
+
+class InvitationFoyer(models.Model):
+    """Invitation à rejoindre un foyer partagé, envoyée par email à un compte
+    existant — le partage n'est actif qu'après acceptation explicite par
+    l'invité (jamais un ajout direct, cf. décision produit)."""
+
+    class Statut(models.TextChoices):
+        EN_ATTENTE = 'en_attente', 'En attente'
+        ACCEPTEE = 'acceptee', 'Acceptée'
+        REFUSEE = 'refusee', 'Refusée'
+        ANNULEE = 'annulee', 'Annulée'
+
+    foyer = models.ForeignKey(Foyer, on_delete=models.CASCADE, related_name='invitations', verbose_name="Foyer")
+    invite_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='invitations_envoyees',
+        verbose_name="Invité par",
+    )
+    email_invite = models.EmailField(verbose_name="Email de l'invité")
+    statut = models.CharField(
+        max_length=20, choices=Statut.choices, default=Statut.EN_ATTENTE, verbose_name="Statut",
+    )
+    token = models.CharField(max_length=64, unique=True, editable=False, verbose_name="Jeton")
+    date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Date d'envoi")
+    date_reponse = models.DateTimeField(null=True, blank=True, verbose_name="Date de réponse")
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Invitation de {self.invite_par} à {self.email_invite} ({self.get_statut_display()})"
+
+    class Meta:
+        verbose_name = "Invitation à un foyer"
+        verbose_name_plural = "Invitations à un foyer"
+        ordering = ['-date_creation']

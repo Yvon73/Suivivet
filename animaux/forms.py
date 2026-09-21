@@ -2,6 +2,8 @@ import re
 
 from django import forms
 from django.db.models import Prefetch, Q
+
+from accueil.utils import comptes_accessibles
 from .models import Animal, AnimalIdentification, Poids, Espece, Robe, Race, Organisme, Proprietaire
 
 
@@ -60,13 +62,14 @@ class AnimalForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.user = user
 
-        # Propriétaires actifs du compte connecté uniquement (chaque compte a
-        # ses propres fiches Proprietaire, cf. Proprietaire.utilisateur) :
-        # une fiche « supprimée » (Proprietaire.actif=False) n'est plus proposée
-        # pour un nouvel animal, mais reste sélectionnée si c'est déjà la valeur
-        # de l'animal en cours de modification (pour ne pas casser l'édition).
+        # Propriétaires actifs visibles du compte connecté (lui-même, plus les
+        # autres membres de son foyer partagé le cas échéant — cf.
+        # accueil.utils.comptes_accessibles) : une fiche « supprimée »
+        # (Proprietaire.actif=False) n'est plus proposée pour un nouvel animal,
+        # mais reste sélectionnée si c'est déjà la valeur de l'animal en cours
+        # de modification (pour ne pas casser l'édition).
         self.fields['proprietaire'].queryset = self._queryset_actifs_ou_valeur_actuelle(
-            Proprietaire.objects.filter(utilisateur=user), 'proprietaire'
+            Proprietaire.objects.filter(utilisateur__in=comptes_accessibles(user)), 'proprietaire'
         )
 
         # Espèce/robe : masque l'entrée générique « Autre » du catalogue,
@@ -326,11 +329,19 @@ class ProprietaireForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data['email']
         if self.user is not None:
-            doublon = Proprietaire.objects.filter(utilisateur=self.user, email__iexact=email)
+            # Doublon au sein de tout le foyer partagé (pas seulement le
+            # compte connecté) : jamais de fusion automatique de fiches
+            # existantes (cf. décision produit), seulement un blocage à la
+            # création/édition pour ne pas en recréer une de plus.
+            doublon = Proprietaire.objects.filter(
+                utilisateur__in=comptes_accessibles(self.user), email__iexact=email,
+            )
             if self.instance.pk:
                 doublon = doublon.exclude(pk=self.instance.pk)
             if doublon.exists():
-                raise forms.ValidationError("Un propriétaire avec cet email existe déjà dans ton compte.")
+                raise forms.ValidationError(
+                    "Un propriétaire avec cet email existe déjà dans ton compte ou chez un membre de ton foyer."
+                )
         return email
 
 

@@ -1,0 +1,10 @@
+Bonjour,
+
+{{ nom_invitant }} vous invite à partager l'accès à son compte (animaux, consultations, factures, documents).
+
+Pour répondre à cette invitation, connecte-toi puis rends-toi sur : {{ lien }}
+
+Si vous ne connaissez pas cette personne, vous pouvez ignorer cet email en toute sécurité.
+
+Cordialement,
+Votre application de suivi vétérinaire

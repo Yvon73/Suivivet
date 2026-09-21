@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from accueil.utils import comptes_accessibles
 from animaux.models import Animal
 from .models import Document
 from .forms import DocumentForm
@@ -13,7 +14,7 @@ from .forms import DocumentForm
 def fichier_document(request, pk):
     """Sert le fichier après vérification du propriétaire (via l'animal) —
     jamais exposé via une URL /media/ statique (cf. Projet_veto/urls.py)."""
-    document = get_object_or_404(Document, pk=pk, animal__utilisateur=request.user)
+    document = get_object_or_404(Document, pk=pk, animal__utilisateur__in=comptes_accessibles(request.user))
     if not document.fichier:
         raise Http404
     return FileResponse(document.fichier.open('rb'))
@@ -27,7 +28,7 @@ class DocumentListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(
-            animal__utilisateur=self.request.user
+            animal__utilisateur__in=comptes_accessibles(self.request.user)
         ).select_related('animal', 'type_document')
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
@@ -40,7 +41,7 @@ class DocumentDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'document'
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))
 
 class DocumentCreateView(LoginRequiredMixin, CreateView):
     model = Document
@@ -51,7 +52,9 @@ class DocumentCreateView(LoginRequiredMixin, CreateView):
         initial = super().get_initial()
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
-            initial['animal'] = get_object_or_404(Animal, pk=animal_id, utilisateur=self.request.user)
+            initial['animal'] = get_object_or_404(
+                Animal, pk=animal_id, utilisateur__in=comptes_accessibles(self.request.user)
+            )
         return initial
 
     def get_form_kwargs(self):
@@ -69,7 +72,7 @@ class DocumentUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('documents:document_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -82,4 +85,4 @@ class DocumentDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('documents:document_list')
 
     def get_queryset(self):
-        return super().get_queryset().filter(animal__utilisateur=self.request.user)
+        return super().get_queryset().filter(animal__utilisateur__in=comptes_accessibles(self.request.user))

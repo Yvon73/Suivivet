@@ -6,6 +6,7 @@ class Notification(models.Model):
         ('RAPPEL_CONSULTATION', 'Rappel de consultation'),
         ('NOUVEAU_DOCUMENT', 'Nouveau document'),
         ('FACTURE_A_PAYER', 'Facture à payer'),
+        ('INVITATION_FOYER', 'Invitation à partager un compte'),
     ]
 
     utilisateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

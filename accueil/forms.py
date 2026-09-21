@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 
-from .models import PreferenceAccessibilite
+from .models import InvitationFoyer, MembreFoyer, PreferenceAccessibilite
 
 
 class PremierUtilisateurForm(UserCreationForm):
@@ -67,3 +67,38 @@ class PremierUtilisateurForm(UserCreationForm):
             reduire_animations=self.cleaned_data.get('reduire_animations', False),
             palette_daltonisme=self.cleaned_data.get('palette_daltonisme', False),
         )
+
+
+class InvitationFoyerForm(forms.Form):
+    """Formulaire d'envoi d'une invitation à partager son compte (cf.
+    accueil.views.envoyer_invitation_foyer) — l'invité doit correspondre à un
+    compte déjà existant (jamais d'invitation « à froid » par email seul, cf.
+    décision produit) et ne pas déjà appartenir à un foyer."""
+
+    email = forms.EmailField(
+        label="Email du compte à inviter",
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'autocomplete': 'email'}),
+    )
+
+    def __init__(self, *args, utilisateur=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.utilisateur = utilisateur
+        self.invite = None
+
+    def clean_email(self):
+        from notifications.utils import resoudre_utilisateur
+
+        email = self.cleaned_data['email']
+        invite = resoudre_utilisateur(email)
+        if invite is None:
+            raise forms.ValidationError("Aucun compte ne correspond à cet email.")
+        if invite == self.utilisateur:
+            raise forms.ValidationError("Tu ne peux pas t'inviter toi-même.")
+        if MembreFoyer.objects.filter(utilisateur=invite).exists():
+            raise forms.ValidationError("Ce compte appartient déjà à un foyer.")
+        if InvitationFoyer.objects.filter(
+            invite_par=self.utilisateur, email_invite__iexact=email, statut=InvitationFoyer.Statut.EN_ATTENTE,
+        ).exists():
+            raise forms.ValidationError("Une invitation est déjà en attente pour cet email.")
+        self.invite = invite
+        return email

@@ -1,6 +1,7 @@
 from django import forms
 from django.db.models import Q
 from django.utils import timezone
+from accueil.utils import comptes_accessibles
 from animaux.models import Animal
 from .models import Consultation, Veterinaire
 
@@ -19,8 +20,9 @@ class ConsultationForm(forms.ModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Uniquement les animaux du compte connecté (cf. Animal.utilisateur).
-        self.fields['animal'].queryset = Animal.objects.filter(utilisateur=user)
+        # Animaux visibles du compte connecté (lui-même, plus les autres
+        # membres de son foyer partagé le cas échéant).
+        self.fields['animal'].queryset = Animal.objects.filter(utilisateur__in=comptes_accessibles(user))
 
         # Vétérinaires actifs uniquement (catalogue partagé, cf. Veterinaire) :
         # une fiche « supprimée » (Veterinaire.actif=False) n'est plus proposée
