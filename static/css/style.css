@@ -715,3 +715,49 @@ html.a11y-contraste[data-bs-theme="dark"] .text-secondary {
 html.a11y-contraste[data-bs-theme="dark"] *:focus-visible {
     outline-color: #FFFFFF !important;
 }
+
+/* =====================================================================
+   8. Menus saisissables (Tom Select, cf. animaux/form.html : Espèce et Race)
+   — sa feuille de style est chargée après celle-ci, d'où des sélecteurs un
+   peu plus spécifiques que les siens.
+   ===================================================================== */
+/* Même hauteur et même retrait que les autres champs (cf. .form-select plus
+   haut) : Tom Select remet à zéro le padding du conteneur et en utilise un
+   plus petit sur sa zone de saisie. */
+.ts-wrapper.form-select .ts-control {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1rem;
+}
+
+/* Tom Select insère son conteneur juste après le <select> d'origine (masqué) :
+   dans un .input-group (menu + bouton « + »), Bootstrap le prend alors pour
+   un élément du milieu (coin gauche carré, décalage de 1px). Sa règle
+   enchaîne six :not(), d'où !important plutôt qu'une surenchère de
+   spécificité. */
+.input-group > select.tomselected + .ts-wrapper {
+    margin-left: 0 !important;
+    border-top-left-radius: var(--border-radius) !important;
+    border-bottom-left-radius: var(--border-radius) !important;
+}
+
+/* Mode sombre : couleurs claires codées en dur dans le thème Bootstrap 5 de
+   Tom Select (texte tapé et liste presque invisibles sur fond sombre). */
+[data-bs-theme="dark"] .ts-dropdown,
+[data-bs-theme="dark"] .ts-control,
+[data-bs-theme="dark"] .ts-control input {
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .ts-dropdown,
+[data-bs-theme="dark"] .ts-dropdown.form-select {
+    border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .ts-dropdown .optgroup-header {
+    color: var(--bs-secondary-color);
+}
+
+[data-bs-theme="dark"] .ts-dropdown [data-selectable] .highlight {
+    background: rgba(255, 193, 7, 0.35);
+}

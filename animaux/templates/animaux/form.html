@@ -8,6 +8,11 @@
     {% endif %}
 {% endblock %}
 
+{% block extra_css %}
+    <!-- Menus Espèce/Race saisissables au clavier (Tom Select, cf. script en bas de page) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/css/tom-select.bootstrap5.min.css">
+{% endblock %}
+
 {% block content %}
     <h1 class="mb-4">
         <i class="bi bi-paw"></i>
@@ -471,6 +476,35 @@
                 return;
             }
 
+            // --- Menus Espèce / Race saisissables (Tom Select) --------------------
+            // On tape quelques lettres pour ne voir que les noms correspondants
+            // (sans tenir compte des accents ni des majuscules), au lieu de faire
+            // défiler plusieurs centaines de races. Le <select> d'origine reste
+            // celui envoyé au serveur : Tom Select le tient à jour, rien ne change
+            // côté Django. Une fois Tom Select en place, on ne modifie plus les
+            // <option> natives directement mais via son API (tsEspece / tsRace).
+            var reglagesListeSaisissable = {
+                maxOptions: null, // toutes les correspondances, pas seulement les 50 premières
+                render: {
+                    no_results: function () {
+                        return '<div class="no-results">Aucun résultat&nbsp;: utilise le bouton «&nbsp;+&nbsp;» pour l\'ajouter.</div>';
+                    },
+                },
+            };
+            var tsEspece = new TomSelect(especeField, Object.assign({}, reglagesListeSaisissable, {
+                placeholder: 'Tape pour chercher une espèce…',
+            }));
+            var tsRace = new TomSelect(raceField, Object.assign({}, reglagesListeSaisissable, {
+                placeholder: 'Tape pour chercher une race…',
+            }));
+
+            // Catalogue complet des races (valeur, nom, espèce via data-espece,
+            // groupe) : tsRace n'en affiche ensuite que celles de l'espèce choisie
+            // (cf. filtrerRaces), les races ajoutées via « + » y sont ajoutées.
+            var catalogueRaces = Object.keys(tsRace.options).map(function (cle) {
+                return tsRace.options[cle];
+            });
+
             // --- Fiche de la race sélectionnée (catalogue static/data/races_*.json) ---
             // Chargée une fois pour toutes (peu de volume par race), complétée à la
             // volée par les races ajoutées via la modale ci-dessous.
@@ -554,34 +588,53 @@
                 });
             }
 
-            function filtrerRaces() {
+            // Ne propose que les races de l'espèce choisie (toutes si aucune).
+            // Au changement d'espèce, une race sélectionnée qui ne correspond plus
+            // est désélectionnée pour forcer un nouveau choix (seul l'affichage du
+            // formulaire change, rien n'est modifié en base) ; au chargement d'une
+            // fiche existante en revanche (`garderRaceActuelle`), la race déjà
+            // enregistrée reste sélectionnée telle quelle, même si elle ne
+            // correspond pas à l'espèce.
+            function filtrerRaces(garderRaceActuelle) {
                 var especeId = especeField.value;
-                Array.from(raceField.options).forEach(function (option) {
-                    if (!option.value) {
-                        return;
-                    }
-                    var correspond = !especeId || option.dataset.espece === especeId;
-                    option.hidden = !correspond;
-                    option.disabled = !correspond;
-                });
-                Array.from(raceField.getElementsByTagName('optgroup')).forEach(function (optgroup) {
-                    var aUneOptionVisible = Array.from(optgroup.children).some(function (option) {
-                        return !option.hidden;
-                    });
-                    optgroup.hidden = !aUneOptionVisible;
-                });
-                // Si la race actuellement sélectionnée ne correspond plus à l'espèce
-                // choisie, on force un nouveau choix (les données déjà enregistrées
-                // en base ne sont pas modifiées, seul l'affichage du formulaire l'est).
-                var optionCourante = raceField.options[raceField.selectedIndex];
-                if (optionCourante && optionCourante.value && optionCourante.hidden) {
-                    raceField.value = '';
+                var raceActuelle = tsRace.options[tsRace.getValue()];
+                if (!garderRaceActuelle && raceActuelle && especeId && raceActuelle.espece !== especeId) {
+                    tsRace.clear();
                 }
+                tsRace.clearOptions(); // garde la race sélectionnée, retire les autres
+                tsRace.addOptions(catalogueRaces.filter(function (race) {
+                    return !especeId || race.espece === especeId;
+                }));
             }
 
-            // On ne filtre qu'au changement d'espèce, jamais au chargement de la page :
-            // en modification, la race déjà enregistrée reste visible telle quelle.
-            especeField.addEventListener('change', filtrerRaces);
+            filtrerRaces(true);
+            especeField.addEventListener('change', function () {
+                filtrerRaces(false);
+            });
+
+            // Race choisie avant l'espèce : l'espèce correspondante est renseignée
+            // d'office (la race choisie lui correspondant, elle reste sélectionnée).
+            raceField.addEventListener('change', function () {
+                var race = tsRace.options[tsRace.getValue()];
+                if (race && race.espece && !especeField.value) {
+                    tsEspece.setValue(race.espece);
+                }
+            });
+
+            // Ajoute au catalogue une race créée via l'une des modales « + », dans
+            // le groupe de son espèce (créé au besoin), comme les races existantes.
+            function ajouterRaceAuCatalogue(race) {
+                var groupe = Object.keys(tsRace.optgroups).find(function (cle) {
+                    return tsRace.optgroups[cle].label === race.espece_nom;
+                });
+                if (!groupe) {
+                    groupe = 'espece-' + race.espece_id;
+                    tsRace.addOptionGroup(groupe, { label: race.espece_nom });
+                }
+                catalogueRaces.push({
+                    value: String(race.id), text: race.nom, espece: String(race.espece_id), optgroup: groupe,
+                });
+            }
 
             // --- Ajout rapide d'une race absente du catalogue ---------------------
             // Le bouton « + » est déjà dans le gabarit (input-group autour du
@@ -673,35 +726,18 @@
                             return;
                         }
                         var race = resultat.data;
-
-                        // Retrouve (ou crée) l'optgroup correspondant à l'espèce de la
-                        // nouvelle race, pour rester cohérent avec le regroupement existant.
-                        var optgroup = Array.from(raceField.getElementsByTagName('optgroup'))
-                            .find(function (og) { return og.label === race.espece_nom; });
-                        if (!optgroup) {
-                            optgroup = document.createElement('optgroup');
-                            optgroup.label = race.espece_nom;
-                            raceField.appendChild(optgroup);
-                        }
-
-                        var option = document.createElement('option');
-                        option.value = race.id;
-                        option.text = race.nom;
-                        option.dataset.espece = String(race.espece_id);
-                        optgroup.appendChild(option);
+                        ajouterRaceAuCatalogue(race);
 
                         // Complète le panneau d'aperçu (racesInfo) avec la fiche de la
                         // race qu'on vient de créer, pour qu'elle s'affiche immédiatement.
                         racesInfo[String(race.id)] = race;
 
                         // Sélectionne la nouvelle race et aligne le champ espèce du
-                        // formulaire principal si besoin, sans modifier de donnée existante.
-                        if (especeField.value !== String(race.espece_id)) {
-                            especeField.value = String(race.espece_id);
-                        }
-                        filtrerRaces();
-                        raceField.value = race.id;
-                        actualiserFicheRace();
+                        // formulaire principal si besoin, sans modifier de donnée existante
+                        // (le changement de race déclenche actualiserFicheRace).
+                        tsEspece.setValue(String(race.espece_id));
+                        filtrerRaces(true);
+                        tsRace.setValue(String(race.id));
 
                         var modal = bootstrap.Modal.getInstance(modalEl);
                         modal.hide();
@@ -781,32 +817,15 @@
                         var espece = resultat.data.espece;
                         var race = resultat.data.race;
 
-                        // Ajoute la nouvelle espèce au menu déroulant principal.
-                        var optionEspece = document.createElement('option');
-                        optionEspece.value = espece.id;
-                        optionEspece.text = espece.nom;
-                        especeField.appendChild(optionEspece);
-
-                        // Ajoute sa première race (avec sa propre optgroup), même mécanisme
-                        // que l'ajout rapide d'une race seule (cf. plus haut).
-                        var optgroup = Array.from(raceField.getElementsByTagName('optgroup'))
-                            .find(function (og) { return og.label === race.espece_nom; });
-                        if (!optgroup) {
-                            optgroup = document.createElement('optgroup');
-                            optgroup.label = race.espece_nom;
-                            raceField.appendChild(optgroup);
-                        }
-                        var optionRace = document.createElement('option');
-                        optionRace.value = race.id;
-                        optionRace.text = race.nom;
-                        optionRace.dataset.espece = String(race.espece_id);
-                        optgroup.appendChild(optionRace);
+                        // Ajoute la nouvelle espèce au menu principal, et sa première race
+                        // (dans son propre groupe), même mécanisme que l'ajout rapide
+                        // d'une race seule (cf. plus haut).
+                        tsEspece.addOption({ value: String(espece.id), text: espece.nom });
+                        ajouterRaceAuCatalogue(race);
                         racesInfo[String(race.id)] = race;
 
-                        especeField.value = String(espece.id);
-                        filtrerRaces();
-                        raceField.value = race.id;
-                        actualiserFicheRace();
+                        tsEspece.setValue(String(espece.id));
+                        tsRace.setValue(String(race.id));
 
                         var modal = bootstrap.Modal.getInstance(modalEspeceEl);
                         modal.hide();
@@ -1157,4 +1176,8 @@
             }
         });
     </script>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/js/tom-select.complete.min.js"></script>
 {% endblock %}
