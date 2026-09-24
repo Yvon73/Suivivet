@@ -139,7 +139,7 @@ def mettre_a_jour_preferences_accessibilite(request):
         if valeur not in PreferenceAccessibilite.Taille.values:
             return JsonResponse({'success': False, 'erreur': 'valeur invalide'}, status=400)
         prefs.taille_texte = valeur
-    elif champ in ('contraste_eleve', 'police_lisible', 'reduire_animations', 'palette_daltonisme'):
+    elif champ in ('contraste_eleve', 'police_lisible', 'reduire_animations', 'palette_daltonisme', 'mode_sombre'):
         setattr(prefs, champ, valeur == '1')
     else:
         return JsonResponse({'success': False, 'erreur': 'champ inconnu'}, status=400)

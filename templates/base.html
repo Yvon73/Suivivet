@@ -8,7 +8,7 @@ publiques (accueil, connexion), ici l'utilisateur est forcément connecté
 (LoginRequiredMixin), donc ses préférences enregistrées font autorité —
 pas besoin d'un script de préchargement basé sur localStorage.
 {% endcomment %}
-<html lang="fr" class="{{ classes_accessibilite_utilisateur }}">
+<html lang="fr" class="{{ classes_accessibilite_utilisateur }}"{% if mode_sombre_utilisateur %} data-bs-theme="dark"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -233,7 +233,7 @@ pas besoin d'un script de préchargement basé sur localStorage.
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light py-4 mt-5">
+    <footer class="bg-body-tertiary py-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-6 text-center text-md-start">

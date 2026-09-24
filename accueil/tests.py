@@ -196,6 +196,31 @@ class PreferencesAccessibiliteViewTest(TestCase):
         })
         self.assertEqual(response.status_code, 400)
 
+    def test_mode_sombre_enregistre_puis_applique_sur_les_pages(self):
+        self.client.login(username='alex', password='motdepasse123')
+        self.assertNotContains(self.client.get(reverse('animaux:animal_list')), 'data-bs-theme="dark"')
+
+        response = self.client.post(reverse('accueil:preferences_accessibilite'), {
+            'champ': 'mode_sombre', 'valeur': '1',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(PreferenceAccessibilite.objects.get(utilisateur=self.utilisateur).mode_sombre)
+        self.assertContains(self.client.get(reverse('animaux:animal_list')), 'data-bs-theme="dark"')
+
+        self.client.post(reverse('accueil:preferences_accessibilite'), {'champ': 'mode_sombre', 'valeur': '0'})
+        self.assertNotContains(self.client.get(reverse('animaux:animal_list')), 'data-bs-theme="dark"')
+
+    def test_mode_sombre_coche_a_la_creation_du_compte(self):
+        User.objects.all().delete()
+        self.client.post(reverse('accueil:premier_compte'), {
+            'username': 'admin',
+            'email': 'admin@example.com',
+            'password1': 'un-mot-de-passe-solide-42',
+            'password2': 'un-mot-de-passe-solide-42',
+            'mode_sombre': 'on',
+        })
+        self.assertTrue(PreferenceAccessibilite.objects.get(utilisateur__username='admin').mode_sombre)
+
 
 class PartageCompteTest(TestCase):
     """Tests du partage de compte entre propriétaires (« foyer »)."""

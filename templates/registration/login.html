@@ -12,6 +12,7 @@
             if (localStorage.getItem('a11yPolice') === '1') { html.classList.add('a11y-police-lisible'); }
             if (localStorage.getItem('a11yReduireAnimations') === '1') { html.classList.add('a11y-reduire-animations'); }
             if (localStorage.getItem('a11yPaletteDaltonisme') === '1') { html.classList.add('a11y-palette-daltonisme'); }
+            if (localStorage.getItem('a11yModeSombre') === '1') { html.setAttribute('data-bs-theme', 'dark'); }
         } catch (e) {}
     })();
 </script>

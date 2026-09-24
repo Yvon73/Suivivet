@@ -42,6 +42,10 @@ class PremierUtilisateurForm(UserCreationForm):
         required=False, label="Palette adaptée daltonisme",
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
     )
+    mode_sombre = forms.BooleanField(
+        required=False, label="Mode sombre",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    )
 
     class Meta(UserCreationForm.Meta):
         model = get_user_model()
@@ -66,6 +70,7 @@ class PremierUtilisateurForm(UserCreationForm):
             police_lisible=self.cleaned_data.get('police_lisible', False),
             reduire_animations=self.cleaned_data.get('reduire_animations', False),
             palette_daltonisme=self.cleaned_data.get('palette_daltonisme', False),
+            mode_sombre=self.cleaned_data.get('mode_sombre', False),
         )
 
 

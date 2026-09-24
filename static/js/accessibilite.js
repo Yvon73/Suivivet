@@ -24,6 +24,7 @@
         police: 'a11yPolice',
         animations: 'a11yReduireAnimations',
         palette: 'a11yPaletteDaltonisme',
+        sombre: 'a11yModeSombre',
     };
 
     var CLASSE_PAR_CLE = {
@@ -63,6 +64,7 @@
         var casePolice = document.getElementById('a11yPoliceLisible');
         var caseAnimations = document.getElementById('a11yReduireAnimations');
         var casePalette = document.getElementById('a11yPaletteDaltonisme');
+        var caseModeSombre = document.getElementById('a11yModeSombre');
         var boutonLecture = document.getElementById('a11yLireVoixHaute');
 
         if (!conteneur) {
@@ -139,6 +141,20 @@
         brancherCase(casePolice, 'police');
         brancherCase(caseAnimations, 'animations');
         brancherCase(casePalette, 'palette');
+
+        // Le mode sombre n'est pas une classe mais l'attribut data-bs-theme
+        // (thème sombre natif de Bootstrap 5.3, cf. static/css/style.css).
+        if (caseModeSombre) {
+            caseModeSombre.checked = html.getAttribute('data-bs-theme') === 'dark';
+            caseModeSombre.addEventListener('change', function () {
+                if (caseModeSombre.checked) {
+                    html.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    html.removeAttribute('data-bs-theme');
+                }
+                persister(CLES.sombre, 'mode_sombre', caseModeSombre.checked ? '1' : '0');
+            });
+        }
 
         // --- Lecture à voix haute du contenu principal ---
         if (boutonLecture) {

@@ -61,6 +61,10 @@ class PreferenceAccessibilite(models.Model):
         default=False, verbose_name="Palette adaptée daltonisme",
         help_text="Remplace les rouge/vert/orange par la palette Okabe-Ito.",
     )
+    mode_sombre = models.BooleanField(
+        default=False, verbose_name="Mode sombre",
+        help_text="Fond sombre et texte clair, pour les yeux sensibles à la lumière.",
+    )
 
     def classes_css(self):
         """Classes à poser sur <html> pour appliquer ces préférences (cf.

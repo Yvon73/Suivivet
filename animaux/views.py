@@ -13,6 +13,7 @@ from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from weasyprint import HTML, CSS
+from accueil.models import PreferenceAccessibilite
 from accueil.utils import comptes_accessibles
 from .models import Animal, AnimalIdentification, Poids, Espece, Robe, Race, Organisme, Proprietaire
 from .forms import (
@@ -339,19 +340,29 @@ def graphique_poids(request, animal_id):
     dates = [p.date for p in poids_list]
     valeurs = [p.valeur for p in poids_list]
 
-    # Création du graphique avec Matplotlib
-    plt.figure(figsize=(10, 5))
-    plt.plot(dates, valeurs, marker='o', linestyle='-', color='b')
-    plt.title(f"Courbe de poids pour {animal.nom}")
-    plt.xlabel("Date")
-    plt.ylabel("Poids (kg)")
-    plt.grid(True)
+    # Image PNG : elle ne suit pas le CSS du thème, on aligne donc ses couleurs
+    # sur le mode sombre du compte (fond = celui des cartes en thème sombre).
+    mode_sombre = PreferenceAccessibilite.objects.filter(utilisateur=request.user, mode_sombre=True).exists()
+    style = {
+        'figure.facecolor': '#212529', 'axes.facecolor': '#212529', 'savefig.facecolor': '#212529',
+        'text.color': '#dee2e6', 'axes.labelcolor': '#dee2e6', 'axes.edgecolor': '#adb5bd',
+        'xtick.color': '#adb5bd', 'ytick.color': '#adb5bd', 'grid.color': '#495057',
+    } if mode_sombre else {}
 
-    # Sauvegarde du graphique dans un buffer
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    plt.close()
+    # Création du graphique avec Matplotlib
+    with plt.rc_context(style):
+        plt.figure(figsize=(10, 5))
+        plt.plot(dates, valeurs, marker='o', linestyle='-', color='#6cb4e4' if mode_sombre else 'b')
+        plt.title(f"Courbe de poids pour {animal.nom}")
+        plt.xlabel("Date")
+        plt.ylabel("Poids (kg)")
+        plt.grid(True)
+
+        # Sauvegarde du graphique dans un buffer
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        plt.close()
 
     # Encodage en base64 pour affichage dans le template
     image_png = buffer.getvalue()

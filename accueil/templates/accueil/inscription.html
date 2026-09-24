@@ -12,6 +12,7 @@
             if (localStorage.getItem('a11yPolice') === '1') { html.classList.add('a11y-police-lisible'); }
             if (localStorage.getItem('a11yReduireAnimations') === '1') { html.classList.add('a11y-reduire-animations'); }
             if (localStorage.getItem('a11yPaletteDaltonisme') === '1') { html.classList.add('a11y-palette-daltonisme'); }
+            if (localStorage.getItem('a11yModeSombre') === '1') { html.setAttribute('data-bs-theme', 'dark'); }
         } catch (e) {}
     })();
 </script>
@@ -124,6 +125,10 @@
                             <div class="form-check">
                                 {{ form.palette_daltonisme }}
                                 <label class="form-check-label" for="{{ form.palette_daltonisme.id_for_label }}">{{ form.palette_daltonisme.label }}</label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.mode_sombre }}
+                                <label class="form-check-label" for="{{ form.mode_sombre.id_for_label }}">{{ form.mode_sombre.label }}</label>
                             </div>
                         </fieldset>
 

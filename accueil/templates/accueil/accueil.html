@@ -12,6 +12,7 @@
             if (localStorage.getItem('a11yPolice') === '1') { html.classList.add('a11y-police-lisible'); }
             if (localStorage.getItem('a11yReduireAnimations') === '1') { html.classList.add('a11y-reduire-animations'); }
             if (localStorage.getItem('a11yPaletteDaltonisme') === '1') { html.classList.add('a11y-palette-daltonisme'); }
+            if (localStorage.getItem('a11yModeSombre') === '1') { html.setAttribute('data-bs-theme', 'dark'); }
         } catch (e) {}
     })();
 </script>
@@ -285,7 +286,7 @@
     </section>
 </main>
 
-<footer class="bg-light py-4 mt-5">
+<footer class="bg-body-tertiary py-4 mt-5">
     <div class="container text-center text-muted small">
         <p class="mb-0">Suivi Vétérinaire — © 2026 {{ editeur.nom }}</p>
     </div>
