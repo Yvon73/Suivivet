@@ -96,9 +96,18 @@ curl -H "Host: suivivet.fr" http://192.162.68.76/
 ```
 
 Une fois le DNS propagé, teste directement `http://suivivet.fr/`, puis
-active le **Let's Encrypt** (case à cocher SSL du site dans ISPConfig — le
-support ACME est déjà câblé dans Apache). Une fois le certificat obtenu,
-voir les instructions HTTPS en tête de `ispconfig-directives.conf`.
+active le **Let's Encrypt** (case « Let's Encrypt SSL » du site dans
+ISPConfig). Let's Encrypt valide le domaine en lisant
+`/.well-known/acme-challenge/…` : ce chemin doit être exclu du proxy vers
+Django, ce que fait le bloc dédié de `ispconfig-directives.conf` — vérifie
+qu'il est bien présent dans les Apache Directives du site **avant** de cocher
+la case, sinon Django répond 404 et le certificat n'est pas émis (le
+`acme.conf` d'ISPConfig n'est pas activé sur ce serveur, et le `ProxyPass /`
+du site passerait de toute façon devant). Pour le tester : dépose un fichier
+dans `/usr/local/ispconfig/interface/acme/.well-known/acme-challenge/`, il
+doit s'afficher via `http://suivivet.fr/.well-known/acme-challenge/<fichier>`
+(puis supprime-le). Une fois le certificat obtenu, voir les instructions
+HTTPS en tête de `ispconfig-directives.conf`.
 
 ## 9. Logs / dépannage
 
@@ -128,9 +137,9 @@ fichier directement.
 
 ## À faire avant un vrai lancement public
 
-- **HTTPS** : activer le Let's Encrypt ISPConfig dès que le DNS de
-  `suivivet.fr` pointe vers ce VPS (voir étape 8), puis repasser
-  `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_SSL_REDIRECT` à
-  `True` et `BEHIND_REVERSE_PROXY` à `True` dans `Projet_veto/.env`.
+- ~~**HTTPS**~~ : fait le 2026-10-01 — certificat Let's Encrypt (pour
+  `suivivet.fr` et `www.suivivet.fr`) obtenu via ISPConfig (étape 8), et
+  `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_SSL_REDIRECT`,
+  `BEHIND_REVERSE_PROXY` à `True` dans `Projet_veto/.env`.
 - **Mention légale RGPD** : `EDITEUR_ADRESSE`/`EDITEUR_TELEPHONE` restent à
   compléter dans `.env` quand tu sors du mode test.
