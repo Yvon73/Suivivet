@@ -25,7 +25,7 @@
                             <span class="badge bg-danger ms-2">Nouveau</span>
                         {% endif %}
                     </h5>
-                    <small>{{ notification.date_creation|timesince }} ago</small>
+                    <small>il y a {{ notification.date_creation|timesince }}</small>
                 </div>
                 <p class="mb-1">{{ notification.message }}</p>
                 <small>{{ notification.get_type_display }}</small>
