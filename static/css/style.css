@@ -322,17 +322,222 @@ a:hover {
 .pb-3 { padding-bottom: 1rem !important; }
 
 /* ===== Responsive ===== */
-@media (max-width: 768px) {
+/* En-têtes et pieds de carte en ligne (titre + boutons, ex. fiche animal,
+   propriétaire, vétérinaire) : passent à la ligne quand la place manque au
+   lieu d'écraser le titre — sans effet visible sur grand écran. */
+.card-header.d-flex,
+.card-footer.d-flex {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Menu replié (sous le point de rupture navbar-expand-lg) */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        padding-top: 0.5rem;
+    }
+
     .navbar-nav .nav-link {
-        padding: 0.5rem 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    /* Sépare la navigation des outils (accessibilité, notifications, compte) */
+    .navbar-collapse > .navbar-nav + .navbar-nav {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* ===== Mobile (téléphone, portrait ou paysage) ===== */
+@media (max-width: 767.98px) {
+    .navbar {
+        padding: 0.5rem 0;
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    main.container {
+        margin-top: 1rem !important;
+    }
+
+    .card-header {
+        padding: 0.75rem 1rem;
     }
 
     .card-body {
         padding: 1rem;
     }
 
+    .alert {
+        padding: 0.75rem 1rem;
+    }
+
+    /* Barre d'actions d'une liste en grille 2 × 2 (cf. animaux/liste.html) :
+       chaque bouton remplit sa case, à hauteur égale avec son voisin même
+       si son libellé passe sur deux lignes. */
+    .actions-liste .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        width: 100%;
+        height: 100%;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
     .table th, .table td {
         padding: 0.5rem;
+    }
+
+    /* Recherche DataTables : champ sur toute la largeur plutôt qu'un petit
+       champ centré à côté de son libellé */
+    div.dataTables_wrapper div.dataTables_filter {
+        margin-bottom: 1rem; /* sinon collé à la première carte */
+    }
+
+    div.dataTables_wrapper div.dataTables_filter label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    div.dataTables_wrapper div.dataTables_filter input {
+        flex: 1;
+        min-width: 0; /* sinon sa largeur par défaut déborde en texte agrandi */
+        margin-left: 0;
+    }
+
+    div.dataTables_wrapper div.dataTables_info {
+        padding-top: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        flex-wrap: wrap;
+    }
+
+    /* --- Tableaux en cartes : une carte par ligne, chaque valeur précédée
+       de l'intitulé de sa colonne. La classe tableau-empilable et les
+       attributs data-label / la classe cellule-actions sont posés par
+       static/js/tableaux-responsives.js (tableaux d'au moins 4 colonnes ;
+       sans JS, le tableau reste un tableau qui défile horizontalement). --- */
+    .table.tableau-empilable,
+    .tableau-empilable > tbody,
+    .tableau-empilable > tbody > tr,
+    .tableau-empilable > tbody > tr > td {
+        display: block;
+        width: 100% !important;
+        box-sizing: border-box; /* DataTables force content-box sur ses cellules */
+    }
+
+    .table.tableau-empilable {
+        border-radius: 0;
+        overflow: visible;
+        margin-top: 0 !important;
+    }
+
+    /* Ligne d'en-tête masquée visuellement, mais conservée pour les
+       lecteurs d'écran (rôles ARIA posés par le script). */
+    .tableau-empilable > thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .table.tableau-empilable > tbody > tr {
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+    }
+
+    /* Déjà dans une carte (fiche animal, formulaire de facture) : pas
+       d'ombre en plus, la bordure suffit. */
+    .card .table.tableau-empilable > tbody > tr {
+        box-shadow: none;
+    }
+
+    .table.tableau-empilable > tbody > tr > td {
+        display: flow-root; /* contient l'intitulé flottant ci-dessous */
+        padding: 0.5rem 0.75rem;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .table.tableau-empilable > tbody > tr > td:last-child {
+        border-bottom-width: 0;
+    }
+
+    /* Ni rayures ni surbrillance au survol : chaque ligne est déjà une carte
+       distincte (!important face aux sélecteurs plus spécifiques de
+       DataTables, cf. dataTables.bootstrap5.min.css). */
+    .table.tableau-empilable > tbody > tr > * {
+        box-shadow: none !important;
+    }
+
+    /* Intitulé à gauche, valeur alignée à droite ; un champ de formulaire
+       (lignes de ventilation d'une facture) passe sous son intitulé. */
+    .tableau-empilable > tbody > tr > td[data-label]::before {
+        content: attr(data-label);
+        float: left;
+        max-width: 60%;
+        overflow-wrap: normal; /* coupe entre les mots, pas au milieu */
+        padding-right: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--bs-secondary-color);
+    }
+
+    /* Cellule contenant un champ : intitulé au-dessus, sur toute la largeur
+       (navigateur sans :has() : il reste flottant à gauche, comme ailleurs). */
+    .tableau-empilable > tbody > tr > td[data-label]:has(.form-control, .form-select, .input-group)::before {
+        float: none;
+        display: block;
+        max-width: none;
+        padding-bottom: 0.25rem;
+    }
+
+    /* Boutons d'action en bas de la carte, sur toute la largeur */
+    .table.tableau-empilable > tbody > tr > td.cellule-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        background-color: var(--bs-tertiary-bg);
+    }
+
+    .tableau-empilable td.cellule-actions > * {
+        flex: 1 1 auto;
+    }
+
+    .tableau-empilable > tbody > tr > td[colspan] {
+        text-align: center;
+    }
+}
+
+@media (max-width: 575.98px) {
+    /* Laisse la place au bouton du menu, même avec le texte agrandi
+       (panneau accessibilité) */
+    .navbar-brand {
+        font-size: 1.1rem;
+        white-space: normal;
+    }
+
+    /* Titres de page : la taille par défaut de Bootstrap reste pensée pour
+       un écran large */
+    h1, .h1 {
+        font-size: 1.6rem;
     }
 }
 

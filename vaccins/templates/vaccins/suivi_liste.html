@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Suivi vaccins & traitements</h1>
-    <div class="mb-3 d-flex gap-2">
+    <div class="mb-3 d-flex flex-wrap gap-2">
         <a href="{% url 'vaccins:vaccin_list' %}" class="btn btn-outline-primary">Voir les vaccins</a>
         <a href="{% url 'vaccins:traitement_list' %}" class="btn btn-outline-primary">Voir les traitements</a>
     </div>

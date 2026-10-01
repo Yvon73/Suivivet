@@ -267,6 +267,10 @@ pas besoin d'un script de préchargement basé sur localStorage.
     <!-- Panneau accessibilité : bascule + mémorisation (cf. static/css/style.css) -->
     <script src="{% static 'js/accessibilite.js' %}"></script>
 
+    <!-- Tableaux affichés en cartes sur téléphone : doit précéder extra_js
+         (initialisation DataTables), cf. le commentaire en tête du script -->
+    <script src="{% static 'js/tableaux-responsives.js' %}"></script>
+
     <!-- Custom JS -->
     {% block extra_js %}{% endblock %}
 </body>

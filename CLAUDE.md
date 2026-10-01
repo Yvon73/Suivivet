@@ -162,6 +162,12 @@ Atkinson Hyperlegible font) is self-hosted under `static/vendor/` (versions/lice
 the CSP in `Projet_veto/middleware.py` allows `'self'` only — add new libraries there too, never a CDN URL.
 A page-specific library's CSS goes in the `vendor_css` block (before `style.css`, which overrides some of
 their classes at equal specificity), not `extra_css`.
+**Mobile**: below 768px, every `table.table` with ≥4 header columns is re-rendered as one card per row
+(`static/js/tableaux-responsives.js` copies each `<th>` text into a `data-label` on its cells; the "Mobile"
+section of `style.css` displays them) — so give every column of a new table a meaningful `<th>`, and name
+the button column `Actions` (or leave its `<th>` empty) so its buttons line up at the bottom of the card.
+Note that the DataTables `responsive: true` / `B` (buttons) options in the list templates are no-ops: those
+extensions aren't vendored. Rows of buttons need `flex-wrap` to avoid overflowing a phone screen.
 List views commonly accept an `animal_id` URL kwarg to scope results to one animal (e.g.
 `consultation_list_animal`, `suivi_list_animal`). Auth uses `django.contrib.auth`'s built-in login/logout
 views at `/accounts/login/` and `/accounts/logout/`.

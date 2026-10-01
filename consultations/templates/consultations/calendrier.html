@@ -16,6 +16,23 @@
     .fc-event {
         cursor: pointer;
     }
+    @media (max-width: 767.98px) {
+        .fc .fc-toolbar {
+            flex-wrap: wrap;
+            row-gap: 0.5rem;
+        }
+        .fc .fc-toolbar-title {
+            font-size: 1.15rem;
+        }
+        /* « Toute la journée », insécable, déborde de l'écran avec le plus
+           grand texte du panneau accessibilité */
+        html.a11y-taille-tres-grand .fc .fc-list-event-time {
+            white-space: normal;
+        }
+        .fc .fc-toolbar.fc-footer-toolbar {
+            margin-top: 1rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -130,13 +147,22 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
+    // Sur téléphone, la grille mensuelle (7 colonnes de ~45 px) tronque tous
+    // les événements : on ouvre plutôt la vue « Planning » (liste du mois),
+    // la grille restant accessible depuis la barre du bas.
+    var petitEcran = window.matchMedia('(max-width: 767.98px)').matches;
     var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
+        initialView: petitEcran ? 'listMonth' : 'dayGridMonth',
+        headerToolbar: petitEcran ? {
+            left: 'prev,next',
+            center: 'title',
+            right: 'today'
+        } : {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
+        footerToolbar: petitEcran ? {center: 'listMonth,dayGridMonth'} : false,
         locale: 'fr',
         events: '{% url "consultations:calendrier_json" %}',
         eventClick: function(info) {
