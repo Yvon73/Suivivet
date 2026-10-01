@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Liste des vétérinaires{% endblock %}
 
@@ -51,7 +52,7 @@
     <script>
         $(document).ready(function() {
             $('#veterinairesTable').DataTable({
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json' },
+                language: { url: '{% static "vendor/datatables/fr-FR.json" %}' },
                 responsive: true,
             });
         });

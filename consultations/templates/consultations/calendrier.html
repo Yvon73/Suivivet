@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Calendrier des Consultations{% endblock %}
+
+{% block vendor_css %}
+<link rel="stylesheet" href="{% static 'vendor/fullcalendar/main.min.css' %}">
+{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -120,6 +125,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'vendor/fullcalendar/main.min.js' %}"></script>
+<script src="{% static 'vendor/fullcalendar/fr.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');

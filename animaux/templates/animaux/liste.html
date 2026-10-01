@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Liste des animaux{% endblock %}
 
@@ -145,7 +146,7 @@
         $(document).ready(function() {
             $('#animauxTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json',
+                    url: '{% static "vendor/datatables/fr-FR.json" %}',
                 },
                 responsive: true,
                 dom: '<"row"<"col-md-6"B><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',

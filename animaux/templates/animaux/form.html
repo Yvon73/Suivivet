@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
     {% if object %}
@@ -10,7 +11,7 @@
 
 {% block extra_css %}
     <!-- Menus Espèce/Race saisissables au clavier (Tom Select, cf. script en bas de page) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/css/tom-select.bootstrap5.min.css">
+    <link rel="stylesheet" href="{% static 'vendor/tom-select/tom-select.bootstrap5.min.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -1179,5 +1180,5 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/js/tom-select.complete.min.js"></script>
+    <script src="{% static 'vendor/tom-select/tom-select.complete.min.js' %}"></script>
 {% endblock %}

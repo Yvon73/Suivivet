@@ -14,30 +14,25 @@ class NoIndexMiddleware:
         return response
 
 
-# Liste blanche des origines externes réellement chargées par l'application —
-# vérifiée exhaustivement dans tout le dépôt (templates + static/js/*.js) :
-# jsdelivr (Bootstrap, bootstrap-icons, FullCalendar), jQuery, DataTables et
-# Google Fonts (+ fonts.gstatic.com, qui héberge les fichiers de police
-# eux-mêmes derrière la feuille de style Google Fonts). N'ajouter un nouveau
-# domaine ici que si une ressource du projet le charge réellement.
-_CSP_ORIGINES_JS = "https://cdn.jsdelivr.net https://code.jquery.com https://cdn.datatables.net"
-_CSP_ORIGINES_CSS = "https://cdn.jsdelivr.net https://cdn.datatables.net https://fonts.googleapis.com"
-# data: pour les polices d'icônes (Bootstrap Icons/FullCalendar embarquent un
-# fallback de police encodé en base64 directement dans leur CSS).
-_CSP_ORIGINES_FONTS = "https://cdn.jsdelivr.net https://fonts.gstatic.com data:"
-
+# Aucune origine externe : toutes les bibliothèques front-end (Bootstrap,
+# Bootstrap Icons, FullCalendar, DataTables + sa traduction fr-FR.json,
+# jQuery, Tom Select, police Atkinson Hyperlegible) sont hébergées dans
+# static/vendor/ (cf. son README.md) plutôt que chargées depuis un CDN. Si
+# une ressource externe devient un jour indispensable, ajouter son domaine
+# à la seule directive concernée plutôt que d'élargir default-src.
 CONTENT_SECURITY_POLICY = "; ".join([
     "default-src 'self'",
-    f"script-src 'self' 'unsafe-inline' {_CSP_ORIGINES_JS}",
-    f"style-src 'self' 'unsafe-inline' {_CSP_ORIGINES_CSS}",
-    f"font-src 'self' {_CSP_ORIGINES_FONTS}",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    # data: pour la police d'icônes de FullCalendar, embarquée en base64
+    # directement dans static/vendor/fullcalendar/main.min.css.
+    "font-src 'self' data:",
     # data: pour la courbe de poids (PNG généré par matplotlib, encodé en
-    # base64 directement dans l'attribut src — cf. animaux/views.py).
-    "img-src 'self' data: https://cdn.datatables.net",
-    # DataTables charge sa traduction française en AJAX depuis ce CDN (cf.
-    # `language: {url: 'https://cdn.datatables.net/plug-ins/.../fr-FR.json'}`
-    # dans animaux/factures/documents/consultations liste.html).
-    "connect-src 'self' https://cdn.datatables.net",
+    # base64 directement dans l'attribut src — cf. animaux/views.py) et pour
+    # les petites icônes SVG inline de Bootstrap/Tom Select (flèches de
+    # <select>, cases à cocher...).
+    "img-src 'self' data:",
+    "connect-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -49,7 +44,7 @@ class ContentSecurityPolicyMiddleware:
     """Limite les origines dont le navigateur accepte de charger un script,
     une feuille de style, une police ou une image — se déclenche si un script
     tiers malveillant tentait de se charger (ex. mineur de cryptomonnaie
-    injecté via une dépendance ou un CDN compromis) ou si une page tentait de
+    injecté via une dépendance compromise) ou si une page tentait de
     s'afficher dans une iframe étrangère (`frame-ancestors 'none'`, en plus
     de XFrameOptionsMiddleware).
 
@@ -58,8 +53,8 @@ class ContentSecurityPolicyMiddleware:
     consultations/calendrier.html...) qu'il faudrait extraire en fichiers
     externes pour s'en passer — hors marge de cette protection ponctuelle.
     La CSP reste malgré tout utile : elle bloque toujours le chargement d'un
-    script/style/police/image externe qui ne viendrait pas d'une des origines
-    listées ci-dessus."""
+    script/style/police/image qui ne serait pas servi par l'application
+    elle-même."""
 
     def __init__(self, get_response):
         self.get_response = get_response

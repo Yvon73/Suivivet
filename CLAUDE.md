@@ -123,11 +123,12 @@ hosting the public homepage:
 - **vaccins** — `Vaccin`, `Traitement` (catalog tables) and `SuiviVaccinTraitement`, which links an
   animal to either a vaccine or a treatment (`SET_NULL` on delete) with a dose date and next-due date.
 - **consultations** — `Consultation` (animal, datetime, motif, compte-rendu, vétérinaire), plus a
-  FullCalendar-based calendar view (`CalendrierView` + `get_consultations_json`, loaded via CDN in
-  `base.html`) showing upcoming consultations and 2-day-out reminders. Saving a new consultation schedules
-  a Celery task (`envoyer_rappel_consultation`, in `consultations/tasks.py`) via `apply_async(eta=...)` to
-  email the owner a reminder 2 days before the appointment; the model imports the task lazily inside
-  `save()` to avoid a circular import with `tasks.py` (which imports the model back via `apps.get_model`).
+  FullCalendar-based calendar view (`CalendrierView` + `get_consultations_json`; FullCalendar is loaded
+  only by `consultations/calendrier.html`, via `base.html`'s `vendor_css` block) showing upcoming
+  consultations and 2-day-out reminders. Saving a new consultation schedules a Celery task
+  (`envoyer_rappel_consultation`, in `consultations/tasks.py`) via `apply_async(eta=...)` to email the
+  owner a reminder 2 days before the appointment; the model imports the task lazily inside `save()` to
+  avoid a circular import with `tasks.py` (which imports the model back via `apps.get_model`).
 - **factures** — `Facture` (invoice: animal, amount, scanned file, `type_depense` of `VETERINAIRE` or
   `ALIMENTAIRE`) with classmethods `depenses_mensuelles`/`depenses_annuelles` used to aggregate spend for
   the invoice list view's dashboard context. An invoice can optionally be itemized ("ventilée", via the
@@ -155,7 +156,12 @@ into `Projet_veto/urls.py` and has no views — treat it as legacy, not a place 
 Views are Django class-based views (`ListView`/`DetailView`/`CreateView`/`UpdateView`/`DeleteView`), all
 gated with `LoginRequiredMixin`. Each app follows the same template layout:
 `<app>/templates/<app>/{liste,detail,form,confirm_delete}.html`, all extending the shared
-`templates/base.html` (Bootstrap 5 + DataTables + FullCalendar, all via CDN, plus `static/css/style.css`).
+`templates/base.html` (Bootstrap 5 + DataTables, plus `static/css/style.css`). **No CDN**: every front-end
+library (Bootstrap, Bootstrap Icons, DataTables + its `fr-FR.json`, jQuery, FullCalendar, Tom Select, the
+Atkinson Hyperlegible font) is self-hosted under `static/vendor/` (versions/licences in its `README.md`), and
+the CSP in `Projet_veto/middleware.py` allows `'self'` only — add new libraries there too, never a CDN URL.
+A page-specific library's CSS goes in the `vendor_css` block (before `style.css`, which overrides some of
+their classes at equal specificity), not `extra_css`.
 List views commonly accept an `animal_id` URL kwarg to scope results to one animal (e.g.
 `consultation_list_animal`, `suivi_list_animal`). Auth uses `django.contrib.auth`'s built-in login/logout
 views at `/accounts/login/` and `/accounts/logout/`.
