@@ -254,17 +254,20 @@ class RaceQuickAddForm(forms.ModelForm):
     """Formulaire utilisé par la modale « Ajouter une race » du formulaire animal.
 
     Seuls espèce/nom sont obligatoires (comme avant) ; les champs de fiche
-    détaillée sont facultatifs pour ne pas bloquer l'ajout d'une race absente
+    détaillée (dont ceux des catalogues static/data/ : degré de dangerosité
+    de 1 à 5, certificat de détention, comportement, note) sont facultatifs pour ne pas bloquer l'ajout d'une race absente
     du catalogue quand on ne connaît pas toutes ces informations."""
 
     class Meta:
         model = Race
         fields = [
-            'espece', 'nom', 'niveau_dangerosite',
+            'espece', 'nom',
+            'echelle_dangerosite', 'certificat_detention', 'comportement', 'note',
             'origine', 'taille_min', 'taille_max', 'poids_min', 'poids_max',
             'esperance_vie', 'description',
         ]
         widgets = {
+            'certificat_detention': forms.NullBooleanSelect(attrs={'class': 'form-select'}),
             'origine': forms.TextInput(attrs={'class': 'form-control'}),
             'taille_min': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0'}),
             'taille_max': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0'}),

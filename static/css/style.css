@@ -230,6 +230,35 @@ a:hover {
     color: var(--info-color);
 }
 
+/* Degré de dangerosité d'une race, sur 5 niveaux (cf.
+   Race.classe_bootstrap_dangerosite) : 1 vert, 2 mauve, 3 jaune, 4 orange,
+   5 rouge. Non renseigné : aucun bandeau. Classes dédiées plutôt que
+   .alert-success/-warning/-danger, dont le « warning » est déjà orange. */
+.alert-dangerosite-1 {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #1e9e54;
+}
+
+.alert-dangerosite-2 {
+    background-color: rgba(155, 89, 182, 0.2);
+    color: #8e44ad;
+}
+
+.alert-dangerosite-3 {
+    background-color: rgba(241, 196, 15, 0.3);
+    color: #9a7400;
+}
+
+.alert-dangerosite-4 {
+    background-color: rgba(230, 126, 34, 0.22);
+    color: #d35400;
+}
+
+.alert-dangerosite-5 {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #c0392b;
+}
+
 /* ===== Badges ===== */
 .badge {
     padding: 0.35rem 0.65rem;
@@ -745,6 +774,32 @@ html.a11y-palette-daltonisme .text-info {
     color: #0072B2 !important;
 }
 
+/* Degré de dangerosité (5 niveaux) : cinq teintes Okabe-Ito distinctes. */
+html.a11y-palette-daltonisme .alert-dangerosite-1 {
+    background-color: #009E73 !important; /* vert bleuté */
+    color: #fff !important;
+}
+
+html.a11y-palette-daltonisme .alert-dangerosite-2 {
+    background-color: #CC79A7 !important; /* rose pourpre */
+    color: #000 !important;
+}
+
+html.a11y-palette-daltonisme .alert-dangerosite-3 {
+    background-color: #F0E442 !important; /* jaune */
+    color: #000 !important;
+}
+
+html.a11y-palette-daltonisme .alert-dangerosite-4 {
+    background-color: #E69F00 !important; /* orange */
+    color: #000 !important;
+}
+
+html.a11y-palette-daltonisme .alert-dangerosite-5 {
+    background-color: #D55E00 !important; /* vermillon */
+    color: #fff !important;
+}
+
 /* --- Ne jamais compter sur la couleur seule pour un lien de texte --- */
 p a:not(.btn), li a:not(.btn), .accordion-body a:not(.btn),
 .form-text a:not(.btn), .card-body > p a:not(.btn) {
@@ -868,6 +923,11 @@ p a:not(.btn), li a:not(.btn), .accordion-body a:not(.btn),
 :where([data-bs-theme="dark"]) .alert-danger { color: #ff968a; }
 :where([data-bs-theme="dark"]) .alert-warning { color: #ffc56b; }
 :where([data-bs-theme="dark"]) .alert-info { color: #72e0c9; }
+:where([data-bs-theme="dark"]) .alert-dangerosite-1 { color: #7ee2a8; }
+:where([data-bs-theme="dark"]) .alert-dangerosite-2 { color: #d7aef0; }
+:where([data-bs-theme="dark"]) .alert-dangerosite-3 { color: #f5d76e; }
+:where([data-bs-theme="dark"]) .alert-dangerosite-4 { color: #ffb26b; }
+:where([data-bs-theme="dark"]) .alert-dangerosite-5 { color: #ff968a; }
 
 :where([data-bs-theme="dark"]) .pagination .page-item .page-link {
     color: var(--lien-sombre);

@@ -39,11 +39,11 @@
                         </a>
                     </div>
                 </div>
-                {% if animal.race.niveau_dangerosite != 'NON_RENSEIGNE' %}
+                {% if animal.race.echelle_dangerosite %}
                     <div class="alert alert-{{ animal.race.classe_bootstrap_dangerosite }} rounded-0 mb-0 text-center fw-semibold">
                         <i class="bi bi-exclamation-triangle-fill"></i>
                         Degré de dangerosité de la race ({{ animal.race.nom }}) :
-                        {{ animal.race.get_niveau_dangerosite_display }}
+                        {{ animal.race.dangerosite_affichee }}
                     </div>
                 {% endif %}
                 <div class="card-body">
@@ -156,6 +156,22 @@
                         </div>
                         {% if animal.race.description %}
                             <p class="mt-2 mb-0">{{ animal.race.description }}</p>
+                        {% endif %}
+                        {% if animal.race.comportement or animal.race.certificat_detention_affiche or animal.race.note %}
+                            <dl class="row mt-2 mb-0">
+                                {% if animal.race.comportement %}
+                                    <dt class="col-sm-3">Comportement :</dt>
+                                    <dd class="col-sm-9">{{ animal.race.comportement }}</dd>
+                                {% endif %}
+                                {% if animal.race.certificat_detention_affiche %}
+                                    <dt class="col-sm-3">Certificat de détention :</dt>
+                                    <dd class="col-sm-9">{{ animal.race.certificat_detention_affiche }}</dd>
+                                {% endif %}
+                                {% if animal.race.note %}
+                                    <dt class="col-sm-3">Note :</dt>
+                                    <dd class="col-sm-9">{{ animal.race.note }}</dd>
+                                {% endif %}
+                            </dl>
                         {% endif %}
 
                         {% with infos=animal.race.infos_complementaires_lisibles %}

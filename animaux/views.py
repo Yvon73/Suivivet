@@ -98,9 +98,9 @@ class AnimalFormContextMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['especes'] = Espece.objects.all()
-        context['niveaux_dangerosite'] = Race.NiveauDangerosite.choices
+        context['echelles_dangerosite'] = Race.EchelleDangerosite.choices
         context['races_info'] = {
-            race.pk: race.donnees_json() for race in Race.objects.all()
+            race.pk: race.donnees_json() for race in Race.objects.select_related('espece')
         }
         context['organisme_especes'] = Organisme.Espece.choices
         return context

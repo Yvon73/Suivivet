@@ -447,3 +447,115 @@ class PartageFoyerVisibiliteTest(TestCase):
         self.client.login(username='tiers', password='p')
         response = self.client.get(reverse('animaux:animal_list'))
         self.assertNotContains(response, "AnimalDAlex")
+
+
+class CatalogueRacesChats2Tests(TestCase):
+    """Catalogue static/data/races_chats2.json (migration 0040) et champs
+    correspondants de la modale « Ajouter une race »."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='catalogue', password='motdepasse')
+        self.client.login(username='catalogue', password='motdepasse')
+        self.chat = Espece.objects.get(code='CHAT')
+
+    def test_catalogue_importe(self):
+        persan = Race.objects.get(espece=self.chat, nom='Persan')
+        self.assertEqual(persan.echelle_dangerosite, 1)
+        self.assertEqual(persan.classe_bootstrap_dangerosite(), 'dangerosite-1')
+        self.assertIs(persan.certificat_detention, False)
+        self.assertTrue(persan.comportement)
+        self.assertTrue(persan.note)
+
+    def test_couleur_suit_l_echelle(self):
+        savannah = Race.objects.get(espece=self.chat, nom='Savannah')
+        self.assertEqual(savannah.echelle_dangerosite, 4)
+        self.assertEqual(savannah.classe_bootstrap_dangerosite(), 'dangerosite-4')
+        self.assertIs(savannah.certificat_detention, True)
+        chausie = Race.objects.get(espece=self.chat, nom='Chausie')
+        self.assertEqual(chausie.echelle_dangerosite, 5)
+        self.assertEqual(chausie.classe_bootstrap_dangerosite(), 'dangerosite-5')
+        self.assertIn('niveau 5/5', chausie.dangerosite_affichee())
+
+    def test_noms_nettoyes_et_sans_doublon(self):
+        races = Race.objects.filter(espece=self.chat)
+        self.assertFalse(races.filter(nom__startswith=' ').exists())
+        # « Turc d'Angora » du fichier complète la race « Angora Turc » existante.
+        self.assertFalse(races.filter(nom="Turc d'Angora").exists())
+        self.assertEqual(races.get(nom='Angora Turc').echelle_dangerosite, 2)
+
+    def test_ajout_rapide_avec_champs_du_catalogue(self):
+        response = self.client.post(reverse('animaux:race_create_ajax'), {
+            'espece': self.chat.pk, 'nom': 'Race de test',
+            'echelle_dangerosite': '4', 'certificat_detention': 'true',
+            'comportement': 'Vif.', 'note': 'À surveiller.',
+        })
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['echelle_dangerosite'], 4)
+        self.assertIs(data['certificat_detention'], True)
+        self.assertEqual(data['classe_dangerosite'], 'dangerosite-4')
+        self.assertIn('Élevé — niveau 4/5', data['dangerosite_affichee'])
+        self.assertTrue(data['certificat_detention_affiche'].startswith('Requis'))
+        self.assertEqual(data['comportement'], 'Vif.')
+
+    def test_ajout_rapide_sans_champs_du_catalogue(self):
+        response = self.client.post(reverse('animaux:race_create_ajax'), {
+            'espece': self.chat.pk, 'nom': 'Race minimale',
+        })
+        self.assertEqual(response.status_code, 200)
+        race = Race.objects.get(nom='Race minimale')
+        self.assertIsNone(race.echelle_dangerosite)
+        self.assertIsNone(race.certificat_detention)
+
+    def test_formulaire_animal_affiche_les_champs_du_catalogue(self):
+        response = self.client.get(reverse('animaux:animal_create'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="ficheRaceComportement"')
+        self.assertContains(response, 'id="nouvelleRaceEchelle"')
+        self.assertContains(response, '5 — Extrême')
+
+
+class CataloguesInsectesReptilesArachnidesTests(TestCase):
+    """Catalogues insectes.json / reptiles.json / arachnides.json et passage
+    de la dangerosité sur une seule échelle à 5 niveaux (migration 0041)."""
+
+    def test_insectes_importes(self):
+        frelon = Race.objects.get(espece__code='INSECTE', nom='Vespa crabro (Frelon Européen)')
+        self.assertEqual(frelon.echelle_dangerosite, 4)
+        self.assertEqual(frelon.categorie, 'Hyménoptère')
+        self.assertEqual(frelon.esperance_vie, 'Colonie: 1 an / Reine: 1 an')
+        self.assertIn('Venin puissant', frelon.dangerosite_affichee())
+
+    def test_arachnides_importes(self):
+        veuve = Race.objects.get(espece__code='ARACHNIDE', nom__startswith='Latrodectus mactans')
+        self.assertEqual(veuve.echelle_dangerosite, 4)
+        self.assertIs(veuve.certificat_detention, True)
+        self.assertTrue(veuve.certificat_detention_affiche().startswith('Requis — Recommandé'))
+
+    def test_reptiles_importes(self):
+        cobra = Race.objects.get(espece__code='REPTILE', nom__startswith='Cobra Royal')
+        self.assertEqual(cobra.echelle_dangerosite, 5)
+        self.assertEqual(cobra.classe_bootstrap_dangerosite(), 'dangerosite-5')
+        self.assertEqual(cobra.categorie, 'Serpent')
+        self.assertEqual(cobra.sous_categorie, 'Elapidae')
+        self.assertEqual(cobra.nom_scientifique, 'Ophiophagus hannah')
+
+    def test_amphibiens_ranges_sous_batracien(self):
+        self.assertTrue(Race.objects.filter(espece__code='BATRACIEN', nom__startswith='Triton Palmé').exists())
+        self.assertFalse(Race.objects.filter(espece__code='REPTILE', nom__startswith='Triton Palmé').exists())
+
+    def test_race_existante_completee_sans_doublon(self):
+        # « Boa Constrictor (Boa imperator) » complète « Boa constrictor ».
+        boas = Race.objects.filter(espece__code='REPTILE', nom__istartswith='boa constrictor')
+        self.assertEqual(boas.count(), 1)
+        self.assertEqual(boas.get().echelle_dangerosite, 2)
+        self.assertEqual(boas.get().classe_bootstrap_dangerosite(), 'dangerosite-2')
+
+    def test_ancien_niveau_converti_en_echelle(self):
+        chiens = Race.objects.filter(espece__code='CHIEN')
+        self.assertFalse(chiens.filter(echelle_dangerosite__isnull=True).exists())
+        rottweiler = chiens.get(nom='Rottweiler')
+        self.assertEqual(rottweiler.echelle_dangerosite, 4)
+        # Pas de légende propre aux chiens : seulement le libellé du niveau.
+        self.assertEqual(rottweiler.dangerosite_affichee(), 'Élevé — niveau 4/5')
+        self.assertEqual(chiens.get(nom='Berger Allemand').echelle_dangerosite, 3)

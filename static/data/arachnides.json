@@ -1,0 +1,157 @@
+{
+  "metadata": {
+    "title": "Liste des Arachnides NAC - Comportement, Dangerosité et Durée de Vie",
+    "description": "Données sur les Arachnides d'élevage (Scorpions, Tarentules, Solifuges, Araignées).",
+    "version": "1.0",
+    "date_created": "2026-10-03"
+  },
+  "categories": {
+    "scorpions": [
+      {
+        "nom": "Pandinus imperator (Scorpion Noir)",
+        "comportement": "Calme, terrestre, fuyant. Utilise ses pinces plutôt que sa queue.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "8-10 ans",
+        "note": "Idéal débutant. Peut vivre dans un terrarium semi-aride."
+      },
+      {
+        "nom": "Androctonus australis (Cestus)",
+        "comportement": "Vif, nocturne, prédateur actif.",
+        "dangerosite": 4,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "5-7 ans",
+        "note": "Venin puissant (douloureux mais rarement mortel pour l'homme)."
+      },
+      {
+        "nom": "Hottentotta tamulus (Scorpion Indien)",
+        "comportement": "Territorial, vif.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "5-7 ans",
+        "note": "L'un des scorpions les plus venimeux. Nécessite une sécurité renforcée."
+      },
+      {
+        "nom": "Mesobuthus eupeus (Scorpion Persan)",
+        "comportement": "Petit, rapide, terrestre.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "5-7 ans",
+        "note": "Morsure comparable à une piqûre de guêpe."
+      }
+    ],
+    "mygales_araneae": [
+      {
+        "nom": "Grammostola rosea (Mygale Brésilienne Rose)",
+        "comportement": "Terrestre, fouisseuse, calme.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans (Femelle)",
+        "note": "Poils urticants au toucher (irritation légère)."
+      },
+      {
+        "nom": "Phormictopus crassipes (Mygale à pattes épaisses)",
+        "comportement": "Très calme, terrestre.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans (Femelle)",
+        "note": "Excellente mygale de débutant."
+      },
+      {
+        "nom": "Brachypelma hamorii (Chili Rouge)",
+        "comportement": "Terrestre, peut être défensif (lance des poils).",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans (Femelle)",
+        "note": "Poils urticants plus prononcés que G. rosea."
+      },
+      {
+        "nom": "Theraphosa blondi (Tarentule Géante du Guyana)",
+        "comportement": "Massive, terrestre, puissante.",
+        "dangerosite": 3,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "15-25 ans (Femelle)",
+        "note": "Peut mordre fermement si elle se sent menacée."
+      },
+      {
+        "nom": "Avicularia avicularis (Mygale Arbre Verte)",
+        "comportement": "Arboricole, vive, grimpante.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "8-12 ans (Femelle)",
+        "note": "Nécessite un terrarium vertical avec végétation."
+      },
+      {
+        "nom": "Aphonopelma chalcodes (Mygale du Désert)",
+        "comportement": "Terrestre, rapide, fouisseuse.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "10-15 ans (Femelle)",
+        "note": "Peut être nerveuse."
+      },
+      {
+        "nom": "Lasiodora parahybana (Goliath Brésilienne)",
+        "comportement": "Terrestre, agressive si provoquée, rapide.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "10-15 ans (Femelle)",
+        "note": "Grande taille, venom puissant pour une mygale."
+      }
+    ],
+    "solifugae_and_other": [
+      {
+        "nom": "Solifuge (Galeodeidae)",
+        "comportement": "Diurne, très rapide, prédateur visuel.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "2-3 ans",
+        "note": "Mâchoires puissantes capables de pincer fermement."
+      },
+      {
+        "nom": "Pholade (Pholadidae)",
+        "comportement": "Nocturne, fuyant.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "1-2 ans",
+        "note": "Apparence effrayante mais inoffensive."
+      },
+      {
+        "nom": "Tegenaria domestica (Tégénaire)",
+        "comportement": "Toileuse, terrestre, nocturne.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "1-2 ans (Femelle)",
+        "note": "Araignée commune, facile à trouver."
+      },
+      {
+        "nom": "Nephila clavipes (Néphile dorée)",
+        "comportement": "Toileuse arboricole, diurne.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "1-2 ans (Femelle)",
+        "note": "Toile immense et dorée."
+      },
+      {
+        "nom": "Latrodectus mactans (Téléphone Noire veuve)",
+        "comportement": "Toileuse désordonnée, territoriale.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "2-3 ans (Femelle)",
+        "note": "Venin neurotoxique. Femelle cannibale."
+      }
+    ]
+  },
+  "legendes": {
+    "dangerosite": {
+      "1": "Inoffensif, morsure comparable à une piqûre d'ortie ou d'abeille.",
+      "2": "Douleur modérée, possible irritation locale.",
+      "3": "Douleur intense,可能需要 soins médicaux mineurs.",
+      "4": "Venin significatif, nécessite une surveillance médicale.",
+      "5": "Dangereux pour l'homme (venin puissant ou forte pression de mâchoire)."
+    },
+    "certificat_detention": {
+      "true": "Recommandé ou obligatoire selon l'espèce et la région.",
+      "false": "Pas de certificat spécifique requis (sauf si espèce protégée)."
+    }
+  }
+}

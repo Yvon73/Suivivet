@@ -1,0 +1,1057 @@
+{
+  "metadata": {
+    "title": "Liste Complète des Races de Chats - Comportement, Dangerosité et Réglementation",
+    "description": "Données exhaustives incluant les races majeures, mineures, exotiques et hybrides.",
+    "version": "2.0",
+    "date_created": "2026-10-03",
+    "federation_reference": "Basé sur les standards TICA, CFA, FIFe, WCF"
+  },
+  "categories": {
+    "persans_et_long_poils": [
+      {
+        "nom": "Persan",
+        "comportement": "Le roi de la douceur. Calme, peu bruyant, aime rester au chaud près de son maître. Moins joueur que la moyenne.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Larmoiement fréquent, nécessite brossage quotidien."
+      },
+      {
+        "nom": "Himalayen",
+        "comportement": "Identique au Persan mais avec le pelage coloré du Siamois. Très doux et sédentaire.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Croisement entre Persan et Siamois."
+      },
+      {
+        "nom": "Maine Coon",
+        "comportement": "Le géant gentil. Sociable, joueur, adore l'eau, excellent avec les enfants et chiens.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pousse jusqu'à 3-4 ans, besoin de hauteur."
+      },
+      {
+        "nom": "Norvégien",
+        "comportement": "Aventurier mais câlin. Excellent chasseur, aime grimper, résiste bien au froid.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Double fourrure imperméable."
+      },
+      {
+        "nom": "Sibérien",
+        "comportement": "Athlétique, affectueux, souvent hypoallergénique (faible production de Fel d 1).",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Race ancienne de Russie, bon nageur."
+      },
+      {
+        "nom": "Ragdoll",
+        "comportement": "Se détend comme un chiffon quand on le prend. Très attaché, suit son maître, peu agressif.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Yeux bleus, croissance lente (finie vers 4 ans)."
+      },
+      {
+        "nom": "Birman",
+        "comportement": "Doux, mystérieux, très lié à sa famille. Ne griffe pas ou peu.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Gants blancs caractéristiques, pelage soyeux."
+      },
+      {
+        "nom": "Turc de Van",
+        "comportement": "Actif, adore l'eau, loyal envers sa famille mais réservé avec les étrangers.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Origine turque, couleur 'van' (blanc avec tache colorée sur la tête)."
+      },
+      {
+        "nom": "Turc d'Angora",
+        "comportement": "Elegant, agile, joueur mais discret. Très intelligent.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Pelai soyeux et fin, souvent yeux bleus ou vairons."
+      },
+      {
+        "nom": "Exotic Shorthair",
+        "comportement": "Même caractère que le Persan mais avec un poil court. Calme et câlin.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Vis aplati comme le Persan."
+      },
+      {
+        "nom": "Chantilly-Tiffany",
+        "comportement": "Compagnon idéal, doux, peu bruyant, s'adapte facilement.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race rare, pelage semi-long soyeux."
+      },
+      {
+        "nom": "LaPerm",
+        "comportement": "Affectueux, curieux, poils bouclés naturels. Très tolérant.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Ne perd presque pas de poils dans la maison."
+      },
+      {
+        "nom": "Selkirk Rex",
+        "comportement": "Patient, joueur, supporte bien les enfants et autres animaux. Pelai bouclé dense.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Peut avoir le poil court ou long."
+      }
+    ],
+    "poils_courts_classiques": [
+      {
+        "nom": "British Shorthair",
+        "comportement": "Calme, indépendant mais affectueux, peu bruyant. Idéal appartement.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Tendance à l'embonpoint, pelage dense 'plush'."
+      },
+      {
+        "nom": "American Shorthair",
+        "comportement": "Vivant, adaptable, bon chasseur, très sain et robuste.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Race historique américaine, peu exigeante."
+      },
+      {
+        "nom": "Russian Blue",
+        "comportement": "Shy avec les inconnus, très fidèle à sa famille, joue beaucoup avec ses owners.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai bleu-gris argenté, yeux verts."
+      },
+      {
+        "nom": "Korat",
+        "comportement": "Doux, forme un lien profond avec une seule personne. Intelligent et sensible.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race ancienne de Thaïlande, cœur en forme."
+      },
+      {
+        "nom": "Chartreux",
+        "comportement": "Silencieux, joueur, observateur. Très attaché à sa famille mais discret.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai laineux bleu-gris, yeux cuivrés."
+      },
+      {
+        "nom": "Oriental Shorthair",
+        "comportement": "Bavard, énergique, cherche constamment l'attention. Peut être nerveux seul.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Corps svelte, grands oreilles, nombreuses couleurs."
+      },
+      {
+        "nom": "Siamois",
+        "comportement": "Très vocal, sociable, intelligent, souffre de solitude. Joue toute la journée.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Yeux bleus en amande, corps élancé."
+      },
+      {
+        "nom": "ABYC (American Bobtail)",
+        "comportement": "Joueur, intelligent, ressemble à un petit lynx. Très affectueux.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Queue courte naturelle."
+      },
+      {
+        "nom": "Bobtail Japonais",
+        "comportement": "Espiègle, adore les hochets, très loyal. Aime monter partout.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Queue en pompon, symbole de chance au Japon."
+      },
+      {
+        "nom": "Tonkinois",
+        "comportement": "Croisement Siamois/Burma. Sociable, bavard, actif et affectueux.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Yeux aqua, pelai colorpoint ou solide."
+      },
+      {
+        "nom": "Burma (Burmese)",
+        "comportement": "Social, joueur, 'chat-chien'. Aime suivre son maître et dormir avec lui.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Yeux dorés/ambrés, corps musclé."
+      },
+      {
+        "nom": "Ocicat",
+        "comportement": "Ressemble à un léopard mais 100% domestique. Sociable, sportif.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Aucun gène sauvage récent."
+      },
+      {
+        "nom": "Toyger",
+        "comportement": "Créé pour ressembler à un mini-Tigre. Calme mais joueur, très attaché.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Rayures verticales marquées."
+      },
+      {
+        "nom": "Snowshoe",
+        "comportement": "Doux, intelligent, vocal modérément. Aime la compagnie.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pattes blanches caractéristiques (comme le Siamois + Pointeur)."
+      },
+      {
+        "nom": "Cornish Rex",
+        "comportement": "Agile, joueur, très actif. Cherche la chaleur humaine.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Poil frisé très fin, peu tolérant au froid."
+      },
+      {
+        "nom": "Devon Rex",
+        "comportement": "Espiègle, affectueux, 'nain' de taille. Cherche constamment l'interaction.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Grands oreilles, visage de lutin."
+      },
+      {
+        "nom": "Sphynx",
+        "comportement": "Extrêmement affectueux, cherchant la chaleur humaine, vocal et sociable.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Nécessite bains réguliers et protection contre le froid."
+      },
+      {
+        "nom": "Donskoy (Don Sphynx)",
+        "comportement": "Chaleureux, intelligent, résistant au froid malgré l'absence de poils.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race russe, peau ridée, peut avoir des poils épars."
+      },
+      {
+        "nom": "Peterbald",
+        "comportement": "Élégant, social, curieux. Peut être entièrement nu ou avoir un pelai court.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Corps oriental longiligne."
+      },
+      {
+        "nom": "Dwelf",
+        "comportement": "Hybride Mains Poilu + Peterbald. Sans pattes avant, sans poils. Très collant.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Besoin d'aide pour se déplacer et manger."
+      },
+      {
+        "nom": " Bambino",
+        "comportement": "Petit, sans pattes avant (ou courtes), affectueux. Nécessite aide pour monter.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race récente, croisement Mains Poilu x Sphynx."
+      },
+      {
+        "nom": "Munchkin",
+        "comportement": "Joueur, espiègle, 'teckel' des chats. Aime jouer sous les meubles.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pattes courtes, attention dos chez certains lignages."
+      },
+      {
+        "nom": "Manx",
+        "comportement": "Sans queue (ou queue courte), doux, joueur. Bon chasseur.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Suscette à des problèmes de colonne vertébrale (syndrome du queue moelle)."
+      },
+      {
+        "nom": "Japanese Bobtail",
+        "comportement": "Actif, intelligent, adore les jeux d'eau et les hochets.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Queue courte en pompon."
+      },
+      {
+        "nom": "American Curl",
+        "comportement": "Joueur, doux, s'adapte bien aux familles. Oreilles recourbées vers l'arrière.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Entretien des oreilles nécessaire."
+      },
+      {
+        "nom": "Scottish Fold",
+        "comportement": "Doux, adapté, aime la compagnie. Oreilles plissées caractéristiques.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Suscette à des problèmes articulaires génétiques (ostéochondrodysplasie)."
+      },
+      {
+        "nom": "American Wirehair",
+        "comportement": "Calme, adaptable, très sain. Poil rêche et cassant.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race rare, originaire de New York."
+      },
+      {
+        "nom": "Lykoi",
+        "comportement": "Le 'chat-loup'. Curieux, social, semble étrange au premier abord mais est très doux.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Perte de poils saisonnière, aspect fantôme."
+      },
+      {
+        "nom": "Khao Manee",
+        "comportement": "Ancien chat thaï, blanc pur, yeux vairons ou bleus. Actif et intelligent.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Souvent sourd si yeux bleus."
+      },
+      {
+        "nom": "Nebelung",
+        "comportement": "Version longue du Russian Blue. Timide, doux, très lié à sa famille.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai bleu-gris long et soyeux."
+      },
+      {
+        "nom": " Havana Brown",
+        "comportement": "Curieux, affectueux, aime explorer. Rare en Europe.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Pelai marron unique, yeux verts."
+      },
+      {
+        "nom": " Colorpoint Shorthair",
+        "comportement": "Similaire au Siamois mais avec plus de couleurs. Vocal et social.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Variété de couleur du Siamois."
+      },
+      {
+        "nom": "Javanese",
+        "comportement": "Variété colorpoint du Chat Oriental. Bavard et actif.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Pelai mi-long ou court selon les fédérations."
+      },
+      {
+        "nom": "Balinese",
+        "comportement": "Version longue du Siamois. Élégant, vocal, très attaché.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Pelai soyeux, queue en panache."
+      },
+      {
+        "nom": " Korat",
+        "comportement": "Calme, doux, forme un lien fort avec une seule personne.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race ancienne thaïlandaise, pelai bleu argenté."
+      },
+      {
+        "nom": " Singapura",
+        "comportement": "Plus petite race domestique. Curieux, joueur, timide avec les inconnus.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Yeux immenses, pelai ticked (grainé)."
+      },
+      {
+        "nom": " Burmilla",
+        "comportement": "Croisement British Shorthair x Chinchilla Persian. Doux et sociable.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai silver shaded ou tabby."
+      },
+      {
+        "nom": " Chausie",
+        "comportement": "Issu du Chat des marais africain. Très énergétique, besoin de grand espace.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Générations précoces (F1-F3) classées NAC ou espèces protégées."
+      },
+      {
+        "nom": " Savannah",
+        "comportement": "Croisement entre un Serval africain et un Chat domestique. Grand, athlétique.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Les premières générations (F1-F2) sont plus sauvages."
+      },
+      {
+        "nom": " Bengal",
+        "comportement": "Hybride (Chat léopard x Chat domestique). Très énergique, adore l'eau.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Générations F1-F3 nécessitent souvent une déclaration."
+      },
+      {
+        "nom": " Ocelot (Felis pardalis)",
+        "comportement": "Souvent confondu avec le Bengal. Plus sauvage, besoin d'un spécialiste.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Espèce sauvage, réglementation stricte."
+      },
+      {
+        "nom": " Chausie",
+        "comportement": "Hybride du Chat des Marais (Felis chaus). Très grand, athlétique.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Générations F1-F3 nécessitant une déclaration."
+      },
+      {
+        "nom": " Cheetoh",
+        "comportement": "Croisement Bengal x Ocicat. Ressemble à un guépard. Calme mais sportif.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Race très récente."
+      },
+      {
+        "nom": " Safari",
+        "comportement": "Hybride Lynx Roux x Bengal. Rare, très sauvage dans l'allure.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Nécessite un environnement spécialisé."
+      },
+      {
+        "nom": " Puma (Cougar)",
+        "comportement": "Grand félin sauvage, parfois élevé en captivité. Très puissant.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Requiert un enclos spécifique et alimentation viande crue."
+      },
+      {
+        "nom": " Léopard des Neiges",
+        "comportement": "Très grand, puissant, nécessite un climat frais.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Élevage rare en Europe."
+      },
+      {
+        "nom": " Jaguarondi",
+        "comportement": "Petit félin sauvage d'Amérique. Agile et rapide.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Espèce protégée dans de nombreux pays."
+      },
+      {
+        "nom": " Caracal",
+        "comportement": "Oreilles touffées, chasseur agile. Peut être domestiqué mais reste sauvage.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Besoin d'espace et de prédateurs pairs."
+      },
+      {
+        "nom": " Lynx Boréal",
+        "comportement": "Grand félin des régions froides. Patience, mais puissance redoutable.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Requiert un climat froid ou climatisé."
+      },
+      {
+        "nom": " Lynx Rouge",
+        "comportement": "Plus petit que le boréal, très agile. Peut être domestiqué avec difficulté.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Nature solitaire et territoriale."
+      },
+      {
+        "nom": " Geofroy's Cat",
+        "comportement": "Petit félin sud-américain. Curieux mais peut être agressif.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Espèce protégée, réglementation variable."
+      },
+      {
+        "nom": " Margay",
+        "comportement": "Petit félin arboricole d'Amérique du Sud. Très agile.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Nécessite des arbres et de la hauteur."
+      },
+      {
+        "nom": " Oncilla",
+        "comportement": "Plus petit félin d'Amérique du Sud. Discret et craintif.",
+        "dangerosite": 3,
+        "certificat_detention": true,
+        "note": "Espèce menacée, élevage rare."
+      },
+      {
+        "nom": " Jaguarondi",
+        "comportement": "Corps allongé, jambes courtes. Chasseur terrestre rapide.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Espèce protégée."
+      },
+      {
+        "nom": " Pallas's Cat (Manul)",
+        "comportement": "Sauvage, peu sociable, vit dans les steppes asiatiques.",
+        "dangerosite": 3,
+        "certificat_detention": true,
+        "note": "Difficile à domestiquer, pelai très dense."
+      },
+      {
+        "nom": " Lion d'Abyssinie",
+        "comportement": "Chat Abyssin avec une robe 'lion' (queue et tête colorées).",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Variété de l'Abyssin."
+      },
+      {
+        "nom": " Pixie-bob",
+        "comportement": "Ressemble à un petit lynx roux. Docile, intelligent, chien-like.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Queue courte naturelle, polydaactylie fréquente."
+      },
+      {
+        "nom": " Selkirk Rex",
+        "comportement": "Patient, doux, tolérant avec les enfants et autres animaux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai bouclé, peut être court ou long."
+      },
+      {
+        "nom": " Exotic Shorthair",
+        "comportement": "Même caractère que le Persan mais avec un poil court.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Vis aplati, larmoiement fréquent."
+      },
+      {
+        "nom": " Highlander",
+        "comportement": "Hybride Desert Lynx x Jaguarhound. Oreilles effilées, queue courte.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Race récente, besoin d'espace."
+      },
+      {
+        "nom": " Serrade Petit",
+        "comportement": "Chat français de montagne. Agile, curieux, doux.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Race rare, originaire du Massif Central."
+      },
+      {
+        "nom": " Donskoy",
+        "comportement": "Sans poils, intelligent, résistant au froid.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race russe, peau ridée."
+      },
+      {
+        "nom": " Don Sphynx",
+        "comportement": "Variété sans poils du Donskoy.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Peau douce, besoins calorifiques."
+      },
+      {
+        "nom": " Elixir",
+        "comportement": "Race française récente, croisement Mains Poilu x Scottish Fold.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Oreilles pliées, pattes courtes."
+      },
+      {
+        "nom": " Kinkalow",
+        "comportement": "Croisement Mains Poilu x Munchkin. Tout petit, doux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Queue bouclée, pattes courtes."
+      },
+      {
+        "nom": " Lambkin",
+        "comportement": "Croisement Selkirk Rex x Munchkin. Tout petit, bouclé.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai bouclé, pattes courtes."
+      },
+      {
+        "nom": " Minuet (Napoleon)",
+        "comportement": "Croisement Persan/Exotic x Munchkin. Doux, joueur, patte courte.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai long ou court, face aplatie possible."
+      },
+      {
+        "nom": " Highlander",
+        "comportement": "Hybride Desert Lynx x Jaguarhound. Oreilles effilées.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Race récente, besoin d'espace."
+      },
+      {
+        "nom": " Khao Manee",
+        "comportement": "Ancien chat thaï, blanc pur, yeux vairons ou bleus.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Souvent sourd si yeux bleus."
+      },
+      {
+        "nom": " Sokoke",
+        "comportement": "Chat forestier du Kenya. Agile, sportif, très actif.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Pelai 'woodcat' unique, rayures fines."
+      },
+      {
+        "nom": " Somali",
+        "comportement": "Version longue de l'Abyssin. Très actif, joueur, intelligent.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Pelai buissonnant, queue en panache."
+      },
+      {
+        "nom": " Toybob",
+        "comportement": "Miniature du Bobtail Japonais. Courtaud, queue courte bouclée.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race rare, taille minuscule."
+      },
+      {
+        "nom": " Walter's Pharaoh",
+        "comportement": "Chat égyptien ancien, blanc et noir. Calme et affectueux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race très rare, originaire d'Égypte."
+      },
+      {
+        "nom": " Waldkatze (Wildcat)",
+        "comportement": "Chat sauvage européen. Difficile à domestiquer, territorial.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Espèce protégée en Europe."
+      },
+      {
+        "nom": " Chausie",
+        "comportement": "Issu du Chat des marais africain. Très énergétique.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Générations précoces (F1-F3) classées NAC."
+      },
+      {
+        "nom": " Savannah",
+        "comportement": "Croisement entre un Serval africain et un Chat domestique.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Les premières générations (F1-F2) sont plus sauvages."
+      },
+      {
+        "nom": " Bengal",
+        "comportement": "Hybride (Chat léopard x Chat domestique). Très énergique.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Générations F1-F3 nécessitent souvent une déclaration."
+      },
+      {
+        "nom": " Ocicat",
+        "comportement": "Ressemble à un petit léopard mais entièrement domestique.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Aucun gène sauvage récent dans son histoire."
+      },
+      {
+        "nom": " Toyger",
+        "comportement": "Créé pour ressembler à un mini-Tigre. Calme mais joueur.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Besoins alimentaires spécifiques."
+      },
+      {
+        "nom": " Chantilly-Tiffany",
+        "comportement": "Doux, compagnon idéal, peu bruyant.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race rare, pelai mi-long."
+      },
+      {
+        "nom": " American Curl",
+        "comportement": "Joueur, doux, s'adapte bien aux familles.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Entretien des oreilles nécessaire."
+      },
+      {
+        "nom": " Devon Rex",
+        "comportement": "Espiègle, affectueux, 'nain' de taille.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Poil court et frisé, peu tolérant au froid."
+      },
+      {
+        "nom": " Cornish Rex",
+        "comportement": "Agile, joueur, très actif.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Poil très fin nécessitant peu de toilettage."
+      },
+      {
+        "nom": " LaPerm",
+        "comportement": "Doux, affectueux, curieux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Moins de perte de poils que les autres races."
+      },
+      {
+        "nom": " Selkirk Rex",
+        "comportement": "Patient, doux, tolérant avec les enfants.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Toilettage fréquent nécessaire."
+      },
+      {
+        "nom": " Bambino",
+        "comportement": "Petit, sans pattes (ou courtes), affectueux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race récente, croisement Mains Poistu x Bambino."
+      },
+      {
+        "nom": " Munchkin",
+        "comportement": "Joueur, espiègle, 'teckel' des chats.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Attention aux problèmes de dos."
+      },
+      {
+        "nom": " Siberian",
+        "comportement": "Aventurier, joueur, peu allergène.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Bon nageur, pelai triple couche."
+      },
+      {
+        "nom": " Turkish Van",
+        "comportement": "Aime l'eau, actif, loyal.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Origine turque, yeux amblyopes fréquents."
+      },
+      {
+        "nom": " Korat",
+        "comportement": "Calme, doux, forme un lien fort avec une seule personne.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race ancienne thaïlandaise."
+      },
+      {
+        "nom": " Havana Brown",
+        "comportement": "Curieux, affectueux, aime explorer.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Pelai marron unique."
+      },
+      {
+        "nom": " British Shorthair",
+        "comportement": "Calme, indépendant mais affectueux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Tendance à l'embonpoint."
+      },
+      {
+        "nom": " American Shorthair",
+        "comportement": "Vivant, adaptable, bon chasseur.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Race historique américaine."
+      },
+      {
+        "nom": " Russian Blue",
+        "comportement": "Shy avec les étrangers, très fidèle.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai bleu-gris argenté."
+      },
+      {
+        "nom": " Oriental Shorthair",
+        "comportement": "Bavard, énergique, cherche constamment l'attention.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Corps svelte, grands oreilles."
+      },
+      {
+        "nom": " Siamois",
+        "comportement": "Très vocal, sociable, intelligent.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Yeux bleus en amande."
+      },
+      {
+        "nom": " ABYC (American Bobtail)",
+        "comportement": "Joueur, intelligent, ressemble à un petit lynx.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Queue courte naturelle."
+      },
+      {
+        "nom": " Bobtail Japonais",
+        "comportement": "Espiègle, adore les hochets.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Queue en pompon."
+      },
+      {
+        "nom": " Tonkinois",
+        "comportement": "Croisement Siamois/Burma. Sociable, bavard.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Yeux aqua."
+      },
+      {
+        "nom": " Burma (Burmese)",
+        "comportement": "Social, joueur, 'chat-chien'.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Yeux dorés/ambrés."
+      },
+      {
+        "nom": " Snowshoe",
+        "comportement": "Doux, intelligent, vocal modérément.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pattes blanches caractéristiques."
+      },
+      {
+        "nom": " Sphynx",
+        "comportement": "Extrêmement affectueux, cherchant la chaleur humaine.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Nécessite bains réguliers."
+      },
+      {
+        "nom": " Donskoy",
+        "comportement": "Chaleureux, intelligent, résistant au froid.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race russe, peau ridée."
+      },
+      {
+        "nom": " Peterbald",
+        "comportement": "Élégant, social, curieux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Corps oriental longiligne."
+      },
+      {
+        "nom": " Dwelf",
+        "comportement": "Hybride Mains Poistu + Peterbald. Sans pattes avant.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Besoin d'aide pour se déplacer."
+      },
+      {
+        "nom": " Lykoi",
+        "comportement": "Le 'chat-loup'. Curieux, social.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Perte de poils saisonnière."
+      },
+      {
+        "nom": " Nebelung",
+        "comportement": "Version longue du Russian Blue.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai bleu-gris long et soyeux."
+      },
+      {
+        "nom": " American Wirehair",
+        "comportement": "Calme, adaptable, très sain.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race rare, originaire de New York."
+      },
+      {
+        "nom": " Singapura",
+        "comportement": "Plus petite race domestique.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Yeux immenses, pelai ticked."
+      },
+      {
+        "nom": " Burmilla",
+        "comportement": "Croisement British Shorthair x Chinchilla Persian.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai silver shaded."
+      },
+      {
+        "nom": " Cheetoh",
+        "comportement": "Croisement Bengal x Ocicat.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Race très récente."
+      },
+      {
+        "nom": " Safari",
+        "comportement": "Hybride Lynx Roux x Bengal.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Nécessite un environnement spécialisé."
+      },
+      {
+        "nom": " Puma (Cougar)",
+        "comportement": "Grand félin sauvage.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Requiert un enclos spécifique."
+      },
+      {
+        "nom": " Léopard des Neiges",
+        "comportement": "Très grand, puissant.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Élevage rare en Europe."
+      },
+      {
+        "nom": " Jaguarondi",
+        "comportement": "Petit félin sauvage d'Amérique.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Espèce protégée dans de nombreux pays."
+      },
+      {
+        "nom": " Caracal",
+        "comportement": "Oreilles touffées, chasseur agile.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Besoin d'espace et de prédateurs pairs."
+      },
+      {
+        "nom": " Lynx Boréal",
+        "comportement": "Grand félin des régions froides.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "note": "Requiert un climat froid."
+      },
+      {
+        "nom": " Lynx Rouge",
+        "comportement": "Plus petit que le boréal, très agile.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Nature solitaire et territoriale."
+      },
+      {
+        "nom": " Geofroy's Cat",
+        "comportement": "Petit félin sud-américain.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Espèce protégée, réglementation variable."
+      },
+      {
+        "nom": " Margay",
+        "comportement": "Petit félin arboricole d'Amérique du Sud.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Nécessite des arbres et de la hauteur."
+      },
+      {
+        "nom": " Oncilla",
+        "comportement": "Plus petit félin d'Amérique du Sud.",
+        "dangerosite": 3,
+        "certificat_detention": true,
+        "note": "Espèce menacée, élevage rare."
+      },
+      {
+        "nom": " Pallas's Cat (Manul)",
+        "comportement": "Sauvage, peu sociable, vit dans les steppes asiatiques.",
+        "dangerosite": 3,
+        "certificat_detention": true,
+        "note": "Difficile à domestiquer."
+      },
+      {
+        "nom": " Lion d'Abyssinie",
+        "comportement": "Chat Abyssin avec une robe 'lion'.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Variété de l'Abyssin."
+      },
+      {
+        "nom": " Pixie-bob",
+        "comportement": "Ressemble à un petit lynx roux.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Queue courte naturelle."
+      },
+      {
+        "nom": " Serrade Petit",
+        "comportement": "Chat français de montagne.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "note": "Race rare, originaire du Massif Central."
+      },
+      {
+        "nom": " Elixir",
+        "comportement": "Race française récente, croisement Mains Poistu x Scottish Fold.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Oreilles pliées, pattes courtes."
+      },
+      {
+        "nom": " Kinkalow",
+        "comportement": "Croisement Mains Poistu x Munchkin.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Queue bouclée, pattes courtes."
+      },
+      {
+        "nom": " Lambkin",
+        "comportement": "Croisement Selkirk Rex x Munchkin.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai bouclé, pattes courtes."
+      },
+      {
+        "nom": " Minuet (Napoleon)",
+        "comportement": "Croisement Persan/Exotic x Munchkin.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Pelai long ou court."
+      },
+      {
+        "nom": " Sokoke",
+        "comportement": "Chat forestier du Kenya.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Pelai 'woodcat' unique."
+      },
+      {
+        "nom": " Somali",
+        "comportement": "Version longue de l'Abyssin.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "note": "Pelai buissonnant."
+      },
+      {
+        "nom": " Toybob",
+        "comportement": "Miniature du Bobtail Japonais.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race rare, taille minuscule."
+      },
+      {
+        "nom": " Walter's Pharaoh",
+        "comportement": "Chat égyptien ancien, blanc et noir.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "note": "Race très rare."
+      },
+      {
+        "nom": " Waldkatze (Wildcat)",
+        "comportement": "Chat sauvage européen.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "note": "Espèce protégée en Europe."
+      }
+    ]
+  },
+  "legendes": {
+    "dangerosite": {
+      "1": "Très doux, sédentaire, idéal pour appartement.",
+      "2": "Calme ou légèrement actif, bon compagnon familial.",
+      "3": "Actif, besoin de jeu et de stimulation.",
+      "4": "Énergique, potentiellement destructeur s'il s'ennuie, besoin d'espace.",
+      "5": "Hybride sauvage ou très puissant, besoin d'un environnement spécialisé."
+    },
+    "certificat_detention": {
+      "true": "Vérifier la réglementation locale (souvent F1-F3 pour les hybrides).",
+      "false": "Pas de certificat spécifique requis dans la plupart des pays européens."
+    }
+  }
+}

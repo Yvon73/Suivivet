@@ -109,6 +109,9 @@
                                         <div id="ficheRaceCategorieWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Catégorie :</strong> <span id="ficheRaceCategorie"></span></div>
                                         <div id="ficheRaceNiveauSoinWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Niveau de soin :</strong> <span id="ficheRaceNiveauSoin"></span></div>
                                         <div id="ficheRaceLegislationWrap" class="col-sm-6 col-lg-3 mb-1"><strong>Législation (France) :</strong> <span id="ficheRaceLegislation"></span></div>
+                                        <div id="ficheRaceComportementWrap" class="col-12 mb-1"><strong>Comportement :</strong> <span id="ficheRaceComportement"></span></div>
+                                        <div id="ficheRaceCertificatWrap" class="col-12 mb-1"><strong>Certificat de détention :</strong> <span id="ficheRaceCertificat"></span></div>
+                                        <div id="ficheRaceNoteWrap" class="col-12 mb-1"><strong>Note :</strong> <span id="ficheRaceNote"></span></div>
                                     </div>
                                     <p id="ficheRaceDescription" class="small mb-0 mt-1 fst-italic"></p>
                                 </div>
@@ -275,10 +278,11 @@
                         <input type="text" id="nouvelleRaceNom" class="form-control" maxlength="100" required>
                     </div>
                     <div class="mb-3">
-                        <label for="nouvelleRaceDangerosite" class="form-label">Degré de dangerosité</label>
-                        <select id="nouvelleRaceDangerosite" class="form-select">
-                            {% for valeur, libelle in niveaux_dangerosite %}
-                                <option value="{{ valeur }}">{{ libelle }}</option>
+                        <label for="nouvelleRaceEchelle" class="form-label">Degré de dangerosité</label>
+                        <select id="nouvelleRaceEchelle" class="form-select">
+                            <option value="">Non renseigné</option>
+                            {% for valeur, libelle in echelles_dangerosite %}
+                                <option value="{{ valeur }}">{{ valeur }} — {{ libelle }}</option>
                             {% endfor %}
                         </select>
                         <div class="form-text">
@@ -288,6 +292,22 @@
                     </div>
                     <p class="text-muted small mb-2">Informations complémentaires (facultatif)</p>
                     <div class="row g-3">
+                        <div class="col-12">
+                            <label for="nouvelleRaceCertificat" class="form-label small mb-1">Certificat de détention</label>
+                            <select id="nouvelleRaceCertificat" class="form-select form-select-sm">
+                                <option value="">Non renseigné</option>
+                                <option value="true">Requis</option>
+                                <option value="false">Non requis</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="nouvelleRaceComportement" class="form-label small mb-1">Comportement</label>
+                            <textarea id="nouvelleRaceComportement" class="form-control form-control-sm" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="nouvelleRaceNote" class="form-label small mb-1">Note</label>
+                            <input type="text" id="nouvelleRaceNote" class="form-control form-control-sm" maxlength="255">
+                        </div>
                         <div class="col-6">
                             <label for="nouvelleRaceOrigine" class="form-label small mb-1">Origine</label>
                             <input type="text" id="nouvelleRaceOrigine" class="form-control form-control-sm" maxlength="150">
@@ -526,6 +546,9 @@
                 groupe_fci: { valeur: document.getElementById('ficheRaceGroupeFci'), wrap: document.getElementById('ficheRaceGroupeFciWrap') },
                 niveau_soin: { valeur: document.getElementById('ficheRaceNiveauSoin'), wrap: document.getElementById('ficheRaceNiveauSoinWrap') },
                 legislation_france: { valeur: document.getElementById('ficheRaceLegislation'), wrap: document.getElementById('ficheRaceLegislationWrap') },
+                comportement: { valeur: document.getElementById('ficheRaceComportement'), wrap: document.getElementById('ficheRaceComportementWrap') },
+                certificat_detention_affiche: { valeur: document.getElementById('ficheRaceCertificat'), wrap: document.getElementById('ficheRaceCertificatWrap') },
+                note: { valeur: document.getElementById('ficheRaceNote'), wrap: document.getElementById('ficheRaceNoteWrap') },
             };
             var ficheRaceCategorieWrap = document.getElementById('ficheRaceCategorieWrap');
             var ficheRaceCategorie = document.getElementById('ficheRaceCategorie');
@@ -554,8 +577,8 @@
                 auMoinsUnChamp = auMoinsUnChamp || !!categorie;
                 ficheRaceDescription.textContent = race.description || '';
 
-                if (race.niveau_dangerosite && race.niveau_dangerosite !== 'NON_RENSEIGNE') {
-                    ficheRaceDangerosite.textContent = 'Dangerosité : ' + race.niveau_dangerosite_display;
+                if (race.echelle_dangerosite) {
+                    ficheRaceDangerosite.textContent = 'Dangerosité : ' + race.dangerosite_affichee;
                     ficheRaceDangerosite.className = 'alert alert-' + race.classe_dangerosite + ' py-1 px-2 mb-2 small fw-semibold';
                 } else {
                     ficheRaceDangerosite.classList.add('d-none');
@@ -563,7 +586,7 @@
 
                 // Rien d'autre qu'un nom de race à afficher (race ajoutée sans fiche
                 // détaillée) : pas besoin d'afficher un bloc vide.
-                ficheRace.classList.toggle('d-none', !auMoinsUnChamp && !race.description);
+                ficheRace.classList.toggle('d-none', !auMoinsUnChamp && !race.description && !race.echelle_dangerosite);
             }
 
             raceField.addEventListener('change', actualiserFicheRace);
@@ -644,7 +667,6 @@
             var modalEl = document.getElementById('modalNouvelleRace');
             var especeModalField = document.getElementById('nouvelleRaceEspece');
             var nomModalField = document.getElementById('nouvelleRaceNom');
-            var dangerositeModalField = document.getElementById('nouvelleRaceDangerosite');
             var erreursDiv = document.getElementById('nouvelleRaceErreurs');
             var boutonValider = document.getElementById('nouvelleRaceValider');
 
@@ -652,11 +674,11 @@
                 erreursDiv.classList.add('d-none');
                 erreursDiv.innerHTML = '';
                 nomModalField.value = '';
-                dangerositeModalField.value = 'NON_RENSEIGNE';
                 if (especeField.value) {
                     especeModalField.value = especeField.value;
                 }
-                ['nouvelleRaceOrigine', 'nouvelleRaceEsperanceVie', 'nouvelleRaceTailleMin',
+                ['nouvelleRaceEchelle', 'nouvelleRaceCertificat', 'nouvelleRaceComportement', 'nouvelleRaceNote',
+                    'nouvelleRaceOrigine', 'nouvelleRaceEsperanceVie', 'nouvelleRaceTailleMin',
                     'nouvelleRaceTailleMax', 'nouvelleRacePoidsMin', 'nouvelleRacePoidsMax',
                     'nouvelleRaceDescription'].forEach(function (id) {
                     document.getElementById(id).value = '';
@@ -688,10 +710,13 @@
                 var donnees = new URLSearchParams();
                 donnees.set('espece', especeModalField.value);
                 donnees.set('nom', nom);
-                donnees.set('niveau_dangerosite', dangerositeModalField.value);
                 // Fiche descriptive facultative : on n'envoie que les champs remplis,
                 // le formulaire côté serveur accepte l'absence de chacun d'eux.
                 [
+                    ['echelle_dangerosite', 'nouvelleRaceEchelle'],
+                    ['certificat_detention', 'nouvelleRaceCertificat'],
+                    ['comportement', 'nouvelleRaceComportement'],
+                    ['note', 'nouvelleRaceNote'],
                     ['origine', 'nouvelleRaceOrigine'],
                     ['esperance_vie', 'nouvelleRaceEsperanceVie'],
                     ['taille_min', 'nouvelleRaceTailleMin'],

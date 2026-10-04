@@ -32,23 +32,92 @@ class Robe(models.Model):
 
 
 class Race(models.Model):
-    class NiveauDangerosite(models.TextChoices):
-        NON_RENSEIGNE = 'NON_RENSEIGNE', 'Non renseigné'
-        AUCUNE = 'AUCUNE', 'Aucune'
-        MODEREE = 'MODEREE', 'Modérée'
-        ELEVEE = 'ELEVEE', 'Élevée'
+    class EchelleDangerosite(models.IntegerChoices):
+        # Échelle unique à 5 niveaux, commune à toutes les espèces : c'est elle
+        # qui donne sa couleur au bandeau (cf. classe_bootstrap_dangerosite).
+        # Vide = non renseigné.
+        NUL = 1, 'Nul'
+        FAIBLE = 2, 'Faible'
+        MOYENNE = 3, 'Moyenne'
+        ELEVE = 4, 'Élevé'
+        EXTREME = 5, 'Extrême'
+
+    # Ce que signifie chaque niveau dépend de l'espèce : légendes reprises
+    # des catalogues static/data/ (clé « legendes.dangerosite » de
+    # races_chats2.json, insectes.json, reptiles.json — qui couvre aussi les
+    # amphibiens — et arachnides.json), par code d'espèce. Une espèce absente
+    # d'ici (chien, oiseau...) n'affiche que le libellé du niveau.
+    _LEGENDES_REPTILES = {
+        1: "Inoffensif, manipulation facile.",
+        2: "Peut mordre/griffer si stressé.",
+        3: "Blessures possibles (morsure profonde, griffe).",
+        4: "Danger significatif (force, toxine).",
+        5: "Dangereux (espèce sauvage puissante).",
+    }
+    _LEGENDES_DANGEROSITE = {
+        'CHAT': {
+            1: "Très doux, sédentaire, idéal pour appartement.",
+            2: "Calme ou légèrement actif, bon compagnon familial.",
+            3: "Actif, besoin de jeu et de stimulation.",
+            4: "Énergique, potentiellement destructeur s'il s'ennuie, besoin d'espace.",
+            5: "Hybride sauvage ou très puissant, besoin d'un environnement spécialisé.",
+        },
+        'INSECTE': {
+            1: "Inoffensif, manipulation possible sans risque majeur.",
+            2: "Douleur modérée (piqûre/morsure), irritation locale.",
+            3: "Douleur intense, possible réaction allergique.",
+            4: "Venin puissant ou morsure forte nécessitant attention.",
+            5: "Dangereux pour l'homme (venin neurotoxique ou allergène).",
+        },
+        'REPTILE': _LEGENDES_REPTILES,
+        'BATRACIEN': _LEGENDES_REPTILES,
+        'ARACHNIDE': {
+            1: "Inoffensif, morsure comparable à une piqûre d'ortie ou d'abeille.",
+            2: "Douleur modérée, possible irritation locale.",
+            3: "Douleur intense, peut nécessiter des soins médicaux mineurs.",
+            4: "Venin significatif, nécessite une surveillance médicale.",
+            5: "Dangereux pour l'homme (venin puissant ou forte pression de mâchoire).",
+        },
+    }
+
+    # Idem pour le certificat de détention (clé « legendes.certificat_detention »).
+    _LEGENDES_CERTIFICAT_REPTILES = {
+        True: "Déclaration obligatoire ou Certificat de Capacité requis.",
+        False: "Pas de certificat spécifique requis pour le grand public.",
+    }
+    _LEGENDES_CERTIFICAT_DETENTION = {
+        'CHAT': {
+            True: "Vérifier la réglementation locale (souvent F1-F3 pour les hybrides).",
+            False: "Pas de certificat spécifique requis dans la plupart des pays européens.",
+        },
+        'INSECTE': {
+            True: ("Recommandé ou obligatoire (ex: abeilles souvent soumises à déclaration "
+                   "en mairie pour éviter les nuisances)."),
+            False: "Pas de certificat spécifique requis.",
+        },
+        'REPTILE': _LEGENDES_CERTIFICAT_REPTILES,
+        'BATRACIEN': _LEGENDES_CERTIFICAT_REPTILES,
+        'ARACHNIDE': {
+            True: "Recommandé ou obligatoire selon l'espèce et la région.",
+            False: "Pas de certificat spécifique requis (sauf si espèce protégée).",
+        },
+    }
 
     espece = models.ForeignKey(Espece, on_delete=models.PROTECT, related_name='races', verbose_name="Espèce")
     nom = models.CharField(max_length=100, verbose_name="Nom de la race")
-    niveau_dangerosite = models.CharField(
-        max_length=20,
-        choices=NiveauDangerosite.choices,
-        default=NiveauDangerosite.NON_RENSEIGNE,
+    echelle_dangerosite = models.PositiveSmallIntegerField(
+        null=True, blank=True,
+        choices=EchelleDangerosite.choices,
         verbose_name="Degré de dangerosité",
-        help_text=(
-            "Ne constitue pas une catégorisation légale."
-        ),
+        help_text="De 1 (nul) à 5 (extrême). Ne constitue pas une catégorisation légale.",
     )
+    certificat_detention = models.BooleanField(
+        null=True, blank=True,
+        verbose_name="Certificat de détention requis",
+        help_text="Vide si non renseigné.",
+    )
+    comportement = models.TextField(blank=True, verbose_name="Comportement")
+    note = models.CharField(max_length=255, blank=True, verbose_name="Note")
 
     # Fiche descriptive de la race, alimentée par le catalogue JSON
     # (static/data/races_*.json). Tous ces champs sont facultatifs : une race
@@ -107,12 +176,35 @@ class Race(models.Model):
         return self.nom
 
     def classe_bootstrap_dangerosite(self):
-        return {
-            self.NiveauDangerosite.NON_RENSEIGNE: 'secondary',
-            self.NiveauDangerosite.AUCUNE: 'success',
-            self.NiveauDangerosite.MODEREE: 'warning',
-            self.NiveauDangerosite.ELEVEE: 'danger',
-        }.get(self.niveau_dangerosite, 'secondary')
+        """Suffixe de classe `alert-*` du bandeau de dangerosité, une couleur
+        par niveau (classes `.alert-dangerosite-1` à `-5` de
+        static/css/style.css : vert, mauve, jaune, orange, rouge)."""
+        if not self.echelle_dangerosite:
+            return 'secondary'
+        return f'dangerosite-{self.echelle_dangerosite}'
+
+    def dangerosite_affichee(self):
+        """Libellé complet du bandeau de dangerosité : « Élevé — niveau 4/5 »,
+        suivi de la légende propre à l'espèce quand il y en a une. Chaîne vide
+        si non renseigné."""
+        if not self.echelle_dangerosite:
+            return ''
+        texte = f"{self.get_echelle_dangerosite_display()} — niveau {self.echelle_dangerosite}/5"
+        legende = self._LEGENDES_DANGEROSITE.get(self.espece.code, {}).get(self.echelle_dangerosite)
+        if legende:
+            texte += f" : {legende}"
+        return texte
+
+    def certificat_detention_affiche(self):
+        """« Requis — ... » / « Non requis — ... » (légende propre à l'espèce
+        quand il y en a une), chaîne vide si non renseigné."""
+        if self.certificat_detention is None:
+            return ''
+        texte = 'Requis' if self.certificat_detention else 'Non requis'
+        legende = self._LEGENDES_CERTIFICAT_DETENTION.get(self.espece.code, {}).get(self.certificat_detention)
+        if legende:
+            texte += f" — {legende}"
+        return texte
 
     def taille_affichee(self):
         return self._fourchette(self.taille_min, self.taille_max, 'cm')
@@ -137,6 +229,7 @@ class Race(models.Model):
             or self.groupe_fci or self.categorie or self.sous_categorie
             or self.nom_scientifique or self.niveau_soin or self.legislation_france
             or self.prix_moyen or self.infos_complementaires
+            or self.comportement or self.note or self.certificat_detention is not None
         )
 
     def infos_complementaires_lisibles(self):
@@ -171,9 +264,13 @@ class Race(models.Model):
             'id': self.pk,
             'nom': self.nom,
             'espece_id': self.espece_id,
-            'niveau_dangerosite': self.niveau_dangerosite,
-            'niveau_dangerosite_display': self.get_niveau_dangerosite_display(),
             'classe_dangerosite': self.classe_bootstrap_dangerosite(),
+            'dangerosite_affichee': self.dangerosite_affichee(),
+            'echelle_dangerosite': self.echelle_dangerosite,
+            'certificat_detention': self.certificat_detention,
+            'certificat_detention_affiche': self.certificat_detention_affiche(),
+            'comportement': self.comportement,
+            'note': self.note,
             'origine': self.origine,
             'taille': self.taille_affichee(),
             'poids': self.poids_affiche(),

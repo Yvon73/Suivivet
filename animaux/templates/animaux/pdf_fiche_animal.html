@@ -85,7 +85,10 @@
             {% if animal.race.categorie %}<tr><th>Catégorie</th><td>{{ animal.race.categorie }}{% if animal.race.sous_categorie %} / {{ animal.race.sous_categorie }}{% endif %}</td></tr>{% endif %}
             {% if animal.race.niveau_soin %}<tr><th>Niveau de soin</th><td>{{ animal.race.niveau_soin }}</td></tr>{% endif %}
             {% if animal.race.legislation_france %}<tr><th>Législation (France)</th><td>{{ animal.race.legislation_france }}</td></tr>{% endif %}
-            {% if animal.race.niveau_dangerosite != 'NON_RENSEIGNE' %}<tr><th>Degré de dangerosité</th><td>{{ animal.race.get_niveau_dangerosite_display }}</td></tr>{% endif %}
+            {% if animal.race.echelle_dangerosite %}<tr><th>Degré de dangerosité</th><td>{{ animal.race.dangerosite_affichee }}</td></tr>{% endif %}
+            {% if animal.race.certificat_detention_affiche %}<tr><th>Certificat de détention</th><td>{{ animal.race.certificat_detention_affiche }}</td></tr>{% endif %}
+            {% if animal.race.comportement %}<tr><th>Comportement</th><td>{{ animal.race.comportement }}</td></tr>{% endif %}
+            {% if animal.race.note %}<tr><th>Note</th><td>{{ animal.race.note }}</td></tr>{% endif %}
             {% if animal.race.description %}<tr><th>Description</th><td>{{ animal.race.description }}</td></tr>{% endif %}
         </table>
     </div>

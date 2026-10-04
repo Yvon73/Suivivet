@@ -1,0 +1,193 @@
+{
+  "metadata": {
+    "title": "Liste des Insectes NAC - Comportement, Dangerosité et Durée de Vie",
+    "description": "Données sur les insectes d'élevage courants : Coléoptères, Phasmodes, Orthoptères, Hyménoptères, Lépidoptères.",
+    "version": "1.0",
+    "date_created": "2026-10-03"
+  },
+  "categories": {
+    "coleoperes": [
+      {
+        "nom": "Dynastes hercules (Hercule)",
+        "comportement": "Lent, terrestre, mâle avec grandes cornes. Ne vole pas beaucoup.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Adulte: 2-3 mois / Larve: 1-2 ans",
+        "note": "Peut pincer avec ses mandibules si manipulé."
+      },
+      {
+        "nom": "Megasoma elephas (Éléphant)",
+        "comportement": "Grand scarabée, lent, attiré par la lumière.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Adulte: 1-2 mois / Larve: 1-2 ans",
+        "note": "Très impressionnant visuellement."
+      },
+      {
+        "nom": "Goliathus goliatus (Goliath)",
+        "comportement": "Puissant, vol rapide et bruyant.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Adulte: 3-4 mois / Larve: 1-2 ans",
+        "note": "Pince fermement avec ses mandibules."
+      },
+      {
+        "nom": "Tenebrio molitor (Ténétrion/Ver de farine)",
+        "comportement": "Larve terrestre, mangeur de céréales.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Cycle complet: 6-8 mois",
+        "note": "Nourriture vivante pour autres NAC, mais aussi élevé comme animal."
+      },
+      {
+        "nom": "Zophobas morio (Biomasse/Géant)",
+        "comportement": "Plus grand que le Ténétrion, plus vorace.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Cycle complet: 6-8 mois",
+        "note": "Ne mord pas mais peut s'accrocher avec ses pattes."
+      }
+    ],
+    "phasmodes_phasmatodea": [
+      {
+        "nom": "Carausius obscurus (Phasme Gris)",
+        "comportement": "Imitation parfaite de brindilles, très calme.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "6-9 mois",
+        "note": "Parfait débutant, ne sent pas mauvais."
+      },
+      {
+        "nom": "Pharnacia furcifera (Phasme Fourchu)",
+        "comportement": "Terrestre, fuit rapidement.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "6-9 mois",
+        "note": "Ailes fonctionnelles chez le mâle seulement."
+      },
+      {
+        "nom": "Haaniella erroris (Phaspe Épineux)",
+        "comportement": "Terrestre, caméléon-like, se déplace lentement.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "12-15 mois",
+        "note": "Camouflage exceptionnel."
+      },
+      {
+        "nom": "Maculatosaurus schultei (Dragon de Komodo miniature)",
+        "comportement": "Arboricole, vif, coloré.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "6-9 mois",
+        "note": "Souvent vendu sous le nom de 'Dragon de feu'."
+      }
+    ],
+    "orthopteres": [
+      {
+        "nom": "Blaberus craniifer (Blatte Géante du Suriname)",
+        "comportement": "Nocturne, fuyant, social (vit en groupe).",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "12-18 mois",
+        "note": "Ne sent pas fort, inoffensive."
+      },
+      {
+        "nom": "Gromphadorhina portentosa (Blatte Malgache)",
+        "comportement": "Grande, lente, émet un sifflement en cas de menace.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "12-18 mois",
+        "note": "Pas d'ailes, mâle plus grand."
+      },
+      {
+        "nom": "Locuste migratoria (Sauterelle Migratrice)",
+        "comportement": "Vive, sauteuse, grégaire.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "3-4 mois",
+        "note": "Peut manger ses congénères si stressée."
+      },
+      {
+        "nom": "Gryllus assimilis (Criquet Grillon)",
+        "comportement": "Vocal (chant nocturne), actif.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "3-4 mois",
+        "note": "Chant caractéristique produit par stridulation."
+      }
+    ],
+    "hymenopteres": [
+      {
+        "nom": "Apis mellifera (Abeille domestique)",
+        "comportement": "Social, butineuse, complexe.",
+        "dangerosite": 2,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "Ouvrière: 6 semaines / Reine: 2-3 ans",
+        "note": "Nécessite un rucher. Piqûre mortelle pour l'abeille après usage."
+      },
+      {
+        "nom": "Polistes dominula (Frelon Vespide)",
+        "comportement": "Social, construit des nids en papier.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Colonie: 1 an / Reine: 1 an",
+        "note": "Piqûre douloureuse, défensif envers les intrus."
+      },
+      {
+        "nom": "Vespa crabro (Frelon Européen)",
+        "comportement": "Prédateur, territorial.",
+        "dangerosite": 4,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Colonie: 1 an / Reine: 1 an",
+        "note": "Piqûre puissante et douloureuse."
+      }
+    ],
+    "lepidopteres_and_other": [
+      {
+        "nom": "Attacus atlas (Papillon Atlas)",
+        "comportement": "Grand papillon de nuit, adulte ne mange pas.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Adulte: 1-2 semaines / Chrysalide: 3-6 mois",
+        "note": "Envergure jusqu'à 25 cm."
+      },
+      {
+        "nom": "Calpodes ethlius (Phasmo-Lépidoptère)",
+        "comportement": "Larve ressemblant à un phasme, puis chrysalide.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Cycle: 6-9 mois",
+        "note": "Papillon de jour."
+      },
+      {
+        "nom": "Manduca sexta (Sphinx Tigre)",
+        "comportement": "Larve verte rayée, vol rapide.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Cycle: 3-4 mois",
+        "note": "Larve comestible pour certains reptiles."
+      },
+      {
+        "nom": "Mantis religiosa (Mante Religieuse)",
+        "comportement": "Prédateur embusqué, cannibale potentiel.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "Adulte: 6-12 mois",
+        "note": "Peut mordre si manipulée."
+      }
+    ]
+  },
+  "legendes": {
+    "dangerosite": {
+      "1": "Inoffensif, manipulation possible sans risque majeur.",
+      "2": "Douleur modérée (piqûre/morsure), irritation locale.",
+      "3": "Douleur intense, possible réaction allergique.",
+      "4": "Venin puissant ou morsure forte nécessitant attention.",
+      "5": "Dangereux pour l'homme (venin neurotoxique ou allergène)."
+    },
+    "certificat_detention": {
+      "true": "Recommandé ou obligatoire (ex: abeilles souvent soumises à déclaration en mairie pour éviter les nuisances).",
+      "false": "Pas de certificat spécifique requis."
+    }
+  }
+}

@@ -29,8 +29,9 @@ class RobeAdmin(admin.ModelAdmin):
 
 @admin.register(Race)
 class RaceAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'espece', 'categorie', 'origine', 'esperance_vie', 'niveau_dangerosite')
-    list_filter = ('espece', 'categorie', 'niveau_dangerosite')
+    list_display = ('nom', 'espece', 'categorie', 'origine', 'esperance_vie',
+                    'echelle_dangerosite', 'certificat_detention')
+    list_filter = ('espece', 'categorie', 'echelle_dangerosite', 'certificat_detention')
     search_fields = ('nom', 'nom_scientifique', 'origine')
 
 

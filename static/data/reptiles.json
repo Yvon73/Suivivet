@@ -1,0 +1,284 @@
+{
+  "metadata": {
+    "title": "Liste Complète des Reptiles NAC - Avec Durée de Vie",
+    "description": "Reptiles et Amphibiens NAC avec comportement, dangerosité, réglementation et espérance de vie.",
+    "version": "2.0"
+  },
+  "categories": {
+    "squamates_lizards": [
+      {
+        "nom": "Gecko Lézard (Phelsuma madagascariensis)",
+        "famille": "Gekkonidae",
+        "comportement": "Diurne, arboricole, doux.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans",
+        "note": "Besoin UVB strict."
+      },
+      {
+        "nom": "Caméléon Panthère (Furcifer pardalis)",
+        "famille": "Chamaeleonidae",
+        "comportement": "Solitaire, territorial.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "7-10 ans",
+        "note": "Très sensible à l'humidité."
+      },
+      {
+        "nom": "Iguan Vert (Chlorocercus iguana)",
+        "famille": "Iguanidae",
+        "comportement": "Herbivore, actif.",
+        "dangerosite": 3,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans",
+        "note": "Poids important (>1kg)."
+      },
+      {
+        "nom": "Dragón Barbudo (Pogona vitticeps)",
+        "famille": "Agamidae",
+        "comportement": "Diurne, calme.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "10-15 ans",
+        "note": "Excellent débutant."
+      },
+      {
+        "nom": "Urode à Gorge Bleue (Halsbergia cyanogularis)",
+        "famille": "Agamidae",
+        "comportement": "Diurne, vif.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "10-15 ans",
+        "note": "Peut mordre."
+      },
+      {
+        "nom": "Monitor Géant (Varanus exanthematicus)",
+        "famille": "Varanidae",
+        "comportement": "Actif, prédateur.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "15-20 ans",
+        "note": "Morsure puissante."
+      },
+      {
+        "nom": "Scinque Triкольор (Tiliqua scincoides)",
+        "famille": "Scincidae",
+        "comportement": "Terrestre, lent.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "20-30 ans",
+        "note": "Longévité élevée."
+      },
+      {
+        "nom": "Gecko Tarentte (Eublepharis macularius)",
+        "famille": "Eublepharidae",
+        "comportement": "Nocturne, docile.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans",
+        "note": "Idéal débutant."
+      }
+    ],
+    "squamates_snakes": [
+      {
+        "nom": "Couleuvre d'Esculape (Zamenis longissimus)",
+        "famille": "Colubridae",
+        "comportement": "Inoffensive, fuyante.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans",
+        "note": "Idéale débutant."
+      },
+      {
+        "nom": "Python Roi (Liasis elaps)",
+        "famille": "Boidae",
+        "comportement": "Calme, constrictor.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "20-30 ans",
+        "note": "Régime de rongeurs."
+      },
+      {
+        "nom": "Boa Constrictor (Boa imperator)",
+        "famille": "Boidae",
+        "comportement": "Puissant, lourd.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "20-30 ans",
+        "note": "Peut atteindre 3-4 mètres."
+      },
+      {
+        "nom": "Cobra Royal (Ophiophagus hannah)",
+        "famille": "Elapidae",
+        "comportement": "Venimeux, intelligent.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "10-20 ans",
+        "note": "Nécessite enclos sécurisé."
+      },
+      {
+        "nom": "Anaconda Vert (Eunectes murinus)",
+        "famille": "Boidae",
+        "comportement": "Aquatique, massif.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "20-30 ans",
+        "note": "Grand bassin nécessaire."
+      },
+      {
+        "nom": "Python Bali (Morelia bredi)",
+        "famille": "Pythonidae",
+        "comportement": "Arboricole, calme.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-25 ans",
+        "note": "Vivipare."
+      }
+    ],
+    "testudines_tortoises_and_turtles": [
+      {
+        "nom": "Tortue Grecque (Testudo graeca)",
+        "famille": "Testudinidae",
+        "comportement": "Herbivore, terrestre.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "50-80 ans",
+        "note": "Espèce protégée en Europe."
+      },
+      {
+        "nom": "Tortue d'Hermann (Testudo hermanni)",
+        "famille": "Testudinidae",
+        "comportement": "Herbivore, terrestre.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "50-80 ans",
+        "note": "Proche de Testudo graeca."
+      },
+      {
+        "nom": "Tortue à Oreilles Rouges (Trachemys scripta)",
+        "famille": "Emydidae",
+        "comportement": "Aquatique, omnivore.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "20-30 ans",
+        "note": "Espèce invasive courante."
+      },
+      {
+        "nom": "Cistude d'Europe (Emys orbicularis)",
+        "famille": "Emydidae",
+        "comportement": "Aquatique, prédatrice jeune.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "30-50 ans",
+        "note": "Espèce native européenne."
+      },
+      {
+        "nom": "Tortue Moelleuse (Trionyx ferox)",
+        "famille": "Trionychidae",
+        "comportement": "Aquatique, rapide.",
+        "dangerosite": 2,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "20-30 ans",
+        "note": "Becs coupants."
+      },
+      {
+        "nom": "Tortue Geochelone (Astrochelys yniphora)",
+        "famille": "Testudinidae",
+        "comportement": "Terrestre, endémique Madagascar.",
+        "dangerosite": 1,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "50-70 ans",
+        "note": "Espèce menacée."
+      }
+    ],
+    "crocodilians": [
+      {
+        "nom": "Alligator d'Amérique (Alligator mississippiensis)",
+        "famille": "Alligatoridae",
+        "comportement": "Prédateur, aquatique.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "35-50 ans",
+        "note": "Croissance rapide."
+      },
+      {
+        "nom": "Caïman Nain (Caiman latirostris)",
+        "famille": "Alligatoridae",
+        "comportement": "Aquatique, social.",
+        "dangerosite": 4,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "20-30 ans",
+        "note": "Plus petit que l'alligator."
+      },
+      {
+        "nom": "Crocodile de Nile (Crocodylus niloticus)",
+        "famille": "Crocodylidae",
+        "comportement": "Prédateur apex.",
+        "dangerosite": 5,
+        "certificat_detention": true,
+        "duree_vie_moyenne": "50-70 ans",
+        "note": "Exotique, nécessite certificat."
+      }
+    ],
+    "amphibians": [
+      {
+        "nom": "Axolotl (Ambystoma mexicanum)",
+        "famille": "Ambystomatidae",
+        "comportement": "Aquatique, néoténique.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "10-15 ans",
+        "note": "Eau froide nécessaire (<18°C)."
+      },
+      {
+        "nom": "Triton Palmé (Triturus vulgaris)",
+        "famille": "Plethodontidae",
+        "comportement": "Amphibien, semi-aquatique.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "10-15 ans",
+        "note": "Peau sensible."
+      },
+      {
+        "nom": "Rainette Verte (Hyla arborea)",
+        "famille": "Hylidae",
+        "comportement": "Arboreur, coléoptérophage.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "5-10 ans",
+        "note": "Humidité requise."
+      },
+      {
+        "nom": "Grenouille Torpille (Dendrobates tinctorius)",
+        "famille": "Dendrobatidae",
+        "comportement": "Colorée, toxique.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "5-10 ans",
+        "note": "Poison irritant."
+      },
+      {
+        "nom": "Salamandre Tachetée (Ambystoma maculatum)",
+        "famille": "Ambystomatidae",
+        "comportement": "Nocturne, terrestre/aquatique.",
+        "dangerosite": 1,
+        "certificat_detention": false,
+        "duree_vie_moyenne": "15-20 ans",
+        "note": "Bellissime à observer."
+      }
+    ]
+  },
+  "legendes": {
+    "dangerosite": {
+      "1": "Inoffensif, manipulation facile.",
+      "2": "Peut mordre/griffer si stressé.",
+      "3": "Blessures possibles (morsure profonde, griffe).",
+      "4": "Danger significatif (force, toxine).",
+      "5": "Dangereux (espèce sauvage puissante)."
+    },
+    "certificat_detention": {
+      "true": "Déclaration obligatoire ou Certificat de Capacité requis.",
+      "false": "Pas de certificat spécifique requis pour le grand public."
+    }
+  }
+}
