@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var supprEl = ligneEl.querySelector('input[name$="-DELETE"]');
             if (supprEl && supprEl.checked) { return; }
             var prixTotalEl = ligneEl.querySelector('.ligne-prix-total');
-            if (prixTotalEl) { total += parseFloat(prixTotalEl.textContent) || 0; }
+            if (prixTotalEl) { total += parseFloat(prixTotalEl.textContent.replace(',', '.')) || 0; }
         });
         champMontant.value = total.toFixed(2);
     }
