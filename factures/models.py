@@ -126,14 +126,14 @@ class Facture(models.Model):
         filtre = {'utilisateur__in': comptes_accessibles(utilisateur), 'date__year': annee, 'date__month': mois}
         if type_depense:
             filtre['type_depense'] = type_depense
-        return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or 0
+        return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or Decimal('0.00')
 
     @classmethod
     def depenses_annuelles(cls, utilisateur, annee, type_depense=None):
         filtre = {'utilisateur__in': comptes_accessibles(utilisateur), 'date__year': annee}
         if type_depense:
             filtre['type_depense'] = type_depense
-        return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or 0
+        return cls.objects.filter(**filtre).aggregate(Sum('montant'))['montant__sum'] or Decimal('0.00')
 
     @classmethod
     def cout_revient_animal(cls, animal, annee, mois=None):

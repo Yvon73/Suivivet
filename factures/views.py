@@ -89,6 +89,14 @@ class FactureListView(LoginRequiredMixin, ListView):
         context['depenses_mensuelles_alimentaires'] = Facture.depenses_mensuelles(utilisateur, annee, mois, 'ALIMENTAIRE')
         context['depenses_annuelles_veterinaires'] = Facture.depenses_annuelles(utilisateur, annee, 'VETERINAIRE')
         context['depenses_annuelles_alimentaires'] = Facture.depenses_annuelles(utilisateur, annee, 'ALIMENTAIRE')
+        # Totaux calculés ici : le filtre de gabarit `add` convertit d'abord ses
+        # opérandes en entiers, ce qui tronquait les centimes.
+        context['depenses_mensuelles_total'] = (
+            context['depenses_mensuelles_veterinaires'] + context['depenses_mensuelles_alimentaires']
+        )
+        context['depenses_annuelles_total'] = (
+            context['depenses_annuelles_veterinaires'] + context['depenses_annuelles_alimentaires']
+        )
 
         return context
 

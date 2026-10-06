@@ -263,6 +263,25 @@ class VentilationFactureTest(TestCase):
         self.assertEqual(cout1, Decimal('5.00'))
         self.assertEqual(cout2, Decimal('5.00'))
 
+    def test_liste_totaux_depenses_sans_facture(self):
+        """Sans aucune facture, les totaux restent des montants à deux
+        décimales (0.00), pas l'entier 0."""
+        response = self.client.get(reverse('factures:facture_list'))
+        self.assertEqual(response.status_code, 200)
+        for cle in ('depenses_mensuelles_total', 'depenses_annuelles_total'):
+            self.assertEqual(str(response.context[cle]), '0.00')
+
+    def test_liste_totaux_depenses_conservent_les_centimes(self):
+        aujourdhui = date.today()
+        for type_depense, montant in (('VETERINAIRE', '12.50'), ('ALIMENTAIRE', '3.25')):
+            Facture.objects.create(
+                animal=self.animal1, utilisateur=self.user, type_depense=type_depense, titre='TEST_TEMP',
+                montant=Decimal(montant), date=aujourdhui, fichier=_fichier_test(),
+            )
+        response = self.client.get(reverse('factures:facture_list'))
+        self.assertEqual(response.context['depenses_mensuelles_total'], Decimal('15.75'))
+        self.assertEqual(response.context['depenses_annuelles_total'], Decimal('15.75'))
+
 
 class FacturePartageFoyerTest(TestCase):
     """Un membre du foyer voit les factures des autres membres, et le coût de
