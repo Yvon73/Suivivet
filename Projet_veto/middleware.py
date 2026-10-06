@@ -16,7 +16,7 @@ class NoIndexMiddleware:
 
 # Aucune origine externe : toutes les bibliothèques front-end (Bootstrap,
 # Bootstrap Icons, FullCalendar, DataTables + sa traduction fr-FR.json,
-# jQuery, Tom Select, police Atkinson Hyperlegible) sont hébergées dans
+# jQuery, Tom Select, htmx, police Atkinson Hyperlegible) sont hébergées dans
 # static/vendor/ (cf. son README.md) plutôt que chargées depuis un CDN. Si
 # une ressource externe devient un jour indispensable, ajouter son domaine
 # à la seule directive concernée plutôt que d'élargir default-src.

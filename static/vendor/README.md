@@ -13,6 +13,7 @@ elle-même (WhiteNoise en production), ce qui permet une CSP limitée à `'self'
 | `datatables/`            | DataTables + Bootstrap 5 | 1.13.6  | MIT         | cdn.datatables.net (+ `plug-ins/i18n/fr-FR.json`) |
 | `jquery/`                | jQuery                   | 3.7.0   | MIT         | code.jquery.com                                   |
 | `tom-select/`            | Tom Select               | 2.6.2   | Apache-2.0  | npm `tom-select/dist`                             |
+| `htmx/`                  | htmx                     | 2.0.11  | 0BSD        | npm `htmx.org/dist` (`htmx.min.js`)               |
 | `atkinson-hyperlegible/` | Atkinson Hyperlegible    | 400     | SIL OFL 1.1 | npm `@fontsource/atkinson-hyperlegible@5`         |
 
 Fichiers téléchargés tels quels, à une exception près : les commentaires

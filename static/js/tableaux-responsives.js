@@ -16,8 +16,9 @@
  * extra_js de templates/base.html) : les cellules sont étiquetées pendant que
  * toutes les lignes sont encore dans le DOM, avant que DataTables n'en
  * retire celles des pages suivantes. Les lignes ajoutées plus tard (ligne
- * « aucun élément » de DataTables, lignes de ventilation ajoutées dans
- * factures/form.html) sont étiquetées à la volée.
+ * « aucun élément » de DataTables) sont étiquetées à la volée, de même que
+ * les tableaux entiers insérés après coup par htmx (zone de ventilation de
+ * factures/form.html, redessinée par le serveur à chaque action).
  */
 (function () {
     'use strict';
@@ -61,7 +62,7 @@
 
     function preparerTableau(table) {
         var intitules = intitulesColonnes(table);
-        if (intitules.length < NB_COLONNES_MIN) {
+        if (intitules.length < NB_COLONNES_MIN || table.classList.contains('tableau-empilable')) {
             return;
         }
         table.classList.add('tableau-empilable');
@@ -95,4 +96,15 @@
     }
 
     document.querySelectorAll('table.table').forEach(preparerTableau);
+
+    document.addEventListener('htmx:load', function (evenement) {
+        var racine = evenement.detail.elt;
+        if (!racine || !racine.querySelectorAll) {
+            return;
+        }
+        if (racine.matches('table.table')) {
+            preparerTableau(racine);
+        }
+        racine.querySelectorAll('table.table').forEach(preparerTableau);
+    });
 })();

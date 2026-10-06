@@ -1,0 +1,14 @@
+{# Réponse de views.ventilation_facture à une requête HTMX. #}
+{% if recalcul %}
+    {% for ligne in lignes %}
+        {% include 'factures/partials/ligne_prix_total.html' with oob=True %}
+        {% include 'factures/partials/ligne_dernier_prix.html' with oob=True %}
+    {% endfor %}
+{% else %}
+    {% include 'factures/partials/ventilation.html' %}
+{% endif %}
+<div id="montantChamp" hx-swap-oob="true">
+    <input type="number" name="montant" id="id_montant" class="form-control" step="0.01"
+           value="{{ total_str }}" {% if verrouillee %}disabled{% else %}readonly{% endif %}>
+    <small class="text-muted">Calculé automatiquement à partir des lignes.</small>
+</div>

@@ -1,0 +1,134 @@
+{# Zone de ventilation, entièrement pilotée par HTMX (cf. factures/ventilation.py). #}
+{# Une saisie dans la zone déclenche un simple recalcul (hx-swap="none" : seuls #}
+{# les totaux reviennent, en hx-swap-oob, pour ne jamais remplacer le champ en #}
+{# cours de frappe) ; les boutons, eux, redessinent toute la zone. #}
+<div id="zoneVentilation" class="mt-3"
+     hx-post="{{ url_ventilation }}"
+     hx-trigger="input delay:300ms, change"
+     hx-target="#zoneVentilation"
+     hx-swap="none"
+     hx-include="#zoneVentilation"
+     hx-sync="#zoneVentilation:replace"
+     hx-params="not fichier"
+     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <input type="hidden" name="ventiler" id="id_ventiler" value="{% if ventiler %}1{% else %}0{% endif %}">
+
+    {% if not ventiler %}
+        <button type="button" class="btn btn-outline-primary"
+                hx-post="{{ url_ventilation }}" hx-vals='{"action": "ventiler"}' hx-swap="outerHTML">
+            <i class="bi bi-list-check"></i> Ventiler la facture
+        </button>
+    {% else %}
+        <div class="card" id="carteVentilation">
+            <div class="card-header">
+                <i class="bi bi-list-check"></i> Ventilation de la facture
+            </div>
+            <div class="card-body">
+                {{ formset.management_form }}
+                {% if afficher_erreurs and formset.non_form_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in formset.non_form_errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle" id="tableLignes">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 220px;">Désignation</th>
+                                <th style="width: 110px;">Quantité</th>
+                                <th style="width: 190px;">Prix unitaire (€)</th>
+                                <th style="width: 110px;">Prix total (€)</th>
+                                <th style="min-width: 180px;">Animal concerné</th>
+                                <th style="width: 60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpsLignes">
+                            {% for ligne in lignes %}
+                                {% with ligne_form=ligne.form %}
+                                    <tr class="ligne-row">
+                                        <td>
+                                            <div class="input-group input-group-sm">
+                                                {{ ligne_form.designation }}
+                                                {% if not ligne.enregistree %}
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                            title="Ajouter une désignation absente de la liste"
+                                                            data-bs-toggle="collapse"
+                                                            data-bs-target="#nouvelleDesignation-{{ ligne.index }}"
+                                                            aria-controls="nouvelleDesignation-{{ ligne.index }}"
+                                                            aria-expanded="{% if ligne.erreurs_designation or ligne.nouvelle_designation %}true{% else %}false{% endif %}">
+                                                        <i class="bi bi-plus-lg"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                            {% if afficher_erreurs %}
+                                                {% for error in ligne_form.designation.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                            {% endif %}
+                                            {% if not ligne.enregistree %}
+                                                {# Rattaché à #formDesignation (hors du formulaire de facture) : #}
+                                                {# Entrée y crée la désignation au lieu d'enregistrer la facture. #}
+                                                <div class="collapse mt-1{% if ligne.erreurs_designation or ligne.nouvelle_designation %} show{% endif %}"
+                                                     id="nouvelleDesignation-{{ ligne.index }}">
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" class="form-control" form="formDesignation"
+                                                               name="nouvelle_designation-{{ ligne.index }}"
+                                                               value="{{ ligne.nouvelle_designation }}" maxlength="200"
+                                                               placeholder="Nouvelle désignation" aria-label="Nouvelle désignation">
+                                                        <button type="submit" class="btn btn-primary" form="formDesignation"
+                                                                name="ligne" value="{{ ligne.index }}">
+                                                            Ajouter
+                                                        </button>
+                                                    </div>
+                                                    {% for erreur in ligne.erreurs_designation %}<div class="text-danger small">{{ erreur }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ ligne_form.quantite }}
+                                            {% if afficher_erreurs %}
+                                                {% for error in ligne_form.quantite.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ ligne_form.prix_unitaire }}
+                                            {% include 'factures/partials/ligne_dernier_prix.html' %}
+                                            {% if afficher_erreurs %}
+                                                {% for error in ligne_form.prix_unitaire.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% include 'factures/partials/ligne_prix_total.html' %}
+                                        </td>
+                                        <td>
+                                            {{ ligne_form.cible }}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if ligne.enregistree %}
+                                                <div class="form-check">
+                                                    {{ ligne_form.DELETE }}
+                                                    <label class="form-check-label small" for="{{ ligne_form.DELETE.id_for_label }}">Suppr.</label>
+                                                </div>
+                                            {% else %}
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        title="Retirer cette ligne" aria-label="Retirer cette ligne"
+                                                        hx-post="{{ url_ventilation }}"
+                                                        hx-vals='{"action": "retirer", "ligne": "{{ ligne.index }}"}'
+                                                        hx-swap="outerHTML">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            {% endif %}
+                                            {% for hidden in ligne_form.hidden_fields %}{{ hidden }}{% endfor %}
+                                        </td>
+                                    </tr>
+                                {% endwith %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm"
+                        hx-post="{{ url_ventilation }}" hx-vals='{"action": "ajouter"}' hx-swap="outerHTML">
+                    <i class="bi bi-plus-lg"></i> Ajouter une ligne
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>

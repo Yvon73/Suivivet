@@ -145,6 +145,16 @@ hosting the public homepage:
   one names it directly, plus an equal share (÷ total animal count) of "shared" costs — `pour_tous_les_animaux`
   lines and non-ventilated invoices with no animal at all. Surfaced on the animal detail page (monthly +
   annual) and as an annual-only column on the global animal list.
+  The create/update form has **no JavaScript of its own**: it is driven by htmx (loaded only by
+  `factures/form.html`). Every interaction in the ventilation zone (`factures/partials/ventilation.html`)
+  posts the current formset state to `ventilation_facture` (`factures:facture_ventilation`, with or without
+  a `pk`), and `factures/ventilation.py` does what the old inline script did — line totals, invoice total,
+  last-price comparison, adding/removing/renumbering lines, creating a `Designation` — then returns HTML.
+  Typing triggers a recalculation that only sends back the totals as `hx-swap-oob` fragments (never the
+  input being typed in); buttons re-render the whole zone. Nothing but a new `Designation` is saved there —
+  the invoice and its lines are still saved by the normal form POST. The CSP has no `'unsafe-eval'`, so
+  don't use htmx features that evaluate code (`hx-on`, `hx-vals='js:…'`, `hx-trigger` filters like
+  `[key=='Enter']`).
 - **documents** — `Document` + `TypeDocument`, generic file attachments per animal.
 
 `Projet_veto_1` is an earlier, monolithic scaffold (same models duplicated in one app) that predates the
@@ -157,7 +167,7 @@ Views are Django class-based views (`ListView`/`DetailView`/`CreateView`/`Update
 gated with `LoginRequiredMixin`. Each app follows the same template layout:
 `<app>/templates/<app>/{liste,detail,form,confirm_delete}.html`, all extending the shared
 `templates/base.html` (Bootstrap 5 + DataTables, plus `static/css/style.css`). **No CDN**: every front-end
-library (Bootstrap, Bootstrap Icons, DataTables + its `fr-FR.json`, jQuery, FullCalendar, Tom Select, the
+library (Bootstrap, Bootstrap Icons, DataTables + its `fr-FR.json`, jQuery, FullCalendar, Tom Select, htmx, the
 Atkinson Hyperlegible font) is self-hosted under `static/vendor/` (versions/licences in its `README.md`), and
 the CSP in `Projet_veto/middleware.py` allows `'self'` only — add new libraries there too, never a CDN URL.
 A page-specific library's CSS goes in the `vendor_css` block (before `style.css`, which overrides some of

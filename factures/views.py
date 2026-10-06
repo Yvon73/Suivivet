@@ -1,41 +1,53 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.http import FileResponse, Http404, JsonResponse
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
-from django.views.decorators.http import require_GET, require_POST
+from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse, reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from datetime import datetime
 from accueil.utils import comptes_accessibles
 from animaux.models import Animal
-from .models import Facture, Designation
-from .forms import FactureForm, DesignationForm, LigneFactureFormSet
+from .models import Facture
+from .forms import FactureForm, LigneFactureFormSet
+from .ventilation import PREFIXE, ajouter_ligne, contexte_lignes, creer_designations, retirer_ligne
 
 
 @login_required
 @require_POST
-def ajouter_designation_ajax(request):
-    """Crée une nouvelle désignation depuis la modale du formulaire de
-    ventilation, et la renvoie en JSON pour l'insérer directement dans le
-    select côté client (même principe que les modales Vétérinaire/Vaccin)."""
-    form = DesignationForm(request.POST)
-    if form.is_valid():
-        designation = form.save()
-        return JsonResponse({'success': True, 'id': designation.pk, 'nom': designation.nom})
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
+def ventilation_facture(request, pk=None):
+    """Point d'entrée HTMX du formulaire de ventilation : reçoit l'état
+    courant des lignes, applique l'action demandée (`ajouter`, `retirer`,
+    `designation`, `ventiler`, ou aucune pour un simple recalcul en cours de
+    saisie) et renvoie le fragment HTML à jour. Rien n'est enregistré ici,
+    hormis une nouvelle désignation (cf. factures/ventilation.py)."""
+    facture = None
+    if pk is not None:
+        facture = get_object_or_404(Facture, pk=pk, utilisateur__in=comptes_accessibles(request.user))
 
+    data = request.POST.copy()
+    action = data.get('action', '')
+    erreurs_designation = {}
+    if f'{PREFIXE}-TOTAL_FORMS' not in data:
+        # Premier clic sur « Ventiler la facture » : pas encore de lignes.
+        data = None
+    elif action == 'ajouter':
+        ajouter_ligne(data)
+    elif action == 'retirer':
+        data = retirer_ligne(data, data.get('ligne'))
+    elif action == 'designation':
+        erreurs_designation = creer_designations(data, data.get('ligne'))
 
-@login_required
-@require_GET
-def dernier_prix_designation_ajax(request, pk):
-    """Dernier prix unitaire connu pour une désignation (affiché en lecture
-    seule à côté du champ de saisie du nouveau prix, avec indicateur
-    hausse/baisse calculé côté client)."""
-    designation = get_object_or_404(Designation, pk=pk)
-    dernier_prix = designation.dernier_prix_unitaire()
-    return JsonResponse({
-        'dernier_prix': str(dernier_prix) if dernier_prix is not None else None,
+    formset = LigneFactureFormSet(data, instance=facture, form_kwargs={'user': request.user})
+    return render(request, 'factures/partials/ventilation_reponse.html', {
+        'formset': formset,
+        'ventiler': True,
+        'verrouillee': bool(facture and facture.est_ventilee()),
+        'afficher_erreurs': False,
+        'recalcul': not action,
+        'url_ventilation': request.path,
+        **contexte_lignes(formset, erreurs_designation),
     })
 
 
@@ -124,6 +136,17 @@ class VentilationFactureMixin:
         if 'formset' not in kwargs:
             context['formset'] = self.get_formset()
         context['verrouillee'] = self._verrouillee()
+        formset = context['formset']
+        facture = getattr(self, 'object', None)
+        context['ventiler'] = context['verrouillee'] or formset.is_bound
+        context['afficher_erreurs'] = formset.is_bound
+        context['url_ventilation'] = reverse(
+            'factures:facture_ventilation', args=[facture.pk] if facture and facture.pk else [],
+        )
+        context.update(contexte_lignes(formset))
+        if context['ventiler']:
+            # Montant calculé à partir des lignes (cf. partials/ventilation_reponse.html).
+            context['form'].fields['montant'].widget.attrs['readonly'] = True
         return context
 
     def post(self, request, *args, **kwargs):
