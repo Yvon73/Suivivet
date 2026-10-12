@@ -1,6 +1,7 @@
 from django import forms
-from accueil.utils import comptes_accessibles
+from accueil.utils import comptes_accessibles, filtre_catalogue
 from animaux.models import Animal
+from animaux.widgets import FichierSansLienInput
 from .models import Document, TypeDocument
 
 class DocumentForm(forms.ModelForm):
@@ -20,7 +21,7 @@ class DocumentForm(forms.ModelForm):
             'animal': forms.Select(attrs={'class': 'form-select'}),
             'type_document': forms.Select(attrs={'class': 'form-select'}),
             'titre': forms.TextInput(attrs={'class': 'form-control'}),
-            'fichier': forms.ClearableFileInput(attrs={
+            'fichier': FichierSansLienInput(attrs={
                 'class': 'form-control',
                 'accept': '.pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx',
             }),
@@ -29,9 +30,16 @@ class DocumentForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
         # Animaux visibles du compte connecté (lui-même, plus les autres
         # membres de son foyer partagé le cas échéant).
         self.fields['animal'].queryset = Animal.objects.filter(utilisateur__in=comptes_accessibles(user))
+        # Types de référence, plus ceux du compte connecté et de son foyer
+        # (jamais ceux d'un autre compte) — et le type déjà porté par le
+        # document en cours de modification, même sorti du filtre.
+        self.fields['type_document'].queryset = TypeDocument.objects.filter(
+            filtre_catalogue(user, reference=True, garder=self.instance.type_document_id)
+        )
         self.fields['type_document'].required = False
         self.fields['type_document'].help_text = (
             "Absent de la liste ? Laissez ce champ vide et saisissez le nouveau type ci-dessous."
@@ -49,9 +57,15 @@ class DocumentForm(forms.ModelForm):
         nouveau_type = (cleaned_data.get('nouveau_type_document') or '').strip()
 
         if nouveau_type:
-            type_document, _ = TypeDocument.objects.get_or_create(
-                nom__iexact=nouveau_type,
-                defaults={'nom': nouveau_type},
+            # Type du même nom déjà visible du compte (référence, compte ou
+            # foyer) : on le reprend, sinon on en crée un rattaché au compte.
+            # Pas de get_or_create(nom__iexact=...) : le nom n'est pas unique
+            # en base, deux types ne différant que par la casse lèveraient
+            # MultipleObjectsReturned. Le plus ancien gagne.
+            type_document = (
+                TypeDocument.objects.filter(filtre_catalogue(self.user, reference=True), nom__iexact=nouveau_type)
+                .order_by('pk').first()
+                or TypeDocument.objects.create(nom=nouveau_type, utilisateur=self.user)
             )
             cleaned_data['type_document'] = type_document
         elif not type_document:

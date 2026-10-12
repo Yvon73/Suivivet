@@ -11,7 +11,13 @@ Deux niveaux :
   redémarrage du process : 15 min la 1ère fois, 1h la 2e, blocage définitif
   à partir de la 3e (levable uniquement depuis /admin/).
 """
+import ipaddress
+import logging
+
+from django.conf import settings
 from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
 
 MAX_TENTATIVES = 3
 
@@ -21,11 +27,29 @@ PALIERS_BLOCAGE_SECONDES = [15 * 60, 60 * 60]
 
 
 def _adresse_ip(request):
-    # NB : si BEHIND_REVERSE_PROXY est actif, REMOTE_ADDR est l'adresse du
-    # proxy (aucun middleware ici ne restitue l'adresse réelle du client via
-    # X-Forwarded-For) — tous les visiteurs passant par ce proxy partagent
-    # alors le même compteur.
-    return request.META.get('REMOTE_ADDR', '')
+    """Adresse IP du visiteur, ou None si aucune adresse valide n'est
+    disponible (dans ce cas aucune limitation n'est appliquée : mieux vaut ne
+    pas limiter que partager un compteur entre tous les visiteurs, ou écrire
+    une adresse vide dans BlocageAdresse.adresse_ip, refusée par la base).
+
+    Derrière le reverse-proxy de confiance (BEHIND_REVERSE_PROXY, cf.
+    settings.py), REMOTE_ADDR est l'adresse du proxy — voire une chaîne vide
+    quand gunicorn écoute sur un socket unix (cf. deploy/) : l'adresse réelle
+    est alors le DERNIER élément de X-Forwarded-For, celui qu'ajoute le proxy
+    lui-même. Les éléments précédents sont fournis par le client et donc
+    falsifiables : jamais le premier."""
+    candidats = []
+    if getattr(settings, 'BEHIND_REVERSE_PROXY', False):
+        transmis = request.META.get('HTTP_X_FORWARDED_FOR', '')
+        if transmis:
+            candidats.append(transmis.split(',')[-1].strip())
+    candidats.append(request.META.get('REMOTE_ADDR', ''))
+    for candidat in candidats:
+        try:
+            return str(ipaddress.ip_address(candidat))
+        except ValueError:
+            continue
+    return None
 
 
 def _cle(prefixe, request):
@@ -39,6 +63,8 @@ def est_bloque(prefixe, request):
     from accueil.models import BlocageAdresse
 
     ip = _adresse_ip(request)
+    if ip is None:
+        return False
     if BlocageAdresse.objects.filter(prefixe=prefixe, adresse_ip=ip, bloque_definitivement=True).exists():
         return True
     return cache.get(_cle(prefixe, request), 0) >= MAX_TENTATIVES
@@ -50,6 +76,11 @@ def enregistrer_tentative(prefixe, request):
     d'un palier, et détermine la durée de la fenêtre de cache en conséquence."""
     from accueil.models import BlocageAdresse
 
+    ip = _adresse_ip(request)
+    if ip is None:
+        logger.warning("Limitation de tentatives inactive : aucune adresse IP exploitable pour cette requête.")
+        return
+
     cle = _cle(prefixe, request)
     tentatives = cache.get(cle, 0) + 1
 
@@ -57,7 +88,6 @@ def enregistrer_tentative(prefixe, request):
         cache.set(cle, tentatives, PALIERS_BLOCAGE_SECONDES[0])
         return
 
-    ip = _adresse_ip(request)
     blocage, _ = BlocageAdresse.objects.get_or_create(prefixe=prefixe, adresse_ip=ip)
 
     if tentatives == MAX_TENTATIVES:
@@ -78,6 +108,8 @@ def enregistrer_tentative(prefixe, request):
 def reinitialiser_tentatives(prefixe, request):
     """Ne remet à zéro que le compteur volatil (une connexion réussie
     n'efface pas l'historique des récidives passées)."""
+    if _adresse_ip(request) is None:
+        return
     cache.delete(_cle(prefixe, request))
 
 
@@ -86,9 +118,29 @@ def message_blocage(prefixe, request):
     atteint (bloque_definitivement ne peut être levé que depuis /admin/)."""
     from accueil.models import BlocageAdresse
 
-    blocage = BlocageAdresse.objects.filter(prefixe=prefixe, adresse_ip=_adresse_ip(request)).first()
+    ip = _adresse_ip(request)
+    blocage = BlocageAdresse.objects.filter(prefixe=prefixe, adresse_ip=ip).first() if ip else None
     if blocage and blocage.bloque_definitivement:
         return "Accès bloqué définitivement depuis cette adresse suite à des tentatives répétées."
     if blocage and blocage.nombre_blocages >= 2:
         return "Trop de tentatives depuis cette adresse. Réessaie dans 1 heure."
     return "Trop de tentatives depuis cette adresse. Réessaie dans 15 minutes."
+
+
+def limite_simple_atteinte(prefixe, request, maximum, duree_secondes):
+    """Limitation sans escalade ni historique en base, pour un formulaire
+    public où un blocage définitif serait disproportionné (ex. « mot de passe
+    oublié », qu'un utilisateur légitime peut redemander plusieurs fois) :
+    compte cet envoi et renvoie True s'il dépasse `maximum` envois depuis
+    cette adresse sur une fenêtre de `duree_secondes`."""
+    if _adresse_ip(request) is None:
+        return False
+    cle = _cle(prefixe, request)
+    # add() ne fait rien si la clé existe déjà : la fenêtre part du 1er envoi.
+    cache.add(cle, 0, duree_secondes)
+    try:
+        return cache.incr(cle) > maximum
+    except ValueError:
+        # Clé expirée entre add() et incr() : on repart d'une fenêtre neuve.
+        cache.set(cle, 1, duree_secondes)
+        return False

@@ -15,6 +15,7 @@ import environ
 from pathlib import Path
 
 from django.contrib import staticfiles
+from django.contrib.messages import constants as niveaux_messages
 
 # Initialise environ
 env = environ.Env()
@@ -69,8 +70,14 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Après AuthenticationMiddleware (a besoin de request.user) : session
+    # expirée pendant une requête htmx -> vraie navigation vers la connexion.
+    'Projet_veto.middleware.ConnexionRequiseHtmxMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # En dernier, donc au plus près de la vue : prépare les tableaux pour
+    # l'affichage en cartes sur téléphone (cf. Projet_veto/tableaux.py).
+    'Projet_veto.tableaux.TableauxEmpilablesMiddleware',
 ]
 
 if not DEBUG:
@@ -83,6 +90,12 @@ if not DEBUG:
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 ROOT_URLCONF = 'Projet_veto.urls'
+
+# messages.error() porte par défaut la balise « error », or les gabarits
+# construisent `alert alert-{{ message.tags }}` et Bootstrap ne connaît que
+# `alert-danger` : sans cette correspondance, les erreurs s'affichaient sans
+# fond ni bordure rouge.
+MESSAGE_TAGS = {niveaux_messages.ERROR: 'danger'}
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'animaux:animal_list'
@@ -178,6 +191,13 @@ CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+# Les rappels sont planifiés par apply_async(eta=...) plusieurs jours, voire
+# plusieurs mois à l'avance. Avec un broker Redis, une tâche reçue mais pas
+# encore acquittée est redélivrée au bout de `visibility_timeout` (1 h par
+# défaut) : un rappel à échéance lointaine serait ainsi redistribué toutes
+# les heures puis envoyé en plusieurs exemplaires. D'où un délai supérieur
+# au plus long rappel envisageable (400 jours).
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 60 * 60 * 24 * 400}
 
 # Cache partagé (Projet_veto.throttling : limitation de tentatives sur les
 # formulaires de connexion/inscription) — sur Redis (base 1, distincte du
@@ -222,7 +242,10 @@ SECURE_REFERRER_POLICY = 'same-origin'
 # reverse-proxy de confiance (nginx, load-balancer...) termine le HTTPS et
 # transmet bien l'en-tête X-Forwarded-Proto — sinon un client pourrait le
 # forger lui-même et tromper Django sur le fait que la requête est en HTTPS.
-if env.bool('BEHIND_REVERSE_PROXY', default=False):
+# Conservé comme réglage : Projet_veto.throttling s'en sert aussi pour savoir
+# s'il peut se fier à X-Forwarded-For (adresse réelle du visiteur).
+BEHIND_REVERSE_PROXY = env.bool('BEHIND_REVERSE_PROXY', default=False)
+if BEHIND_REVERSE_PROXY:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Contacts techniques : Django y envoie un email (cf. LOGGING plus bas, et le

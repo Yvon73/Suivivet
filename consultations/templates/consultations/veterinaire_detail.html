@@ -11,6 +11,7 @@
                     <span class="badge bg-secondary">Archivé</span>
                 {% endif %}
             </h1>
+            {% if modifiable %}
             <div class="d-flex flex-wrap gap-2">
                 <a href="{% url 'consultations:veterinaire_update' veterinaire.pk %}" class="btn btn-warning">
                     <i class="bi bi-pencil"></i> Modifier
@@ -19,6 +20,7 @@
                     <i class="bi bi-trash"></i> Supprimer
                 </a>
             </div>
+            {% endif %}
         </div>
         <div class="card-body">
             <dl class="row mb-0">
@@ -37,9 +39,9 @@
             <i class="bi bi-calendar-check"></i> Consultations
         </div>
         <div class="card-body">
-            {% if veterinaire.consultations.all %}
+            {% if consultations %}
                 <ul class="list-group list-group-flush">
-                    {% for consultation in veterinaire.consultations.all %}
+                    {% for consultation in consultations %}
                         <li class="list-group-item">
                             <a href="{% url 'consultations:consultation_detail' consultation.pk %}">
                                 {{ consultation.animal.nom }} — {{ consultation.date|date:"d/m/Y H:i" }}

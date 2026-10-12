@@ -13,6 +13,8 @@ from decimal import Decimal, InvalidOperation
 
 from django.http import QueryDict
 
+from accueil.utils import filtre_catalogue
+
 from .forms import DesignationForm, LigneFactureFormSet
 from .models import Designation
 
@@ -87,9 +89,10 @@ def retirer_ligne(data, index):
     return resultat
 
 
-def creer_designations(data, ligne_demandee=None):
-    """Crée chaque désignation saisie dans un champ « Nouvelle désignation »
-    et la sélectionne sur sa ligne. Renvoie les erreurs par index de ligne."""
+def creer_designations(data, ligne_demandee=None, utilisateur=None):
+    """Crée chaque désignation saisie dans un champ « Nouvelle désignation »,
+    rattachée au compte `utilisateur`, et la sélectionne sur sa ligne.
+    Renvoie les erreurs par index de ligne."""
     erreurs = {}
     creees = set()
     for cle in list(data.keys()):
@@ -99,7 +102,7 @@ def creer_designations(data, ligne_demandee=None):
         nom = data.get(cle, '').strip()
         if not nom:
             continue
-        form = DesignationForm({'nom': nom})
+        form = DesignationForm({'nom': nom}, user=utilisateur)
         if form.is_valid():
             designation = form.save()
             data[f'{PREFIXE}-{index}-designation'] = str(designation.pk)
@@ -109,18 +112,21 @@ def creer_designations(data, ligne_demandee=None):
             erreurs[int(index)] = [erreur for liste in form.errors.values() for erreur in liste]
 
     # Bouton « Ajouter » cliqué sur une ligne dont le champ est resté vide.
-    if str(ligne_demandee).isdigit():
+    # Seulement si la requête n'a rien créé ni refusé ailleurs : la touche
+    # Entrée dans le champ d'une autre ligne « clique » le premier bouton
+    # « Ajouter » du formulaire, pas celui de la ligne où l'on tape.
+    if not creees and not erreurs and str(ligne_demandee).isdigit():
         index = int(ligne_demandee)
-        if index not in creees and index not in erreurs \
-                and f'{CHAMP_NOUVELLE_DESIGNATION}-{index}' in data:
+        if f'{CHAMP_NOUVELLE_DESIGNATION}-{index}' in data:
             erreurs[index] = ["La désignation est obligatoire."]
     return erreurs
 
 
-def contexte_lignes(formset, erreurs_designation=None):
+def contexte_lignes(formset, erreurs_designation=None, utilisateur=None):
     """Contexte d'affichage des lignes : prix total de chacune, rappel du
     dernier prix pratiqué pour sa désignation, et montant total de la
-    facture (hors lignes cochées « Suppr. »)."""
+    facture (hors lignes cochées « Suppr. »). Le dernier prix n'est cherché
+    que parmi les factures visibles de `utilisateur` (aucun rappel sans lui)."""
     erreurs_designation = erreurs_designation or {}
     data = formset.data if formset.is_bound else {}
     lignes = []
@@ -141,9 +147,13 @@ def contexte_lignes(formset, erreurs_designation=None):
             total += prix_total
 
         dernier_prix = comparaison = None
-        if designation_id and str(designation_id).isdigit():
-            designation = Designation.objects.filter(pk=designation_id).first()
-            dernier_prix = designation.dernier_prix_unitaire() if designation else None
+        if utilisateur and designation_id and str(designation_id).isdigit():
+            # Désignation du compte ou de son foyer, ou celle que porte déjà
+            # la ligne enregistrée — jamais celle d'un autre compte.
+            designation = Designation.objects.filter(
+                filtre_catalogue(utilisateur, garder=form.instance.designation_id), pk=designation_id,
+            ).first()
+            dernier_prix = designation.dernier_prix_unitaire(utilisateur) if designation else None
         if dernier_prix is not None and prix_unitaire is not None:
             if prix_unitaire > dernier_prix:
                 comparaison = 'plus'

@@ -18,8 +18,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
 
-from .views import LoginThrottleView
+from .views import LoginThrottleView, PasswordResetThrottleView
 
 # L'appli n'a qu'un seul "Admin" (le tout premier compte cree via
 # PremierUtilisateurCreateView, is_staff=is_superuser=True) - d'autres comptes
@@ -32,10 +33,14 @@ admin.site.has_permission = lambda request: (
 )
 
 urlpatterns = [
+    # Le site d'administration a son propre formulaire de connexion, qui
+    # échapperait à la limitation de tentatives (cf. LoginThrottleView) : on
+    # le renvoie vers la connexion commune, `?next=/admin/` conservé.
+    path('admin/login/', RedirectView.as_view(pattern_name='login', query_string=True)),
     path('admin/', admin.site.urls),
     path('accounts/login/', LoginThrottleView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('accounts/password_reset/', auth_views.PasswordResetView.as_view(
+    path('accounts/password_reset/', PasswordResetThrottleView.as_view(
         template_name='registration/password_reset_form.html',
         email_template_name='registration/password_reset_email.html',
         subject_template_name='registration/password_reset_subject.txt',

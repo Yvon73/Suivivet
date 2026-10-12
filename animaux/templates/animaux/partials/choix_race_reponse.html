@@ -1,0 +1,9 @@
+{# Réponse htmx aux changements des menus « Espèce » / « Race » (cf. #}
+{# animaux/formulaire.py : _reponse_menus) : tout revient en hx-swap-oob, #}
+{# précédé du panneau d'ajout rapide replié après un ajout au catalogue. #}
+{% if ajout %}{% include 'partials/ajout_rapide_panneau.html' %}{% endif %}
+{% if maj_espece %}{% include 'partials/ajout_rapide_champ.html' with ajout=ajout_espece oob=True %}{% endif %}
+{% if maj_race %}{% include 'partials/ajout_rapide_champ.html' with ajout=ajout_race oob=True %}{% endif %}
+{% include 'animaux/partials/fiche_race.html' with oob=True %}
+{# Espèce proposée par défaut dans le panneau « Ajouter une race ». #}
+{% if maj_panneau_race %}{{ ajout_race.form.espece }}{% endif %}

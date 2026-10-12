@@ -231,11 +231,13 @@
                                             <td>{{ poids.date|date:"d/m/Y" }}</td>
                                             <td>{{ poids.valeur }}</td>
                                             <td>
-                                                <a href="#" class="btn btn-sm btn-outline-warning">
-                                                    <i class="bi bi-pencil"></i>
+                                                <a href="{% url 'animaux:poids_update' poids.pk %}" class="btn btn-sm btn-outline-warning"
+                                                   title="Modifier cette pesée" aria-label="Modifier la pesée du {{ poids.date|date:"d/m/Y" }}">
+                                                    <i class="bi bi-pencil" aria-hidden="true"></i>
                                                 </a>
-                                                <a href="#" class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-trash"></i>
+                                                <a href="{% url 'animaux:poids_delete' poids.pk %}" class="btn btn-sm btn-outline-danger"
+                                                   title="Supprimer cette pesée" aria-label="Supprimer la pesée du {{ poids.date|date:"d/m/Y" }}">
+                                                    <i class="bi bi-trash" aria-hidden="true"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -328,7 +330,7 @@
                                                     <tr>
                                                         <td>{{ traitement.traitement.nom }}</td>
                                                         <td>{{ traitement.date|date:"d/m/Y" }}</td>
-                                                        <td>{{ traitement.traitement.dose|default:"-" }}</td>
+                                                        <td>{% if traitement.dose_valeur %}{{ traitement.dose_valeur }} {{ traitement.get_dose_unite_display }}{% else %}-{% endif %}</td>
                                                         <td>{{ traitement.notes|default:"-" }}</td>
                                                     </tr>
                                                 {% endfor %}
@@ -356,7 +358,7 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    {% if animal.consultations.all %}
+                    {% if consultations %}
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>
@@ -368,7 +370,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for consultation in animal.consultations.all %}
+                                    {% for consultation in consultations %}
                                         <tr>
                                             <td>{{ consultation.date|date:"d/m/Y H:i" }}</td>
                                             <td>{{ consultation.motif }}</td>
@@ -407,7 +409,7 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    {% if animal.factures.all %}
+                    {% if factures %}
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>
@@ -420,7 +422,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for facture in animal.factures.all %}
+                                    {% for facture in factures %}
                                         <tr>
                                             <td>{{ facture.date|date:"d/m/Y" }}</td>
                                             <td>{{ facture.get_type_depense_display }}</td>
@@ -459,7 +461,7 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    {% if animal.documents.all %}
+                    {% if documents %}
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>
@@ -471,7 +473,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for document in animal.documents.all %}
+                                    {% for document in documents %}
                                         <tr>
                                             <td>{{ document.type_document }}</td>
                                             <td>{{ document.titre }}</td>
@@ -551,21 +553,21 @@
                         <div class="col-6 mb-3">
                             <div class="p-3 bg-body-tertiary rounded">
                                 <i class="bi bi-calendar-check fs-1 text-success"></i>
-                                <h6 class="mt-2">{{ animal.consultations.count }}</h6>
+                                <h6 class="mt-2">{{ consultations|length }}</h6>
                                 <small>Consultations</small>
                             </div>
                         </div>
                         <div class="col-6 mb-3">
                             <div class="p-3 bg-body-tertiary rounded">
                                 <i class="bi bi-receipt fs-1 text-warning"></i>
-                                <h6 class="mt-2">{{ animal.factures.count }}</h6>
+                                <h6 class="mt-2">{{ factures|length }}</h6>
                                 <small>Factures</small>
                             </div>
                         </div>
                         <div class="col-6 mb-3">
                             <div class="p-3 bg-body-tertiary rounded">
                                 <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-                                <h6 class="mt-2">{{ animal.documents.count }}</h6>
+                                <h6 class="mt-2">{{ documents|length }}</h6>
                                 <small>Documents</small>
                             </div>
                         </div>

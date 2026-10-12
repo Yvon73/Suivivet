@@ -45,14 +45,9 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="{{ form.veterinaire.id_for_label }}" class="form-label">{{ form.veterinaire.label }}</label>
-                        <div class="input-group">
-                            {{ form.veterinaire }}
-                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                                    data-bs-target="#modalNouveauVeterinaire" title="Ajouter un vétérinaire absent de la liste">
-                                <i class="bi bi-plus-lg"></i>
-                            </button>
-                        </div>
+                        {% include 'partials/ajout_rapide_champ.html' with ajout=ajout_veterinaire %}
                         {% for error in form.veterinaire.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        {% include 'partials/ajout_rapide_panneau.html' with ajout=ajout_veterinaire %}
                     </div>
                     <div class="col-12 mb-3">
                         <label for="{{ form.motif.id_for_label }}" class="form-label">{{ form.motif.label }}</label>
@@ -77,140 +72,5 @@
         </div>
     </form>
 
-    <!-- Modale d'ajout rapide d'un vétérinaire absent de la liste -->
-    <div class="modal fade" id="modalNouveauVeterinaire" tabindex="-1" aria-labelledby="modalNouveauVeterinaireLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalNouveauVeterinaireLabel">
-                        <i class="bi bi-plus-circle"></i> Ajouter un vétérinaire
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="nouveauVeterinaireErreurs" class="alert alert-danger d-none"></div>
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <label for="nouveauVeterinaireNom" class="form-label">Nom</label>
-                            <input type="text" id="nouveauVeterinaireNom" class="form-control" maxlength="100" required>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <label for="nouveauVeterinaireAdresse" class="form-label">Adresse</label>
-                            <input type="text" id="nouveauVeterinaireAdresse" class="form-control" maxlength="255">
-                        </div>
-                        <div class="col-sm-6 mb-3">
-                            <label for="nouveauVeterinaireTelephone" class="form-label">Téléphone</label>
-                            <input type="text" id="nouveauVeterinaireTelephone" class="form-control" maxlength="20">
-                        </div>
-                        <div class="col-sm-6 mb-3">
-                            <label for="nouveauVeterinaireEmail" class="form-label">Email</label>
-                            <input type="email" id="nouveauVeterinaireEmail" class="form-control">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" id="nouveauVeterinaireValider">
-                        <i class="bi bi-check"></i> Ajouter le vétérinaire
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endblock %}
-
-{% block extra_js %}
-    {{ block.super }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // --- Ajout rapide d'un vétérinaire absent de la liste -------------
-            var veterinaireField = document.getElementById('id_veterinaire');
-            if (!veterinaireField) {
-                return;
-            }
-            var modalVeterinaireEl = document.getElementById('modalNouveauVeterinaire');
-            var nomVeterinaireModalField = document.getElementById('nouveauVeterinaireNom');
-            var adresseVeterinaireModalField = document.getElementById('nouveauVeterinaireAdresse');
-            var telephoneVeterinaireModalField = document.getElementById('nouveauVeterinaireTelephone');
-            var emailVeterinaireModalField = document.getElementById('nouveauVeterinaireEmail');
-            var erreursVeterinaireDiv = document.getElementById('nouveauVeterinaireErreurs');
-            var boutonValiderVeterinaire = document.getElementById('nouveauVeterinaireValider');
-
-            modalVeterinaireEl.addEventListener('show.bs.modal', function () {
-                erreursVeterinaireDiv.classList.add('d-none');
-                erreursVeterinaireDiv.innerHTML = '';
-                [nomVeterinaireModalField, adresseVeterinaireModalField,
-                    telephoneVeterinaireModalField, emailVeterinaireModalField].forEach(function (champ) {
-                    champ.value = '';
-                });
-            });
-
-            function afficherErreursVeterinaire(erreurs) {
-                var messages = [];
-                Object.keys(erreurs || {}).forEach(function (champ) {
-                    erreurs[champ].forEach(function (erreur) {
-                        messages.push(erreur.message || erreur);
-                    });
-                });
-                if (!messages.length) {
-                    messages.push("Impossible d'ajouter ce vétérinaire.");
-                }
-                erreursVeterinaireDiv.innerHTML = messages.join('<br>');
-                erreursVeterinaireDiv.classList.remove('d-none');
-            }
-
-            boutonValiderVeterinaire.addEventListener('click', function () {
-                var nom = nomVeterinaireModalField.value.trim();
-                if (!nom) {
-                    afficherErreursVeterinaire({ nom: [{ message: 'Le nom est obligatoire.' }] });
-                    return;
-                }
-
-                var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
-                var donnees = new URLSearchParams();
-                donnees.set('nom', nom);
-                donnees.set('adresse', adresseVeterinaireModalField.value.trim());
-                donnees.set('telephone', telephoneVeterinaireModalField.value.trim());
-                donnees.set('email', emailVeterinaireModalField.value.trim());
-
-                boutonValiderVeterinaire.disabled = true;
-                fetch('{% url "consultations:veterinaire_create_ajax" %}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: donnees.toString(),
-                })
-                    .then(function (reponse) {
-                        return reponse.json().then(function (data) {
-                            return { ok: reponse.ok, data: data };
-                        });
-                    })
-                    .then(function (resultat) {
-                        if (!resultat.ok || !resultat.data.success) {
-                            afficherErreursVeterinaire(resultat.data.errors);
-                            return;
-                        }
-                        var veterinaire = resultat.data;
-
-                        var option = document.createElement('option');
-                        option.value = veterinaire.id;
-                        option.text = veterinaire.nom;
-                        veterinaireField.appendChild(option);
-                        veterinaireField.value = veterinaire.id;
-
-                        var modal = bootstrap.Modal.getInstance(modalVeterinaireEl);
-                        modal.hide();
-                    })
-                    .catch(function () {
-                        afficherErreursVeterinaire({});
-                    })
-                    .finally(function () {
-                        boutonValiderVeterinaire.disabled = false;
-                    });
-            });
-        });
-    </script>
+    {% include 'partials/ajout_rapide_form.html' with ajout=ajout_veterinaire %}
 {% endblock %}

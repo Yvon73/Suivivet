@@ -1,0 +1,6 @@
+{# Formulaire htmx d'un ajout rapide, à inclure HORS du formulaire principal #}
+{# (un <form> ne s'imbrique pas dans un autre). Le menu déroulant concerné est #}
+{# joint à l'envoi (hx-include) pour que le serveur connaisse la sélection en cours. #}
+<form id="form-ajout-{{ ajout.nom }}" novalidate
+      hx-post="{{ ajout.url }}" hx-target="#ajout-{{ ajout.nom }}" hx-swap="outerHTML"
+      hx-include="{{ ajout.inclure }}" hx-sync="this:drop"></form>

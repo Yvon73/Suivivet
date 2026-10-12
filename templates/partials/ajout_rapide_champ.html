@@ -1,0 +1,20 @@
+{# Menu déroulant + bouton « + » d'un ajout rapide (cf. Projet_veto/ajout_rapide.py). #}
+{% if ajout.bouton %}
+    <div id="champ-{{ ajout.nom }}"{% if oob %} hx-swap-oob="true"{% endif %}>
+        {{ ajout.champ }}
+        <button type="button" class="btn btn-sm btn-outline-primary mt-2" title="{{ ajout.titre }}"
+                data-bs-toggle="collapse" data-bs-target="#ajout-{{ ajout.nom }}"
+                aria-controls="ajout-{{ ajout.nom }}" aria-expanded="false">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> {{ ajout.bouton }}
+        </button>
+    </div>
+{% else %}
+    <div class="input-group" id="champ-{{ ajout.nom }}"{% if oob %} hx-swap-oob="true"{% endif %}>
+        {{ ajout.champ }}
+        <button type="button" class="btn btn-outline-primary" title="{{ ajout.titre }}" aria-label="{{ ajout.titre }}"
+                data-bs-toggle="collapse" data-bs-target="#ajout-{{ ajout.nom }}"
+                aria-controls="ajout-{{ ajout.nom }}" aria-expanded="false">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        </button>
+    </div>
+{% endif %}

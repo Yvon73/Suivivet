@@ -1,0 +1,33 @@
+{# Panneau dépliable d'un ajout rapide (cf. Projet_veto/ajout_rapide.py). Ses #}
+{# champs appartiennent au formulaire htmx « form-ajout-… », pas au formulaire #}
+{# principal dans lequel le panneau est affiché. #}
+<div class="collapse{% if ajout.ouvert %} show{% endif %} mt-2" id="ajout-{{ ajout.nom }}">
+    <div class="card card-body">
+        <h2 class="h6"><i class="bi bi-plus-circle" aria-hidden="true"></i> {{ ajout.titre }}</h2>
+        {% if ajout.form.non_field_errors %}
+            <div class="alert alert-danger py-2">
+                {% for erreur in ajout.form.non_field_errors %}<div>{{ erreur }}</div>{% endfor %}
+            </div>
+        {% endif %}
+        {% for champ in ajout.form.hidden_fields %}{{ champ }}{% endfor %}
+        <div class="row">
+            {% for champ in ajout.form.visible_fields %}
+                <div class="col-sm-6 mb-2">
+                    <label for="{{ champ.id_for_label }}" class="form-label small mb-1">{{ champ.label }}</label>
+                    {{ champ }}
+                    {% if champ.help_text %}<div class="form-text">{{ champ.help_text }}</div>{% endif %}
+                    {% for erreur in champ.errors %}<div class="text-danger small mt-1">{{ erreur }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="submit" class="btn btn-primary btn-sm" form="form-ajout-{{ ajout.nom }}">
+                <i class="bi bi-check" aria-hidden="true"></i> Ajouter
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm"
+                    data-bs-toggle="collapse" data-bs-target="#ajout-{{ ajout.nom }}">
+                Annuler
+            </button>
+        </div>
+    </div>
+</div>

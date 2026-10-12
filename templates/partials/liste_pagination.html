@@ -1,0 +1,42 @@
+{# Pied d'une liste (cf. Projet_veto/listes.py), à inclure DANS #zoneListe : #}
+{# décompte, pagination, et tri en cours (champs cachés rattachés au formulaire #}
+{# de recherche, qui est hors de la zone et ne serait sinon pas tenu à jour). #}
+<input type="hidden" name="tri" value="{{ tri }}" form="formRechercheListe">
+<input type="hidden" name="sens" value="{{ sens }}" form="formRechercheListe">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div class="text-muted small" role="status">
+        {% if page_obj.paginator.count %}
+            Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }}
+            sur {{ page_obj.paginator.count }} élément{{ page_obj.paginator.count|pluralize }}{% if q %} correspondant à « {{ q }} »{% endif %}
+        {% elif q %}
+            Aucun élément ne correspond à « {{ q }} »
+        {% else %}
+            Aucun élément à afficher
+        {% endif %}
+    </div>
+    {% if is_paginated %}
+        <nav aria-label="Pagination de la liste" hx-boost="true">
+            <ul class="pagination flex-wrap mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="{% querystring page=page_obj.previous_page_number %}">Précédent</a>
+                    </li>
+                {% endif %}
+                {% for num in pages_affichees %}
+                    {% if num == ellipse_pagination %}
+                        <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="{% querystring page=num %}"{% if page_obj.number == num %} aria-current="page"{% endif %}>{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{% querystring page=page_obj.next_page_number %}">Suivant</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>

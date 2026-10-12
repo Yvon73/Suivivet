@@ -4,13 +4,18 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.urls import reverse
 from animaux.models import Animal
 from django.db.models import Sum
+from django.db.models.functions import Lower, Trim
 
 from accueil.utils import comptes_accessibles
+from accueil.catalogues import REATTRIBUER_OU_SUPPRIMER
 from notifications.models import Notification
 from notifications.utils import resoudre_utilisateur
+from Projet_veto.fichiers import brancher_menage_fichier
 from Projet_veto.validators import validate_file_extension, validate_file_size
 
 
@@ -26,18 +31,52 @@ class TypeDepense(models.Model):
 
 
 class Designation(models.Model):
-    """Catalogue partagé des désignations de produits/prestations utilisées
-    dans la ventilation d'une facture (catalogue réutilisable, comme
-    Veterinaire/Organisme) : permet de retrouver le dernier prix unitaire
-    pratiqué pour une même désignation, quelle que soit la facture."""
+    """Catalogue des désignations de produits/prestations utilisées dans la
+    ventilation d'une facture : permet de retrouver le dernier prix unitaire
+    pratiqué pour une même désignation. Chaque désignation est rattachée à
+    son compte créateur (`utilisateur`) et visible par tout le foyer partagé
+    de ce compte (cf. accueil.utils.filtre_catalogue) — jamais par un autre
+    compte, qui peut donc créer la sienne sous le même nom. Les prix, eux, ne
+    se lisent que dans les factures du compte et de son foyer — cf.
+    dernier_prix_unitaire()."""
 
-    nom = models.CharField(max_length=200, unique=True, verbose_name="Désignation")
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=REATTRIBUER_OU_SUPPRIMER, related_name='designations',
+        verbose_name="Compte",
+    )
+    nom = models.CharField(max_length=200, verbose_name="Désignation")
 
-    def dernier_prix_unitaire(self):
-        """Dernier prix unitaire connu pour cette désignation (toutes
-        factures confondues), ou None si elle n'a jamais été utilisée."""
+    @staticmethod
+    def cle_nom(nom):
+        """Forme de comparaison d'un nom de désignation : sans espaces de
+        bord ni distinction de casse. Deux désignations de même clé sont des
+        « homonymes » — chaque compte pouvant créer la sienne, un foyer en
+        réunit dès que deux de ses membres avaient la même avant de se
+        rejoindre (cf. dernier_prix_unitaire, LigneFactureForm)."""
+        return (nom or '').strip().lower()
+
+    @classmethod
+    def avec_cle_nom(cls, queryset, champ='nom'):
+        """`queryset` annoté de `cle_nom` : l'équivalent SQL de cle_nom()
+        pour le nom de désignation porté par `champ`."""
+        return queryset.annotate(cle_nom=Lower(Trim(champ)))
+
+    def dernier_prix_unitaire(self, utilisateur):
+        """Dernier prix unitaire connu pour cette désignation parmi les
+        factures visibles de `utilisateur` (les siennes et celles de son
+        foyer partagé — jamais le prix payé par un autre compte), ou None
+        si elle n'y a jamais été utilisée.
+
+        Cherché par *nom* (cf. cle_nom), pas par clé : dans un foyer où deux
+        membres ont chacun leur « Croquettes », l'historique des prix est
+        celui du produit, quelle que soit celle des deux désignations que
+        porte chaque ligne."""
         derniere_ligne = (
-            self.lignes_facture
+            Designation.avec_cle_nom(LigneFacture.objects.all(), 'designation__nom')
+            .filter(
+                facture__utilisateur__in=comptes_accessibles(utilisateur),
+                cle_nom=self.cle_nom(self.nom),
+            )
             .order_by('-facture__date', '-pk')
             .first()
         )
@@ -50,6 +89,14 @@ class Designation(models.Model):
         verbose_name = "Désignation"
         verbose_name_plural = "Désignations"
         ordering = ['nom']
+        constraints = [
+            # Unique par compte (et non plus dans toute l'installation) : deux
+            # comptes peuvent avoir chacun leur « Croquettes ». Le doublon au
+            # sein d'un foyer est refusé par DesignationForm.clean_nom ; ceux
+            # qui existaient avant que les comptes ne se rejoignent sont
+            # regroupés à l'affichage (cf. LigneFactureForm).
+            models.UniqueConstraint(fields=['utilisateur', 'nom'], name='designation_unique_nom_par_compte'),
+        ]
 
 
 class Facture(models.Model):
@@ -224,7 +271,11 @@ class Facture(models.Model):
         super().save(*args, **kwargs)
 
         if is_new and self.animal and self.animal.proprietaire.email:
-            utilisateur = resoudre_utilisateur(self.animal.proprietaire.email)
+            # Seulement un compte qui voit cette facture (le sien ou son
+            # foyer) : l'email d'une fiche propriétaire est une saisie libre.
+            utilisateur = resoudre_utilisateur(
+                self.animal.proprietaire.email, parmi=comptes_accessibles(self.utilisateur),
+            )
             if utilisateur:
                 Notification.objects.create(
                     utilisateur=utilisateur,
@@ -238,6 +289,10 @@ class Facture(models.Model):
         verbose_name = "Facture"
         verbose_name_plural = "Factures"
         ordering = ['-date']
+
+
+# Le fichier scanné quitte le disque avec sa facture, ou quand il est remplacé.
+brancher_menage_fichier(Facture, 'fichier')
 
 
 class LigneFacture(models.Model):
@@ -294,3 +349,61 @@ class LigneFacture(models.Model):
     class Meta:
         verbose_name = "Ligne de facture"
         verbose_name_plural = "Lignes de facture"
+
+
+def factures_emportees_par(animal):
+    """Ce que la suppression de `animal` emporte côté factures (décision
+    produit : « supprimer avec l'animal »), sous forme de trois QuerySets :
+
+    - `lignes` : ses lignes de facture ventilées ;
+    - `factures_videes` : les factures ventilées dont *toutes* les lignes lui
+      sont attribuées — sans plus aucune ligne, elles sont supprimées aussi
+      (une facture ventilée qui garde d'autres lignes est conservée, son
+      montant recalculé) ;
+    - `factures_non_ventilees` : les factures non ventilées qui le nomment.
+
+    Les lignes « Tous les animaux » et les factures sans animal ne sont jamais
+    concernées. Sert à la fois à la suppression elle-même (signal ci-dessous)
+    et à la page de confirmation (cf. animaux.views.AnimalDeleteView), pour
+    que celle-ci annonce exactement ce qui sera supprimé."""
+    lignes = LigneFacture.objects.filter(animal=animal)
+    factures_videes = Facture.objects.filter(
+        pk__in=lignes.values('facture'),
+    ).exclude(
+        pk__in=LigneFacture.objects.exclude(animal=animal).values('facture'),
+    )
+    factures_non_ventilees = Facture.objects.filter(animal=animal, lignes__isnull=True)
+    return {
+        'lignes': lignes,
+        'factures_videes': factures_videes,
+        'factures_non_ventilees': factures_non_ventilees,
+    }
+
+
+@receiver(pre_delete, sender=Animal, dispatch_uid='factures_supprimer_avec_animal')
+def supprimer_factures_avec_animal(sender, instance, **kwargs):
+    """Supprimer un animal supprime ses lignes de facture et ses factures non
+    ventilées (cf. factures_emportees_par). Sans cela, les clés `animal` en
+    SET_NULL transformaient ses factures en dépenses partagées entre les
+    animaux restants et faisaient disparaître ses lignes des coûts de revient.
+
+    Branché sur pre_delete plutôt que dans la vue : vaut pour tout chemin de
+    suppression (vue, admin, shell, QuerySet.delete(), cascade depuis le
+    compte). Django émet ce signal à l'intérieur de la transaction de la
+    suppression : tout est annulé ensemble en cas d'erreur, et les fichiers
+    scannés ne quittent le disque qu'une fois celle-ci validée (signal
+    post_delete de Facture, cf. Projet_veto.fichiers)."""
+    emportees = factures_emportees_par(instance)
+    # Listes figées avant toute suppression : les QuerySets ci-dessus
+    # dépendent des lignes que l'on s'apprête à retirer.
+    ids_a_supprimer = set(emportees['factures_videes'].values_list('pk', flat=True))
+    ids_a_supprimer.update(emportees['factures_non_ventilees'].values_list('pk', flat=True))
+    factures_a_recalculer = list(
+        Facture.objects.filter(pk__in=emportees['lignes'].values('facture')).exclude(pk__in=ids_a_supprimer)
+    )
+    # QuerySet.delete() ne passe pas par LigneFacture.delete() : le montant
+    # des factures qui gardent d'autres lignes est donc recalculé ici.
+    emportees['lignes'].delete()
+    for facture in factures_a_recalculer:
+        facture.recalculer_montant()
+    Facture.objects.filter(pk__in=ids_a_supprimer).delete()

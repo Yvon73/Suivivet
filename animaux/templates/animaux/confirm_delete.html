@@ -12,8 +12,29 @@
         <div class="card-body">
             <p>
                 Es-tu sûr(e) de vouloir supprimer <strong>{{ object.nom }}</strong> ?
-                Cette action est irréversible et supprimera également son historique
-                (poids, vaccins/traitements, consultations, factures, documents).
+                Cette action est irréversible. Seront supprimés avec sa fiche :
+            </p>
+            <ul>
+                <li>{{ suppressions.identifications }} identification{{ suppressions.identifications|pluralize }}</li>
+                <li>{{ suppressions.poids }} pesée{{ suppressions.poids|pluralize }}</li>
+                <li>{{ suppressions.suivis }} suivi{{ suppressions.suivis|pluralize }} de vaccin/traitement</li>
+                <li>{{ suppressions.consultations }} consultation{{ suppressions.consultations|pluralize }}</li>
+                <li>{{ suppressions.documents }} document{{ suppressions.documents|pluralize }} (fichier compris)</li>
+                <li>
+                    <strong>{{ suppressions.factures }} facture{{ suppressions.factures|pluralize }}</strong>
+                    (fichier scanné compris) : celles qui lui sont attribuées en entier
+                </li>
+                <li>
+                    <strong>{{ suppressions.lignes_facture }} ligne{{ suppressions.lignes_facture|pluralize }}
+                    de facture ventilée{{ suppressions.lignes_facture|pluralize }}</strong> qui lui
+                    {{ suppressions.lignes_facture|pluralize:"est,sont" }}
+                    attribuée{{ suppressions.lignes_facture|pluralize }}
+                </li>
+            </ul>
+            <p>
+                Une facture ventilée qui garde des lignes pour d'autres animaux est conservée, son
+                montant diminué des lignes supprimées. Les lignes « Tous les animaux » et les factures
+                sans animal ne sont pas touchées.
             </p>
             <form method="post">
                 {% csrf_token %}

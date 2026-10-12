@@ -1,3 +1,6 @@
+import logging
+from urllib.parse import urldefrag
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
@@ -5,17 +8,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError, transaction
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, TemplateView
 
 from Projet_veto import throttling
 from Projet_veto.emailing import envoyer_email
+from . import accessibilite
 from .forms import InvitationFoyerForm, PremierUtilisateurForm
 from .models import Foyer, InvitationFoyer, MembreFoyer, PreferenceAccessibilite
+
+logger = logging.getLogger(__name__)
 
 
 def robots_txt(request):
@@ -51,7 +58,29 @@ class AccueilView(TemplateView):
         return context
 
 
-class PremierUtilisateurCreateView(CreateView):
+class PreferencesVisiteurMixin:
+    """Pour les vues de création de compte : reprend les réglages que le
+    visiteur a déjà faits dans le panneau accessibilité avant d'avoir un
+    compte (cookie, cf. accueil/accessibilite.py), au lieu de les lui faire
+    perdre à la connexion — les cases du formulaire en sont précochées (il
+    peut toujours les décocher), et « Très grand » est conservé."""
+
+    def get_initial(self):
+        initial = super().get_initial()
+        preferences = accessibilite.lire(self.request)
+        initial.update({champ: preferences[champ] for champ in accessibilite.CHAMPS_BOOLEENS})
+        initial['texte_agrandi'] = preferences['taille_texte'] != PreferenceAccessibilite.Taille.NORMAL
+        return initial
+
+    def enregistrer_preferences(self, form):
+        """À appeler avant login() : une fois connecté, accessibilite.lire()
+        ne regarde plus le cookie du visiteur."""
+        form.creer_preferences_accessibilite(
+            self.object, taille_visiteur=accessibilite.lire(self.request)['taille_texte'],
+        )
+
+
+class PremierUtilisateurCreateView(PreferencesVisiteurMixin, CreateView):
     """Création du tout premier compte de l'application, depuis la page
     d'accueil (cf. AccueilView) — un raccourci à `createsuperuser` en ligne
     de commande pour un premier lancement. Volontairement bloquée dès qu'un
@@ -79,13 +108,13 @@ class PremierUtilisateurCreateView(CreateView):
         self.object.is_staff = True
         self.object.is_superuser = True
         self.object.save(update_fields=['is_staff', 'is_superuser'])
-        form.creer_preferences_accessibilite(self.object)
+        self.enregistrer_preferences(form)
         login(self.request, self.object)
         messages.success(self.request, f"Bienvenue {self.object.username}, ton compte administrateur a été créé.")
         return reponse
 
 
-class InscriptionCreateView(CreateView):
+class InscriptionCreateView(PreferencesVisiteurMixin, CreateView):
     """Création d'un compte utilisateur « classique » (par opposition au tout
     premier compte, administrateur — cf. PremierUtilisateurCreateView) :
     ouverte à tout visiteur, sans validation de l'Admin. Par défaut, chaque
@@ -115,37 +144,37 @@ class InscriptionCreateView(CreateView):
 
     def form_valid(self, form):
         reponse = super().form_valid(form)
-        form.creer_preferences_accessibilite(self.object)
+        self.enregistrer_preferences(form)
         login(self.request, self.object)
         messages.success(self.request, f"Bienvenue {self.object.username}, ton compte a été créé.")
         return reponse
 
 
-@login_required
 @require_POST
 def mettre_a_jour_preferences_accessibilite(request):
-    """Enregistre un réglage du panneau accessibilité (cf.
-    templates/partials/panneau_accessibilite.html et static/js/accessibilite.js)
-    pour le compte connecté, afin qu'il soit réappliqué à chaque connexion —
-    sur n'importe quel navigateur — plutôt que mémorisé uniquement dans le
-    navigateur courant (cf. PreferenceAccessibilite.classes_css(), utilisée
-    au rendu de chaque page par Projet_veto.context_processors)."""
-    prefs, _ = PreferenceAccessibilite.objects.get_or_create(utilisateur=request.user)
+    """Enregistre l'état du panneau accessibilité (cf.
+    templates/partials/panneau_accessibilite.html), envoyé en entier à chaque
+    changement d'un de ses réglages, puis renvoie vers la page d'où il vient :
+    c'est en la réaffichant que le serveur applique les nouveaux réglages (cf.
+    Projet_veto.context_processors). Ouvert aux visiteurs non connectés, dont
+    les réglages vont dans un cookie (cf. accueil/accessibilite.py) : rien
+    d'autre que leurs propres préférences d'affichage n'y est modifiable."""
+    preferences = accessibilite.depuis_formulaire(request.POST)
 
-    champ = request.POST.get('champ')
-    valeur = request.POST.get('valeur')
+    # Page à réafficher : celle où se trouve le visiteur (htmx la transmet), à
+    # défaut celle où le panneau a été rendu. Jamais une adresse externe.
+    suite = request.headers.get('HX-Current-URL') or request.POST.get('suite', '')
+    suite = urldefrag(suite).url
+    if not url_has_allowed_host_and_scheme(suite, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        suite = reverse('accueil:accueil')
 
-    if champ == 'taille_texte':
-        if valeur not in PreferenceAccessibilite.Taille.values:
-            return JsonResponse({'success': False, 'erreur': 'valeur invalide'}, status=400)
-        prefs.taille_texte = valeur
-    elif champ in ('contraste_eleve', 'police_lisible', 'reduire_animations', 'palette_daltonisme', 'mode_sombre'):
-        setattr(prefs, champ, valeur == '1')
+    if request.headers.get('HX-Request'):
+        reponse = HttpResponse(status=204)
+        reponse['HX-Redirect'] = suite
     else:
-        return JsonResponse({'success': False, 'erreur': 'champ inconnu'}, status=400)
-
-    prefs.save()
-    return JsonResponse({'success': True})
+        reponse = redirect(suite)
+    accessibilite.enregistrer(request, reponse, preferences)
+    return reponse
 
 
 def _foyer_ou_creation(utilisateur):
@@ -172,6 +201,10 @@ class PartageCompteView(LoginRequiredMixin, TemplateView):
         utilisateur = self.request.user
         membre = MembreFoyer.objects.filter(utilisateur=utilisateur).select_related('foyer', 'invite_par').first()
         context['membre_foyer'] = membre
+        # Seul le fondateur du foyer voit les boutons « Retirer ».
+        fondateur = membre.foyer.membre_fondateur() if membre else None
+        context['membre_fondateur'] = fondateur
+        context['est_fondateur'] = bool(membre and fondateur and fondateur.pk == membre.pk)
         if membre:
             context['autres_membres'] = (
                 MembreFoyer.objects.filter(foyer=membre.foyer)
@@ -183,12 +216,11 @@ class PartageCompteView(LoginRequiredMixin, TemplateView):
         context['invitations_envoyees'] = InvitationFoyer.objects.filter(
             invite_par=utilisateur, statut=InvitationFoyer.Statut.EN_ATTENTE,
         )
-        context['invitations_recues'] = (
-            InvitationFoyer.objects.filter(
-                email_invite__iexact=utilisateur.email, statut=InvitationFoyer.Statut.EN_ATTENTE,
-            )
-            if utilisateur.email else InvitationFoyer.objects.none()
-        )
+        # Par compte invité (résolu à l'envoi), jamais par email : celui-ci
+        # n'est pas vérifié, un autre compte pourrait déclarer le même.
+        context['invitations_recues'] = InvitationFoyer.objects.filter(
+            invite=utilisateur, statut=InvitationFoyer.Statut.EN_ATTENTE,
+        ).select_related('invite_par')
         context['formulaire_invitation'] = InvitationFoyerForm(utilisateur=utilisateur)
         return context
 
@@ -207,21 +239,16 @@ def envoyer_invitation_foyer(request):
         return redirect('accueil:partage_compte')
 
     foyer = _foyer_ou_creation(request.user)
-    invitation = InvitationFoyer.objects.create(
-        foyer=foyer, invite_par=request.user, email_invite=form.cleaned_data['email'],
+    InvitationFoyer.objects.create(
+        foyer=foyer, invite_par=request.user, email_invite=form.cleaned_data['email'], invite=form.invite,
     )
 
     # Pas de lien GET direct vers l'acceptation/le refus (actions en POST,
     # protégées CSRF) : le lien mène à la page de gestion du partage, où
     # l'invitation apparaît avec ses deux boutons une fois connecté.
     lien = request.build_absolute_uri(reverse('accueil:partage_compte'))
-    envoyer_email(
-        'invitation_foyer',
-        {'nom_invitant': request.user.username, 'lien': lien},
-        "Invitation à partager un compte - Suivi Vétérinaire",
-        [form.cleaned_data['email']],
-    )
-
+    # Notification dans l'application d'abord : l'invité est ainsi prévenu
+    # même si l'email ne part pas.
     from notifications.models import Notification
     Notification.objects.create(
         utilisateur=form.invite,
@@ -231,21 +258,58 @@ def envoyer_invitation_foyer(request):
         lien=lien,
     )
 
+    try:
+        envoyer_email(
+            'invitation_foyer',
+            {'nom_invitant': request.user.username, 'lien': lien},
+            "Invitation à partager un compte - Suivi Vétérinaire",
+            [form.cleaned_data['email']],
+        )
+    except Exception:
+        # Serveur SMTP injoignable, destinataire refusé... : l'invitation est
+        # déjà enregistrée et reste acceptable, pas de page d'erreur.
+        logger.exception("Échec de l'envoi de l'email d'invitation de foyer")
+        messages.warning(
+            request,
+            "Invitation enregistrée, mais l'email n'a pas pu être envoyé : "
+            "la personne la verra en se connectant.",
+        )
+        return redirect('accueil:partage_compte')
+
     messages.success(request, f"Invitation envoyée à {form.cleaned_data['email']}.")
     return redirect('accueil:partage_compte')
 
 
 def _invitation_pour_repondre(request, token):
-    invitation = get_object_or_404(InvitationFoyer, token=token, statut=InvitationFoyer.Statut.EN_ATTENTE)
-    if not request.user.email or invitation.email_invite.lower() != request.user.email.lower():
-        raise Http404
-    return invitation
+    """Invitation en attente adressée au compte connecté — identifié par la
+    clé `invite` posée à l'envoi, pas par son email (ni vérifié ni unique :
+    un compte créé avec l'adresse de l'invité pouvait répondre à sa place)."""
+    return get_object_or_404(
+        InvitationFoyer, token=token, statut=InvitationFoyer.Statut.EN_ATTENTE, invite=request.user,
+    )
+
+
+def _annuler_invitations_de(membre):
+    """Annule les invitations encore en attente envoyées par un membre qui
+    sort du foyer : elles ne doivent plus pouvoir faire entrer quelqu'un dans
+    un foyer que leur auteur a quitté."""
+    InvitationFoyer.objects.filter(
+        foyer=membre.foyer, invite_par=membre.utilisateur, statut=InvitationFoyer.Statut.EN_ATTENTE,
+    ).update(statut=InvitationFoyer.Statut.ANNULEE, date_reponse=timezone.now())
 
 
 @login_required
 @require_POST
 def accepter_invitation_foyer(request, token):
     invitation = _invitation_pour_repondre(request, token)
+    # Garde-fou : l'auteur de l'invitation doit toujours être membre du foyer
+    # (quitter_foyer/retirer_membre_foyer annulent déjà ses invitations).
+    if not MembreFoyer.objects.filter(utilisateur=invitation.invite_par, foyer=invitation.foyer).exists():
+        invitation.statut = InvitationFoyer.Statut.ANNULEE
+        invitation.date_reponse = timezone.now()
+        invitation.save(update_fields=['statut', 'date_reponse'])
+        messages.error(request, "Cette invitation n'est plus valable : son auteur ne fait plus partie du foyer.")
+        return redirect('accueil:partage_compte')
     try:
         with transaction.atomic():
             # Le savepoint créé par atomic() permet à IntegrityError d'être
@@ -253,6 +317,16 @@ def accepter_invitation_foyer(request, token):
             # dans un savepoint avorte toute la transaction en cours — gênant
             # notamment sous TestCase, qui enveloppe chaque test dans une
             # transaction).
+            # Un foyer où l'on est seul (créé par une invitation envoyée
+            # puis restée sans suite) ne partage rien : on le supprime pour
+            # rejoindre celui-ci — la cascade emporte ses invitations encore
+            # en attente, qui mèneraient sinon à un foyer vide.
+            solo = MembreFoyer.objects.filter(utilisateur=request.user).first()
+            if (
+                solo and solo.foyer_id != invitation.foyer_id
+                and not MembreFoyer.objects.filter(foyer=solo.foyer_id).exclude(pk=solo.pk).exists()
+            ):
+                Foyer.objects.filter(pk=solo.foyer_id).delete()
             MembreFoyer.objects.create(
                 utilisateur=request.user, foyer=invitation.foyer, invite_par=invitation.invite_par,
             )
@@ -295,12 +369,20 @@ def annuler_invitation_foyer(request, pk):
 @login_required
 @require_POST
 def retirer_membre_foyer(request, pk):
-    """Retire un membre du foyer — réservé à celui qui l'a invité (cf.
-    MembreFoyer.invite_par) ; le membre fondateur (invite_par=None) ne peut
-    être retiré par personne, seulement se retirer lui-même (cf.
-    quitter_foyer)."""
-    membre = get_object_or_404(MembreFoyer, pk=pk, invite_par=request.user)
+    """Retire un membre du foyer — réservé au fondateur du foyer (cf.
+    Foyer.membre_fondateur), qu'il ait lui-même invité ce membre ou non :
+    avoir invité quelqu'un ne donne aucun droit de le retirer. Le fondateur
+    ne peut être retiré par personne (lui seul retire, et pas lui-même par
+    cette action) ; il peut seulement quitter le foyer (cf. quitter_foyer),
+    le plus ancien membre restant devenant alors fondateur."""
+    moi = get_object_or_404(MembreFoyer.objects.select_related('foyer'), utilisateur=request.user)
+    # Dans le foyer du compte connecté seulement — jamais un membre d'un
+    # autre foyer, même en devinant sa clé.
+    membre = get_object_or_404(MembreFoyer, pk=pk, foyer=moi.foyer)
+    if membre.pk == moi.pk or not moi.est_fondateur():
+        raise Http404
     nom = membre.utilisateur.username
+    _annuler_invitations_de(membre)
     membre.delete()
     messages.info(request, f"{nom} a été retiré du foyer.")
     return redirect('accueil:partage_compte')
@@ -310,8 +392,11 @@ def retirer_membre_foyer(request, pk):
 @require_POST
 def quitter_foyer(request):
     """Un membre peut toujours se retirer lui-même du foyer, à tout moment,
-    sans condition (contrairement à retirer_membre_foyer)."""
+    sans condition (contrairement à retirer_membre_foyer) — fondateur
+    compris : le plus ancien membre restant devient alors fondateur, sans
+    rien à faire ici (cf. Foyer.membre_fondateur)."""
     membre = get_object_or_404(MembreFoyer, utilisateur=request.user)
+    _annuler_invitations_de(membre)
     membre.delete()
     messages.info(request, "Tu as quitté le foyer partagé.")
     return redirect('accueil:partage_compte')

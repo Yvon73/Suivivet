@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Ajouter une pesée - {{ animal.nom }}{% endblock %}
+{% block title %}{% if object.pk %}Modifier une pesée{% else %}Ajouter une pesée{% endif %} - {{ animal.nom }}{% endblock %}
 
 {% block content %}
     <h1 class="mb-4">
-        <i class="bi bi-graph-up-arrow"></i> Ajouter une pesée pour {{ animal.nom }}
+        <i class="bi bi-graph-up-arrow"></i> {% if object.pk %}Modifier une pesée de{% else %}Ajouter une pesée pour{% endif %} {{ animal.nom }}
     </h1>
 
     <form method="post" novalidate>

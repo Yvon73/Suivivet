@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load listes %}
 {% load static %}
 
 {% block title %}Liste des documents{% endblock %}
@@ -9,16 +10,22 @@
         <i class="bi bi-plus"></i> Ajouter un document
     </a>
 
+    {% include 'partials/liste_recherche.html' %}
+
+    {# Zone redessinée par htmx à chaque recherche, tri ou changement de page #}
+    {# (cf. Projet_veto/listes.py) : seuls les liens de l'en-tête et de la #}
+    {# pagination sont « boostés », pas ceux des lignes du tableau. #}
+    <div id="zoneListe" hx-target="#zoneListe" hx-select="#zoneListe" hx-swap="outerHTML">
     <div class="table-responsive">
         <table class="table table-striped" id="documentsTable">
-            <thead>
+            <thead hx-boost="true">
                 <tr>
-                    <th>Animal</th>
-                    <th>Titre</th>
-                    <th>Type</th>
-                    <th>Date d'ajout</th>
-                    <th>Fichier</th>
-                    <th>Actions</th>
+                    {% entete_tri 'animal' 'Animal' %}
+                    {% entete_tri 'titre' 'Titre' %}
+                    {% entete_tri 'type' 'Type' %}
+                    {% entete_tri 'date' "Date d'ajout" %}
+                    <th scope="col">Fichier</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,38 +52,13 @@
                             <a href="{% url 'documents:document_delete' document.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
                         </td>
                     </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted">Aucun document.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% include 'partials/liste_pagination.html' %}
+    </div>
 
 {% endblock %}
-
-    {% block extra_js %}
-    {{ block.super }}
-    <script>
-    $(document).ready(function() {
-        $('#documentsTable').DataTable({
-            language: {
-                url: '{% static "vendor/datatables/fr-FR.json" %}',
-            },
-            responsive: true,
-            dom: '<"row"<"col-md-6"B><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
-            buttons: [
-                {
-                    extend: 'csv',
-                    text: '<i class="bi bi-file-earmark-csv"></i> CSV',
-                    className: 'btn btn-sm btn-outline-secondary',
-                    title: 'Liste des documents',
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="bi bi-printer"></i> Imprimer',
-                    className: 'btn btn-sm btn-outline-secondary',
-                    title: 'Liste des documents',
-                },
-            ],
-        });
-    });
-    </script>
-    {% endblock %}

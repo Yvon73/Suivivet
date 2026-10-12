@@ -3,45 +3,12 @@
 
 {% block title %}Calendrier des Consultations{% endblock %}
 
-{% block vendor_css %}
-<link rel="stylesheet" href="{% static 'vendor/fullcalendar/main.min.css' %}">
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    #calendar {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .fc-event {
-        cursor: pointer;
-    }
-    @media (max-width: 767.98px) {
-        .fc .fc-toolbar {
-            flex-wrap: wrap;
-            row-gap: 0.5rem;
-        }
-        .fc .fc-toolbar-title {
-            font-size: 1.15rem;
-        }
-        /* « Toute la journée », insécable, déborde de l'écran avec le plus
-           grand texte du panneau accessibilité */
-        html.a11y-taille-tres-grand .fc .fc-list-event-time {
-            white-space: normal;
-        }
-        .fc .fc-toolbar.fc-footer-toolbar {
-            margin-top: 1rem;
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
     <h1>Calendrier des Consultations</h1>
 
     <div class="card mb-4">
         <div class="card-body">
-            <div id="calendar"></div>
+            {% include 'consultations/partials/calendrier.html' %}
         </div>
     </div>
 
@@ -52,13 +19,13 @@
         <div class="card-body">
             <div class="d-flex flex-wrap gap-3">
                 <div>
-                    <span class="legende-evenement fc-event-consultation">Consultation</span>
+                    <span class="legende-evenement evenement-consultation">Consultation</span>
                 </div>
                 <div>
-                    <span class="legende-evenement fc-event-rappel-consultation">⚠️ Rappel consultation (2 jours avant)</span>
+                    <span class="legende-evenement evenement-rappel-consultation">⚠️ Rappel consultation (2 jours avant)</span>
                 </div>
                 <div>
-                    <span class="legende-evenement fc-event-rappel-vaccin">💉 Rappel vaccin</span>
+                    <span class="legende-evenement evenement-rappel-vaccin">💉 Rappel vaccin</span>
                 </div>
             </div>
         </div>
@@ -139,52 +106,4 @@
             {% endif %}
         </div>
     </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'vendor/fullcalendar/main.min.js' %}"></script>
-<script src="{% static 'vendor/fullcalendar/fr.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    // Sur téléphone, la grille mensuelle (7 colonnes de ~45 px) tronque tous
-    // les événements : on ouvre plutôt la vue « Planning » (liste du mois),
-    // la grille restant accessible depuis la barre du bas.
-    var petitEcran = window.matchMedia('(max-width: 767.98px)').matches;
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: petitEcran ? 'listMonth' : 'dayGridMonth',
-        headerToolbar: petitEcran ? {
-            left: 'prev,next',
-            center: 'title',
-            right: 'today'
-        } : {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        footerToolbar: petitEcran ? {center: 'listMonth,dayGridMonth'} : false,
-        locale: 'fr',
-        events: '{% url "consultations:calendrier_json" %}',
-        eventClick: function(info) {
-            if (info.event.url) {
-                window.open(info.event.url, '_blank');
-            }
-        },
-        height: 'auto',
-    });
-    calendar.render();
-
-    // Le clic sur un événement ouvre son détail dans un nouvel onglet (pour ne
-    // pas perdre la position dans le calendrier). Si une consultation est
-    // modifiée ou supprimée depuis cet onglet, le calendrier d'origine n'est
-    // pas averti : son événement reste affiché tel quel et pointer dessus
-    // renverrait une 404 (ou des infos périmées). On recharge donc les
-    // événements à chaque retour sur cet onglet.
-    document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible') {
-            calendar.refetchEvents();
-        }
-    });
-});
-</script>
 {% endblock %}

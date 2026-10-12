@@ -1,0 +1,104 @@
+{# Calendrier rendu par le serveur (cf. consultations/calendrier.py). Toute la #}
+{# navigation est faite de liens ordinaires ; avec htmx (hx-boost), seule cette #}
+{# zone est remplacée. Elle se rafraîchit aussi d'elle-même quand la fenêtre #}
+{# redevient active : un événement s'ouvre dans un nouvel onglet (pour ne pas #}
+{# perdre sa place dans le calendrier) et peut y être modifié ou supprimé. #}
+{# hx-sync étant hérité, la barre de navigation redéfinit le sien : un clic #}
+{# annule le rafraîchissement en cours (replace) au lieu d'être abandonné #}
+{# (drop) — sinon le premier clic au retour sur la fenêtre serait perdu. Le #}
+{# délai laisse en outre ce clic partir avant le rafraîchissement. #}
+{# Sans choix explicite (`vue` vide), la grille s'affiche sur grand écran et le #}
+{# planning sur téléphone, où 7 colonnes de 45 px tronqueraient tout. #}
+<div id="zoneCalendrier"
+     hx-get="{{ url_courante }}" hx-trigger="focus from:window delay:400ms" hx-sync="this:drop"
+     hx-target="#zoneCalendrier" hx-select="#zoneCalendrier" hx-swap="outerHTML">
+    <div class="calendrier-barre d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3" hx-boost="true" hx-sync="#zoneCalendrier:replace">
+        <div class="btn-group" role="group" aria-label="Changer de mois">
+            {% if url_mois_precedent %}
+                <a href="{{ url_mois_precedent }}" class="btn btn-outline-primary" title="Mois précédent" aria-label="Mois précédent">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </a>
+            {% endif %}
+            {% if url_mois_suivant %}
+                <a href="{{ url_mois_suivant }}" class="btn btn-outline-primary" title="Mois suivant" aria-label="Mois suivant">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+            {% endif %}
+            <a href="{{ url_aujourdhui }}" class="btn btn-outline-primary{% if est_mois_courant %} disabled{% endif %}"
+               {% if est_mois_courant %}aria-disabled="true" tabindex="-1"{% endif %}>Aujourd'hui</a>
+        </div>
+        <h2 class="h4 mb-0 text-capitalize" aria-live="polite">{{ mois_affiche|date:"F Y" }}</h2>
+        <div class="btn-group" role="group" aria-label="Type d'affichage">
+            <a href="{{ url_grille }}" class="btn btn-outline-secondary{% if vue == 'grille' %} active{% endif %}"
+               {% if vue == 'grille' %}aria-current="true"{% endif %}>
+                <i class="bi bi-calendar3" aria-hidden="true"></i> Mois
+            </a>
+            <a href="{{ url_planning }}" class="btn btn-outline-secondary{% if vue == 'planning' %} active{% endif %}"
+               {% if vue == 'planning' %}aria-current="true"{% endif %}>
+                <i class="bi bi-list-ul" aria-hidden="true"></i> Planning
+            </a>
+        </div>
+    </div>
+
+    {# --- Grille du mois --- #}
+    <div class="{% if vue == 'planning' %}d-none{% elif not vue %}d-none d-md-block{% endif %}">
+        <table class="calendrier-grille">
+            <caption class="visually-hidden">Calendrier de {{ mois_affiche|date:"F Y" }}</caption>
+            <thead>
+                <tr>
+                    {% for jour in jours_semaine %}
+                        <th scope="col"><abbr title="{{ jour }}">{{ jour|slice:":3" }}.</abbr></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for semaine in semaines %}
+                    <tr>
+                        {% for jour in semaine %}
+                            <td class="{% if jour.hors_mois %}calendrier-hors-mois{% endif %}{% if jour.aujourdhui %} calendrier-aujourdhui{% endif %}"
+                                {% if jour.aujourdhui %}aria-current="date"{% endif %}>
+                                <div class="calendrier-numero">
+                                    <span class="visually-hidden">{{ jour.date|date:"l j F" }}</span>
+                                    <span aria-hidden="true">{{ jour.date.day }}</span>
+                                </div>
+                                {% for evenement in jour.evenements %}
+                                    <a href="{{ evenement.url }}" target="_blank" rel="noopener"
+                                       class="calendrier-evenement {{ evenement.classe }}" title="{{ evenement.titre }}">
+                                        {% if evenement.heure %}<span class="calendrier-heure">{{ evenement.heure|time:"H:i" }}</span>{% endif %}
+                                        {{ evenement.titre }}
+                                    </a>
+                                {% endfor %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# --- Planning : liste des journées du mois qui ont un événement --- #}
+    <div class="{% if vue == 'grille' %}d-none{% elif not vue %}d-md-none{% endif %}">
+        {% for journee in planning %}
+            <section class="calendrier-journee{% if journee.aujourdhui %} calendrier-aujourdhui{% endif %}">
+                <h3 class="h6 calendrier-journee-titre text-capitalize">
+                    {{ journee.date|date:"l j F Y" }}{% if journee.aujourdhui %} <span class="badge bg-primary">Aujourd'hui</span>{% endif %}
+                </h3>
+                <ul class="list-unstyled mb-0">
+                    {% for evenement in journee.evenements %}
+                        <li>
+                            <a href="{{ evenement.url }}" target="_blank" rel="noopener"
+                               class="calendrier-evenement {{ evenement.classe }}">
+                                <span class="calendrier-heure">{% if evenement.heure %}{{ evenement.heure|time:"H:i" }}{% else %}Toute la journée{% endif %}</span>
+                                {{ evenement.titre }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% empty %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle" aria-hidden="true"></i> Aucun événement en {{ mois_affiche|date:"F Y" }}.
+            </div>
+        {% endfor %}
+    </div>
+</div>

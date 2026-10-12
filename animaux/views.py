@@ -1,4 +1,4 @@
-import io, logging, matplotlib, base64, csv, pandas as pd
+import io, logging, matplotlib, base64, csv, re, pandas as pd
 from io import BytesIO
 from datetime import date
 import matplotlib.pyplot as plt
@@ -8,19 +8,20 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import transaction
-from django.http import FileResponse, Http404, HttpResponse, JsonResponse
+from django.db.models import Count
+from django.http import FileResponse, Http404, HttpResponse
 from django.template.loader import render_to_string
-from django.views.decorators.http import require_POST
 from weasyprint import HTML, CSS
 from accueil.models import PreferenceAccessibilite
 from accueil.utils import comptes_accessibles
+from Projet_veto.listes import ListeTriableMixin
 from .models import Animal, AnimalIdentification, Poids, Espece, Robe, Race, Organisme, Proprietaire
-from .forms import (
-    AnimalForm, AnimalIdentificationFormSet, PoidsForm, RaceQuickAddForm, OrganismeQuickAddForm,
-    RobeQuickAddForm, EspeceQuickAddForm, ProprietaireForm,
-)
-from .forms import AnimalSearchForm
+from . import formulaire
+from .forms import AnimalForm, AnimalIdentificationFormSet, PoidsForm, ProprietaireForm
+from .forms import AnimalSearchForm, sans_accents
 
 logger = logging.getLogger(__name__)
 
@@ -36,28 +37,105 @@ def _sanitize_spreadsheet_value(value):
     return value
 
 
-def _proprietaire_depuis_email(email, utilisateur):
-    """Retrouve (ou crée) le Proprietaire correspondant à l'email d'une ligne
-    importée (colonne « Propriétaire » du CSV, historiquement un simple
-    email) : dédoublonnage par email au sein de tout le foyer partagé de
-    `utilisateur` (cf. accueil.utils.comptes_accessibles) — pour ne pas
-    recréer silencieusement une fiche déjà présente chez un autre membre du
-    foyer —, nouvelle fiche rattachée à `utilisateur` sinon, avec un nom
-    dérivé de la partie locale de l'adresse à défaut de mieux (ex.
-    « jean.dupont@... » -> « Jean Dupont »), à compléter ensuite via la fiche
-    propriétaire."""
-    email = (email or '').strip()
-    if not email or email.lower() == 'nan':
-        email = 'inconnu@exemple.invalid'
+EMAIL_PROPRIETAIRE_INCONNU = 'inconnu@exemple.invalid'
+
+
+def _proprietaire_depuis_import(valeur, utilisateur):
+    """Retrouve (ou crée) le Proprietaire désigné par la colonne
+    « Propriétaire » d'une ligne importée. La valeur est soit un email
+    (format historique de l'import), soit un nom complet — c'est ce qu'écrit
+    l'export CSV, et ce que l'on saisit spontanément.
+
+    - Email : dédoublonnage par email au sein de tout le foyer partagé de
+      `utilisateur` (cf. accueil.utils.comptes_accessibles) — pour ne pas
+      recréer silencieusement une fiche déjà présente chez un autre membre du
+      foyer —, nouvelle fiche rattachée à `utilisateur` sinon, avec un nom
+      dérivé de la partie locale de l'adresse à défaut de mieux (ex.
+      « jean.dupont@... » -> « Jean Dupont »), à compléter ensuite via la
+      fiche propriétaire.
+    - Nom : fiche du foyer portant ce nom complet (sans tenir compte des
+      majuscules), nouvelle fiche à ce nom sinon. Le nom n'est jamais rangé
+      dans le champ email : une fiche créée ainsi reçoit un email qui lui est
+      propre dans le domaine réservé « .invalid » (l'email est obligatoire et
+      unique par compte), à corriger ensuite via la fiche propriétaire.
+    - Valeur vide : fiche « Inconnu » du foyer.
+
+    Seules les fiches actives sont retrouvées : comme dans le formulaire
+    (cf. ProprietaireForm.clean_email), un propriétaire « supprimé » puis
+    réimporté donne une fiche neuve, jamais l'ancienne fiche archivée."""
+    valeur = (valeur or '').strip()
+    comptes = comptes_accessibles(utilisateur)
+    if not valeur:
+        valeur = EMAIL_PROPRIETAIRE_INCONNU
+    try:
+        validate_email(valeur)
+    except ValidationError:
+        for proprietaire in Proprietaire.objects.filter(utilisateur__in=comptes, actif=True).order_by('pk'):
+            if proprietaire.nom_complet().lower() == valeur.lower():
+                return proprietaire
+        base = re.sub(r'[^a-z0-9]+', '.', sans_accents(valeur)).strip('.') or 'inconnu'
+        email, numero = f'{base}@exemple.invalid', 1
+        while Proprietaire.objects.filter(utilisateur=utilisateur, email__iexact=email).exists():
+            numero += 1
+            email = f'{base}.{numero}@exemple.invalid'
+        return Proprietaire.objects.create(nom=valeur[:100], email=email, utilisateur=utilisateur)
+
     proprietaire = Proprietaire.objects.filter(
-        utilisateur__in=comptes_accessibles(utilisateur), email__iexact=email,
-    ).first()
+        utilisateur__in=comptes, email__iexact=valeur, actif=True,
+    ).order_by('pk').first()
     if proprietaire:
         return proprietaire
-    partie_locale = email.split('@', 1)[0]
+    partie_locale = valeur.split('@', 1)[0]
     mots = [mot for mot in partie_locale.replace('_', '.').replace('+', '.').split('.') if mot]
-    nom = ' '.join(mot.capitalize() for mot in mots) or email
-    return Proprietaire.objects.create(nom=nom, email=email, utilisateur=utilisateur)
+    nom = ' '.join(mot.capitalize() for mot in mots) or valeur
+    return Proprietaire.objects.create(nom=nom, email=valeur, utilisateur=utilisateur)
+
+
+class ErreurImport(Exception):
+    """Ligne du fichier importé inexploitable ; le message est affiché tel
+    quel à l'utilisateur."""
+
+
+def _valeur_csv(row, colonne):
+    """Cellule d'une ligne importée, en texte ; chaîne vide si la colonne est
+    absente du fichier ou la cellule vide."""
+    valeur = row.get(colonne)
+    return '' if valeur is None or pd.isna(valeur) else str(valeur).strip()
+
+
+def _identifications_csv(row):
+    """Couples (numéro, organisme) d'une ligne importée, chaînes vides pour
+    ce qui manque. Deux formats sont lus : les colonnes « Identification » +
+    « Organisme » de la notice d'import, et la colonne « Identifications » de
+    l'export (« 2502… (LOF); 987654 (SIRE) », cf.
+    Animal.identifications_display), pour qu'un fichier exporté puis
+    réimporté retrouve ses animaux au lieu de les recréer en double. Dans ce
+    second format, un élément sans parenthèses ni chiffre est le nom d'un
+    organisme sans numéro."""
+    numero = _valeur_csv(row, 'Identification')
+    organisme = _valeur_csv(row, 'Organisme')
+    if numero or not _valeur_csv(row, 'Identifications'):
+        return [(numero, organisme)] if numero or organisme else []
+    couples = []
+    for element in _valeur_csv(row, 'Identifications').split(';'):
+        element = element.strip()
+        decoupe = re.match(r'^(.*?)\s*\(([^()]*)\)$', element)
+        if decoupe:
+            couples.append((decoupe.group(1).strip(), decoupe.group(2).strip()))
+        elif element and not re.search(r'\d', element):
+            couples.append(('', element))
+        elif element:
+            couples.append((element, ''))
+    return couples
+
+
+def _il_y_a(jour, annees):
+    """Même jour `annees` années plus tôt (le 29 février devient le 28
+    quand l'année visée n'est pas bissextile)."""
+    try:
+        return jour.replace(year=jour.year - annees)
+    except ValueError:
+        return jour.replace(year=jour.year - annees, day=28)
 
 matplotlib.use('Agg')  # Pour générer des graphiques sans interface graphique
 
@@ -71,12 +149,18 @@ class AnimalDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        animal = self.get_object()
+        animal = self.object
         context['poids_list'] = animal.poids.all().order_by('date')
         context['age'] = animal.age()
         suivis = animal.suivi_vaccins_traitements.all()
-        context['vaccins'] = suivis.filter(vaccin__isnull=False)
-        context['traitements'] = suivis.filter(traitement__isnull=False)
+        context['vaccins'] = suivis.filter(vaccin__isnull=False).select_related('vaccin')
+        context['traitements'] = suivis.filter(traitement__isnull=False).select_related('traitement')
+        # Listes passées par le contexte (et non parcourues depuis `animal`
+        # dans le gabarit) : chacune n'est ainsi lue qu'une fois, avec ses
+        # relations, au lieu d'une requête par ligne.
+        context['consultations'] = animal.consultations.select_related('veterinaire')
+        context['factures'] = animal.factures.all()
+        context['documents'] = animal.documents.select_related('type_document')
 
         # Coût de revient (cf. factures.Facture.cout_revient_animal) : mensuel
         # (mois en cours) et annuel (année en cours), même granularité que le
@@ -88,35 +172,24 @@ class AnimalDetailView(LoginRequiredMixin, DetailView):
 
         return context
 
-class AnimalFormContextMixin:
-    """Contexte partagé par les vues de création/modification d'animal : liste
-    des espèces et niveaux de dangerosité pour la modale « Ajouter une race »,
-    fiche descriptive de chaque race (races_info) pour le panneau d'aperçu JS
-    affiché quand une race est sélectionnée, et espèces d'organisme pour la
-    modale « Ajouter un organisme » (cf. form.html)."""
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['especes'] = Espece.objects.all()
-        context['echelles_dangerosite'] = Race.EchelleDangerosite.choices
-        context['races_info'] = {
-            race.pk: race.donnees_json() for race in Race.objects.select_related('espece')
-        }
-        context['organisme_especes'] = Organisme.Espece.choices
-        return context
-
 class AnimalIdentificationsFormsetMixin:
     """Gère, en plus du AnimalForm, le formset AnimalIdentificationFormSet
     (couples organisme/identification, cf. animaux/form.html) sur les vues de
     création et modification d'un animal : un animal pouvant être enregistré
     auprès de plusieurs organismes, ces couples ne sont plus des champs
-    directs d'AnimalForm mais des lignes liées, ajoutées/retirées à la volée
-    par le bouton « + » du formulaire."""
+    directs d'AnimalForm mais des lignes liées, ajoutées/retirées à la
+    demande. Fournit aussi au gabarit le contexte de tout ce que htmx pilote
+    dans le formulaire (menus Espèce/Race, fiche de race, ajouts rapides,
+    identifications — cf. animaux/formulaire.py)."""
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if 'identifications_formset' not in context:
-            context['identifications_formset'] = AnimalIdentificationFormSet(instance=self.object)
+        formset = context.get('identifications_formset')
+        if formset is None:
+            formset = AnimalIdentificationFormSet(instance=self.object)
+        context.update(formulaire.contexte_formulaire(
+            context['form'], formset, self.object, afficher_erreurs=formset.is_bound,
+        ))
         return context
 
     def form_valid(self, form):
@@ -133,7 +206,7 @@ class AnimalIdentificationsFormsetMixin:
         formset = AnimalIdentificationFormSet(self.request.POST, instance=self.object)
         return self.render_to_response(self.get_context_data(form=form, identifications_formset=formset))
 
-class AnimalCreateView(LoginRequiredMixin, AnimalFormContextMixin, AnimalIdentificationsFormsetMixin, CreateView):
+class AnimalCreateView(LoginRequiredMixin, AnimalIdentificationsFormsetMixin, CreateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'animaux/form.html'
@@ -148,7 +221,7 @@ class AnimalCreateView(LoginRequiredMixin, AnimalFormContextMixin, AnimalIdentif
         form.instance.utilisateur = self.request.user
         return super().form_valid(form)
 
-class AnimalUpdateView(LoginRequiredMixin, AnimalFormContextMixin, AnimalIdentificationsFormsetMixin, UpdateView):
+class AnimalUpdateView(LoginRequiredMixin, AnimalIdentificationsFormsetMixin, UpdateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'animaux/form.html'
@@ -170,89 +243,44 @@ class AnimalDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return super().get_queryset().filter(utilisateur__in=comptes_accessibles(self.request.user))
 
-@login_required
-@require_POST
-def ajouter_espece_ajax(request):
-    """Crée une nouvelle espèce (et éventuellement sa première race) depuis
-    la modale du formulaire animal, et les renvoie en JSON pour les insérer
-    directement dans les menus déroulants « Espèce » et « Race » côté
-    client (remplace l'ancien choix « Autre » du menu déroulant)."""
-    form = EspeceQuickAddForm(request.POST)
-    if form.is_valid():
-        espece, race = form.save()
-        return JsonResponse({
-            'success': True,
-            'espece': {'id': espece.pk, 'nom': espece.nom},
-            'race': {'espece_nom': espece.nom, **race.donnees_json()},
-        })
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
+    def get_context_data(self, **kwargs):
+        """Nombres réels de ce que la suppression emporte, pour que la page
+        de confirmation dise exactement ce qui sera supprimé."""
+        # Import différé : factures dépend d'animaux, pas l'inverse.
+        from factures.models import factures_emportees_par
+        context = super().get_context_data(**kwargs)
+        animal = self.object
+        emportees = factures_emportees_par(animal)
+        context['suppressions'] = {
+            'identifications': animal.identifications.count(),
+            'poids': animal.poids.count(),
+            'suivis': animal.suivi_vaccins_traitements.count(),
+            'consultations': animal.consultations.count(),
+            'documents': animal.documents.count(),
+            'lignes_facture': emportees['lignes'].count(),
+            'factures': emportees['factures_non_ventilees'].count() + emportees['factures_videes'].count(),
+        }
+        return context
 
-@login_required
-@require_POST
-def ajouter_race_ajax(request):
-    """Crée une nouvelle race depuis la modale du formulaire animal, sans jamais
-    toucher aux données déjà en base, et la renvoie en JSON pour l'insérer
-    directement dans le menu déroulant côté client."""
-    form = RaceQuickAddForm(request.POST)
-    if form.is_valid():
-        race = form.save()
-        return JsonResponse({
-            'success': True,
-            'espece_nom': race.espece.nom,
-            **race.donnees_json(),
-        })
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
-
-@login_required
-@require_POST
-def ajouter_organisme_ajax(request):
-    """Crée un nouvel organisme depuis la modale du formulaire animal, et le
-    renvoie en JSON pour l'insérer directement dans le menu déroulant côté
-    client (même principe que ajouter_race_ajax)."""
-    form = OrganismeQuickAddForm(request.POST)
-    if form.is_valid():
-        organisme = form.save()
-        return JsonResponse({
-            'success': True,
-            'id': organisme.pk,
-            'nom_court': organisme.nom_court,
-            'espece': organisme.espece,
-            'espece_libelle': organisme.get_espece_display(),
-        })
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
-
-@login_required
-@require_POST
-def ajouter_robe_ajax(request):
-    """Crée une nouvelle robe depuis la modale du formulaire animal, et la
-    renvoie en JSON pour l'insérer directement dans le menu déroulant côté
-    client (même principe que ajouter_race_ajax)."""
-    form = RobeQuickAddForm(request.POST)
-    if form.is_valid():
-        robe = form.save()
-        return JsonResponse({'success': True, 'id': robe.pk, 'nom': robe.nom})
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
-
-@login_required
-@require_POST
-def ajouter_proprietaire_ajax(request):
-    """Crée un nouveau propriétaire depuis la modale du formulaire animal, et
-    le renvoie en JSON pour l'insérer directement dans le menu déroulant côté
-    client (même principe que ajouter_organisme_ajax)."""
-    form = ProprietaireForm(request.POST, user=request.user)
-    if form.is_valid():
-        proprietaire = form.save()
-        return JsonResponse({'success': True, 'id': proprietaire.pk, 'nom': str(proprietaire)})
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
-
-class ProprietaireListView(LoginRequiredMixin, ListView):
+class ProprietaireListView(LoginRequiredMixin, ListeTriableMixin, ListView):
     model = Proprietaire
     template_name = 'animaux/proprietaire_liste.html'
     context_object_name = 'proprietaires'
-    ordering = ['nom', 'prenom']
+    champs_recherche = ('nom', 'prenom', 'telephone', 'email', 'ville')
+    colonnes_tri = {
+        'nom': ('nom', 'prenom'),
+        'prenom': ('prenom', 'nom'),
+        'telephone': 'telephone',
+        'email': 'email',
+        'animaux': 'nb_animaux',
+    }
+    tri_defaut = 'nom'
 
     def get_queryset(self):
-        return super().get_queryset().filter(utilisateur__in=comptes_accessibles(self.request.user), actif=True)
+        queryset = super().get_queryset().filter(
+            utilisateur__in=comptes_accessibles(self.request.user), actif=True,
+        ).annotate(nb_animaux=Count('animaux'))
+        return self.filtrer_et_trier(queryset)
 
 class ProprietaireDetailView(LoginRequiredMixin, DetailView):
     model = Proprietaire
@@ -261,6 +289,11 @@ class ProprietaireDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return super().get_queryset().filter(utilisateur__in=comptes_accessibles(self.request.user))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['animaux'] = self.object.animaux.select_related('espece')
+        return context
 
 class ProprietaireCreateView(LoginRequiredMixin, CreateView):
     model = Proprietaire
@@ -309,17 +342,56 @@ class PoidsCreateView(LoginRequiredMixin, CreateView):
     form_class = PoidsForm
     template_name = 'animaux/poids_form.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            self.animal = get_object_or_404(
+                Animal, pk=kwargs['animal_id'], utilisateur__in=comptes_accessibles(request.user),
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        # L'animal est posé sur l'instance avant la validation, pour que
+        # PoidsForm.clean_date() puisse refuser une deuxième pesée à la même
+        # date (sinon : IntegrityError à l'enregistrement).
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = Poids(animal=self.animal)
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['animal'] = get_object_or_404(Animal, pk=self.kwargs['animal_id'], utilisateur__in=comptes_accessibles(self.request.user))
+        context['animal'] = self.animal
         return context
 
-    def form_valid(self, form):
-        form.instance.animal = get_object_or_404(Animal, pk=self.kwargs['animal_id'], utilisateur__in=comptes_accessibles(self.request.user))
-        return super().form_valid(form)
+    def get_success_url(self):
+        return reverse_lazy('animaux:animal_detail', kwargs={'pk': self.animal.pk})
+
+
+class PoidsQuerysetMixin:
+    """Pesées des animaux visibles du compte connecté (lui-même, plus les
+    autres membres de son foyer partagé le cas échéant)."""
+    model = Poids
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            animal__utilisateur__in=comptes_accessibles(self.request.user),
+        ).select_related('animal')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['animal'] = self.object.animal
+        return context
 
     def get_success_url(self):
-        return reverse_lazy('animaux:animal_detail', kwargs={'pk': self.kwargs['animal_id']})
+        return reverse_lazy('animaux:animal_detail', kwargs={'pk': self.object.animal_id})
+
+
+class PoidsUpdateView(LoginRequiredMixin, PoidsQuerysetMixin, UpdateView):
+    form_class = PoidsForm
+    template_name = 'animaux/poids_form.html'
+
+
+class PoidsDeleteView(LoginRequiredMixin, PoidsQuerysetMixin, DeleteView):
+    template_name = 'animaux/poids_confirm_delete.html'
 
 @login_required
 def photo_animal(request, animal_id):
@@ -329,7 +401,11 @@ def photo_animal(request, animal_id):
     animal = get_object_or_404(Animal, pk=animal_id, utilisateur__in=comptes_accessibles(request.user))
     if not animal.photo:
         raise Http404
-    return FileResponse(animal.photo.open('rb'))
+    try:
+        return FileResponse(animal.photo.open('rb'))
+    except FileNotFoundError:
+        # Fiche présente en base mais photo absente du disque : 404, pas 500.
+        raise Http404
 
 @login_required
 def graphique_poids(request, animal_id):
@@ -399,11 +475,24 @@ def generer_pdf_fiche_animal(request, animal_id):
     HTML(string=html).write_pdf(response, stylesheets=[CSS(string='@page { size: A4; margin: 1cm; }')])
     return response
 
-class AnimalListView(LoginRequiredMixin, ListView):
+class AnimalListView(LoginRequiredMixin, ListeTriableMixin, ListView):
     model = Animal
     template_name = 'animaux/liste.html'
     context_object_name = 'animaux'
-    paginate_by = 10
+    champs_recherche = (
+        'nom', 'espece__nom', 'race__nom', 'proprietaire__nom', 'proprietaire__prenom',
+        'identifications__identification',
+        'identifications__organisme__nom_court', 'identifications__organisme_autre',
+    )
+    colonnes_tri = {
+        'nom': 'nom',
+        'espece': 'espece__nom',
+        'race': 'race__nom',
+        # Âge croissant = du plus jeune au plus vieux, donc date de naissance décroissante.
+        'age': '-date_naissance',
+        'proprietaire': ('proprietaire__nom', 'proprietaire__prenom'),
+    }
+    tri_defaut = 'nom'
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(
@@ -425,20 +514,21 @@ class AnimalListView(LoginRequiredMixin, ListView):
             if data['race']:
                 queryset = queryset.filter(race__nom__icontains=data['race'])
 
+            # Âges en années révolues, comme l'âge affiché (Animal.age()).
+            # Les valeurs sont bornées par AnimalSearchForm, l'année calculée
+            # reste donc toujours valide.
             if data['min_age'] is not None:
-                today = date.today()
-                min_birth_date = date(today.year - data['min_age'] - 1, today.month, today.day)
-                queryset = queryset.filter(date_naissance__lte=min_birth_date)
+                # Au moins N ans : né au plus tard il y a N ans jour pour jour.
+                queryset = queryset.filter(date_naissance__lte=_il_y_a(date.today(), data['min_age']))
 
             if data['max_age'] is not None:
-                today = date.today()
-                max_birth_date = date(today.year - data['max_age'], today.month, today.day)
-                queryset = queryset.filter(date_naissance__gte=max_birth_date)
+                # Au plus N ans : n'a pas encore fêté ses N + 1 ans.
+                queryset = queryset.filter(date_naissance__gt=_il_y_a(date.today(), data['max_age'] + 1))
 
             if data['robe']:
                 queryset = queryset.filter(robe=data['robe'])
 
-        return queryset.order_by('nom')
+        return self.filtrer_et_trier(queryset)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -464,8 +554,12 @@ def exporter_animaux_csv(request):
         utilisateur__in=comptes_accessibles(request.user)
     ).select_related('espece', 'race', 'robe', 'proprietaire').prefetch_related('identifications__organisme')
 
-    response = HttpResponse(content_type='text/csv')
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="animaux.csv"'
+    # Marque d'ordre des octets : sans elle, Excel lit le fichier en
+    # Windows-1252 et affiche « EspÃ¨ce ». Le séparateur reste la virgule,
+    # celui que relit l'import (qui ignore cette marque).
+    response.write('\ufeff')
 
     writer = csv.writer(response)
     writer.writerow(['ID', 'Nom', 'Espèce', 'Race', 'Identifications', 'Date de Naissance', 'Âge', 'Propriétaire', 'Robe'])
@@ -499,16 +593,16 @@ def exporter_animaux_excel(request):
             'race': animal.race.nom,
             'identifications': animal.identifications_display(),
             'date_naissance': animal.date_naissance,
+            'age': animal.age(),
             'proprietaire': str(animal.proprietaire),
             'robe': animal.robe.nom,
         }
         for animal in animaux
+    ], columns=[
+        # Colonnes explicites : sans animal, le tableau garde ainsi ses
+        # colonnes et l'export produit un classeur réduit à ses en-têtes.
+        'id', 'nom', 'espece', 'race', 'identifications', 'date_naissance', 'age', 'proprietaire', 'robe',
     ])
-
-    # Calcul de l'âge
-    df['age'] = df['date_naissance'].apply(
-        lambda x: date.today().year - x.year - ((date.today().month, date.today().day) < (x.month, x.day))
-    )
 
     # Neutralisation de l'injection de formules avant écriture dans le classeur
     for col in ('nom', 'race', 'identifications', 'proprietaire'):
@@ -540,9 +634,16 @@ def importer_animaux_csv(request):
             messages.error(request, "Aucun fichier sélectionné.")
             return redirect('animaux:animal_list')
 
+        # Ligne du fichier en cours de traitement (1 = en-têtes), pour la
+        # désigner dans le message d'erreur.
+        numero_ligne = None
         try:
-            # Lecture du fichier CSV
-            df = pd.read_csv(csv_file)
+            # Lecture du fichier CSV. Tout est lu comme du texte : laissé à
+            # lui-même, pandas convertit une colonne de numéros de puce en
+            # nombres (zéros de tête perdus, « 250269812345678.0 » dès qu'une
+            # cellule de la colonne est vide). La marque d'ordre des octets
+            # que pose l'export (pour Excel) est ignorée.
+            df = pd.read_csv(csv_file, dtype=str, encoding='utf-8-sig')
 
             # Vérification des colonnes obligatoires
             # (Identification est optionnelle : elle n'est possible qu'à partir de 2-3 mois)
@@ -554,93 +655,125 @@ def importer_animaux_csv(request):
             # Récupération/création des espèces, robes et races correspondant au fichier
             espece_autre = Espece.objects.get(code='AUTRE')
             robe_autre = Robe.objects.get(code='AUTRE')
+            comptes = comptes_accessibles(request.user)
 
-            # Import des animaux
-            for _, row in df.iterrows():
-                espece_obj = Espece.objects.filter(nom__iexact=str(row['Espèce']).strip()).first() or espece_autre
-                robe_obj = Robe.objects.filter(nom__iexact=str(row.get('Robe', '')).strip()).first() or robe_autre
-                nom_race = str(row['Race']).strip() or 'Autre'
-                race_obj, _ = Race.objects.get_or_create(
-                    espece=espece_obj, nom__iexact=nom_race, defaults={'nom': nom_race}
-                )
+            # Import des animaux : tout ou rien. Une ligne inexploitable
+            # annule l'import entier — sinon les lignes précédentes resteraient
+            # enregistrées et seraient créées une seconde fois au réimport du
+            # fichier corrigé (pas de dédoublonnage sans identification).
+            resultats = []
+            with transaction.atomic():
+                for numero_ligne, row in enumerate(df.to_dict('records'), start=2):
+                    nom = _valeur_csv(row, 'Nom')
+                    if not nom:
+                        raise ErreurImport("le nom de l'animal est vide")
+                    date_naissance = pd.to_datetime(_valeur_csv(row, 'Date de Naissance') or None, errors='coerce')
+                    if pd.isna(date_naissance):
+                        raise ErreurImport(
+                            "la date de naissance est absente ou illisible (format attendu : AAAA-MM-JJ)"
+                        )
+                    date_naissance = date_naissance.date()
 
-                identification = row.get('Identification')
-                if pd.isna(identification) or str(identification).strip() == '':
-                    identification = None
-                else:
-                    identification = str(identification).strip()
+                    espece_obj = Espece.objects.filter(nom__iexact=_valeur_csv(row, 'Espèce')).first() or espece_autre
+                    nom_race = _valeur_csv(row, 'Race') or 'Autre'
+                    race_obj, _ = Race.objects.get_or_create(
+                        espece=espece_obj, nom__iexact=nom_race, defaults={'nom': nom_race}
+                    )
+                    # Colonnes optionnelles : vides ou absentes du fichier,
+                    # elles ne s'appliquent qu'à une création (valeurs par
+                    # défaut) et ne modifient jamais un animal déjà connu.
+                    robe_valeur = _valeur_csv(row, 'Robe')
+                    proprietaire_valeur = _valeur_csv(row, 'Propriétaire')
 
-                # Organisme d'inscription : reconnu par son nom court parmi les
-                # organismes catalogués pour cette espèce, sinon conservé tel
-                # quel comme saisie libre plutôt que rejeté.
-                organisme_obj = None
-                organisme_autre = ''
-                organisme_valeur = str(row.get('Organisme', '')).strip()
-                if organisme_valeur and organisme_valeur.lower() != 'nan':
-                    organisme_obj = Organisme.objects.filter(
-                        espece=espece_obj.code, nom_court__iexact=organisme_valeur
-                    ).first()
-                    if not organisme_obj:
-                        organisme_autre = organisme_valeur
+                    # Organisme d'inscription : reconnu par son nom court parmi les
+                    # organismes catalogués pour cette espèce, sinon conservé tel
+                    # quel comme saisie libre plutôt que rejeté.
+                    identifications = []
+                    for numero, organisme_valeur in _identifications_csv(row):
+                        organisme_obj = None
+                        if organisme_valeur:
+                            organisme_obj = Organisme.objects.filter(
+                                espece=espece_obj.code, nom_court__iexact=organisme_valeur
+                            ).first()
+                        identifications.append({
+                            'identification': numero or None,
+                            'organisme': organisme_obj,
+                            'organisme_autre': '' if organisme_obj else organisme_valeur,
+                        })
+                    numeros = [ident['identification'] for ident in identifications if ident['identification']]
 
-                defaults = {
-                    'nom': row['Nom'],
-                    'race': race_obj,
-                    'espece': espece_obj,
-                    'date_naissance': pd.to_datetime(row['Date de Naissance']).date(),
-                    'proprietaire': _proprietaire_depuis_email(str(row.get('Propriétaire', '')), request.user),
-                    'robe': robe_obj,
-                    'utilisateur': request.user,
-                }
-
-                if identification:
                     # Dédoublonnage par identification, parmi les animaux
                     # visibles du compte connecté (lui-même, plus les autres
                     # membres de son foyer partagé le cas échéant — cf.
                     # accueil.utils.comptes_accessibles) : un import ne doit
                     # jamais mettre à jour la fiche d'un compte hors foyer.
+                    # Sans identification, impossible de dédoublonner de
+                    # manière fiable : on crée systématiquement un nouvel animal.
                     animal_identification = AnimalIdentification.objects.filter(
-                        identification=identification,
-                        animal__utilisateur__in=comptes_accessibles(request.user),
-                    ).select_related('animal').first()
+                        identification__in=numeros, animal__utilisateur__in=comptes,
+                    ).select_related('animal').first() if numeros else None
+
                     if animal_identification:
                         # Animal déjà connu (retrouvé par son identification) : on
                         # applique quand même les valeurs de la ligne, pour que la
                         # ré-importation serve bien à le mettre à jour (cf. message
                         # "déjà existant (mis à jour)" plus bas), pas seulement à le
-                        # dédoublonner sans effet.
+                        # dédoublonner sans effet. Il reste rattaché à son compte
+                        # d'origine, et garde sa robe et son propriétaire si le
+                        # fichier n'en dit rien.
                         animal = animal_identification.animal
-                        for champ, valeur in defaults.items():
-                            setattr(animal, champ, valeur)
+                        animal.nom = nom
+                        animal.espece = espece_obj
+                        animal.race = race_obj
+                        animal.date_naissance = date_naissance
+                        if robe_valeur:
+                            animal.robe = Robe.objects.filter(nom__iexact=robe_valeur).first() or robe_autre
+                        if proprietaire_valeur and proprietaire_valeur.lower() not in (
+                            animal.proprietaire.nom_complet().lower(), animal.proprietaire.email.lower(),
+                        ):
+                            animal.proprietaire = _proprietaire_depuis_import(proprietaire_valeur, request.user)
                         animal.save()
                         created = False
                     else:
-                        animal = Animal.objects.create(**defaults)
-                        AnimalIdentification.objects.create(
-                            animal=animal, organisme=organisme_obj,
-                            organisme_autre=organisme_autre, identification=identification,
+                        if AnimalIdentification.objects.filter(identification__in=numeros).exists():
+                            raise ErreurImport(
+                                "ce numéro d'identification est déjà utilisé et ne peut pas être repris"
+                            )
+                        animal = Animal.objects.create(
+                            nom=nom, espece=espece_obj, race=race_obj, date_naissance=date_naissance,
+                            robe=Robe.objects.filter(nom__iexact=robe_valeur).first() or robe_autre,
+                            proprietaire=_proprietaire_depuis_import(proprietaire_valeur, request.user),
+                            utilisateur=request.user,
                         )
+                        for ident in identifications:
+                            AnimalIdentification.objects.create(animal=animal, **ident)
                         created = True
-                else:
-                    # Pas d'identification : impossible de dédoublonner de manière fiable,
-                    # on crée systématiquement un nouvel animal.
-                    animal = Animal.objects.create(**defaults)
-                    if organisme_obj or organisme_autre:
-                        AnimalIdentification.objects.create(
-                            animal=animal, organisme=organisme_obj, organisme_autre=organisme_autre,
-                        )
-                    created = True
+                    resultats.append((created, animal.nom))
 
+            # Messages émis une fois la transaction validée seulement : ils
+            # n'annoncent ainsi jamais un import qui a été annulé.
+            for created, nom in resultats:
                 if created:
-                    messages.success(request, f"Animal {animal.nom} importé avec succès.")
+                    messages.success(request, f"Animal {nom} importé avec succès.")
                 else:
-                    messages.warning(request, f"Animal {animal.nom} déjà existant (mis à jour).")
+                    messages.warning(request, f"Animal {nom} déjà existant (mis à jour).")
 
             return redirect('animaux:animal_list')
 
-        except Exception:
-            logger.exception("Erreur lors de l'import CSV des animaux")
-            messages.error(request, "Erreur lors de l'import : vérifiez le format du fichier et réessayez.")
+        except Exception as erreur:
+            if isinstance(erreur, ErreurImport):
+                logger.warning("Import CSV des animaux refusé, ligne %s : %s", numero_ligne, erreur)
+            else:
+                logger.exception("Erreur lors de l'import CSV des animaux")
+            if numero_ligne is None:
+                messages.error(request, "Erreur lors de l'import : vérifiez le format du fichier et réessayez.")
+            else:
+                detail = f"{erreur}" if isinstance(erreur, ErreurImport) else "vérifiez son contenu"
+                messages.error(
+                    request,
+                    f"Erreur à la ligne {numero_ligne} du fichier ({detail}) : aucun animal n'a été importé. "
+                    "Corrigez cette ligne et réimportez le fichier entier.",
+                )
             return redirect('animaux:animal_list')
 
     return render(request, 'animaux/import.html')

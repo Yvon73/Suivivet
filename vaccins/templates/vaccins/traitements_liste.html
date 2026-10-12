@@ -25,7 +25,7 @@
             <tbody>
                 {% for traitement in traitements %}
                     <tr>
-                        <td>{{ traitement.nom }}</td>
+                        <td>{{ traitement.nom }}{% if not traitement.est_reference %} <span class="badge bg-info text-dark">Ajouté par ton compte ou ton foyer</span>{% endif %}</td>
                         <td>{{ traitement.description|default:"-" }}</td>
                     </tr>
                 {% empty %}
@@ -37,6 +37,6 @@
         </table>
     </div>
     <p class="text-muted">
-        <i class="bi bi-info-circle"></i> Pour ajouter un traitement au catalogue, demandez à l'administrateur.
+        <i class="bi bi-info-circle"></i> Traitements de référence de l'application, plus ceux que toi ou un membre de ton foyer avez ajoutés : ces derniers ne sont visibles que de ton compte et de ton foyer. Pour en ajouter un, utilise le bouton « Nouveau traitement » du formulaire de suivi.
     </p>
 {% endblock %}

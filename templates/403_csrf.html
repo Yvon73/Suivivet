@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- Échec de la vérification CSRF (formulaire envoyé après expiration de la
+     session ou du jeton) : HTML statique, la vue csrf_failure de Django ne
+     passe pas par les processeurs de contexte. -->
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Session expirée - Suivi Vétérinaire</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+
+    <!-- Bootstrap CSS -->
+    <link href="/static/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/vendor/atkinson-hyperlegible/atkinson-hyperlegible.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="contenu-principal">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">Session expirée</h1>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Ce formulaire a expiré (session trop ancienne ou page restée ouverte longtemps).
+                        Reviens à la page précédente, recharge-la, puis réessaie.
+                    </p>
+                    <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

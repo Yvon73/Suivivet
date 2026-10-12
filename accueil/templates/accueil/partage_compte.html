@@ -19,9 +19,16 @@
             {% if membre_foyer %}
                 <ul class="list-group mb-3">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><strong>{{ request.user.username }}</strong> (toi)</span>
+                        <span>
+                            <strong>{{ request.user.username }}</strong>
+                            (toi{% if est_fondateur %}, fondateur du foyer{% endif %})
+                        </span>
+                        {# hx-boost limité à <main> : sans cible, tout <body> serait #}
+                        {# remplacé, scripts de fin de page compris — Bootstrap, chargé #}
+                        {# deux fois, n'ouvrait alors plus les menus de la barre. #}
                         <form method="post" action="{% url 'accueil:partage_quitter' %}"
-                              onsubmit="return confirm('Quitter le foyer partagé ?');">
+                              hx-boost="true" hx-confirm="Quitter le foyer partagé ?"
+                              hx-target="#contenu-principal" hx-select="#contenu-principal" hx-swap="outerHTML">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                 Quitter le foyer
@@ -30,10 +37,14 @@
                     </li>
                     {% for membre in autres_membres %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>{{ membre.utilisateur.username }}</span>
-                            {% if membre.invite_par_id == request.user.id %}
+                            <span>
+                                {{ membre.utilisateur.username }}
+                                {% if membre.pk == membre_fondateur.pk %}(fondateur du foyer){% endif %}
+                            </span>
+                            {% if est_fondateur %}
                                 <form method="post" action="{% url 'accueil:partage_retirer_membre' membre.pk %}"
-                                      onsubmit="return confirm('Retirer {{ membre.utilisateur.username }} du foyer ?');">
+                                      hx-boost="true" hx-confirm="Retirer {{ membre.utilisateur.username }} du foyer ?"
+                                      hx-target="#contenu-principal" hx-select="#contenu-principal" hx-swap="outerHTML">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         Retirer
@@ -44,8 +55,9 @@
                     {% endfor %}
                 </ul>
                 <p class="text-muted small mb-0">
-                    Seul le compte qui a invité un membre peut le retirer ; chacun peut se retirer
-                    lui-même à tout moment.
+                    Seul le fondateur du foyer peut retirer un membre ; chacun peut quitter le foyer
+                    de lui-même à tout moment. Si le fondateur le quitte, le plus ancien membre restant
+                    devient fondateur.
                 </p>
             {% else %}
                 <p class="mb-0">Tu ne partages ton compte avec personne pour le moment.</p>

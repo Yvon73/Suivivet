@@ -22,12 +22,22 @@
             </p>
             <pre>
 Nom,Espèce,Race,Identification,Date de Naissance,Propriétaire,Organisme,Robe
-Rex,CHIEN,Labrador,123456,2020-05-15,Jean Dupont,LOF,NOIR
+Rex,CHIEN,Labrador,123456,2020-05-15,jean.dupont@exemple.fr,LOF,NOIR
 Moustache,CHAT,Européen,654321,2019-08-20,Marie Martin,LOOF,ROUX
             </pre>
             <p class="text-muted small">
+                <strong>Propriétaire</strong> : son adresse email ou, à défaut, son nom complet
+                (« Prénom Nom ») ; la fiche correspondante est retrouvée, ou créée si elle n'existe pas encore.
+            </p>
+            <p class="text-muted small">
                 Une ligne dont l'<strong>Identification</strong> correspond à un animal déjà enregistré
-                met à jour cet animal plutôt que d'en créer un doublon.
+                met à jour cet animal plutôt que d'en créer un doublon : seules les colonnes présentes
+                et renseignées sont appliquées (sans colonne Propriétaire ou Robe, il garde les siens).
+                Le fichier produit par « Exporter CSV » peut être réimporté tel quel.
+            </p>
+            <p class="text-muted small">
+                L'import est fait en une seule fois : si une ligne est en erreur, aucun animal
+                n'est importé et le numéro de la ligne à corriger est indiqué.
             </p>
         </div>
     </div>

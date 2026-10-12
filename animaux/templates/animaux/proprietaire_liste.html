@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load listes %}
 {% load static %}
 
 {% block title %}Liste des propriétaires{% endblock %}
@@ -10,16 +11,22 @@
         <i class="bi bi-plus"></i> Ajouter un propriétaire
     </a>
 
+    {% include 'partials/liste_recherche.html' %}
+
+    {# Zone redessinée par htmx à chaque recherche, tri ou changement de page #}
+    {# (cf. Projet_veto/listes.py) : seuls les liens de l'en-tête et de la #}
+    {# pagination sont « boostés », pas ceux des lignes du tableau. #}
+    <div id="zoneListe" hx-target="#zoneListe" hx-select="#zoneListe" hx-swap="outerHTML">
     <div class="table-responsive">
         <table class="table table-striped table-hover" id="proprietairesTable">
-            <thead class="table-dark">
+            <thead class="table-dark" hx-boost="true">
                 <tr>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Téléphone</th>
-                    <th>Email</th>
-                    <th>Animaux</th>
-                    <th>Actions</th>
+                    {% entete_tri 'nom' 'Nom' %}
+                    {% entete_tri 'prenom' 'Prénom' %}
+                    {% entete_tri 'telephone' 'Téléphone' %}
+                    {% entete_tri 'email' 'Email' %}
+                    {% entete_tri 'animaux' 'Animaux' %}
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +38,7 @@
                         <td>{{ proprietaire.prenom }}</td>
                         <td>{{ proprietaire.telephone|default:"-" }}</td>
                         <td>{{ proprietaire.email }}</td>
-                        <td>{{ proprietaire.animaux.count }}</td>
+                        <td>{{ proprietaire.nb_animaux }}</td>
                         <td>
                             <a href="{% url 'animaux:proprietaire_update' proprietaire.pk %}" class="btn btn-sm btn-warning">
                                 <i class="bi bi-pencil"></i> Modifier
@@ -41,20 +48,12 @@
                             </a>
                         </td>
                     </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted">Aucun propriétaire.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-{% endblock %}
-
-{% block extra_js %}
-    {{ block.super }}
-    <script>
-        $(document).ready(function() {
-            $('#proprietairesTable').DataTable({
-                language: { url: '{% static "vendor/datatables/fr-FR.json" %}' },
-                responsive: true,
-            });
-        });
-    </script>
+    {% include 'partials/liste_pagination.html' %}
+    </div>
 {% endblock %}

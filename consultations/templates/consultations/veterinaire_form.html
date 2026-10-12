@@ -38,6 +38,11 @@
                         {{ form.nom }}
                         {% for error in form.nom.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                     </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.prenom.id_for_label }}" class="form-label">{{ form.prenom.label }}</label>
+                        {{ form.prenom }}
+                        {% for error in form.prenom.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
                     <div class="col-12 mb-3">
                         <label for="{{ form.adresse.id_for_label }}" class="form-label">{{ form.adresse.label }}</label>
                         {{ form.adresse }}

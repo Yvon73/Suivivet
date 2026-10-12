@@ -111,8 +111,3 @@
         {% csrf_token %}
     </form>
 {% endblock %}
-
-{% block extra_js %}
-{{ block.super }}
-<script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
-{% endblock %}

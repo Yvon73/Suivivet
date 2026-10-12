@@ -7,15 +7,21 @@
 
     <div class="d-flex justify-content-between mb-3">
         <div>
-            <a href="{% url 'notifications:marquer_toutes_lues' %}" class="btn btn-outline-primary">
-                <i class="bi bi-check-all"></i> Tout marquer comme lu
-            </a>
+            {# Actions modifiantes : formulaires POST, jamais de simple lien GET. #}
+            <form method="post" action="{% url 'notifications:marquer_toutes_lues' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-check-all"></i> Tout marquer comme lu
+                </button>
+            </form>
         </div>
     </div>
 
     <div class="list-group">
         {% for notification in notifications %}
-            <div class="list-group-item {% if not notification.lue %}active{% endif %}">
+            {# Non lue : liseré et fond discret plutôt que la classe `active`, dont le #}
+            {# fond bleu rendait illisible le titre (un lien, lui aussi bleu). #}
+            <div class="list-group-item {% if not notification.lue %}border-start border-primary border-4 bg-body-tertiary{% endif %}">
                 <div class="d-flex flex-wrap w-100 justify-content-between column-gap-3">
                     <h5 class="mb-1">
                         <a href="{% if notification.lien %}{{ notification.lien }}{% else %}{% url 'notifications:notification_list' %}{% endif %}">
@@ -29,13 +35,19 @@
                 </div>
                 <p class="mb-1">{{ notification.message }}</p>
                 <small>{{ notification.get_type_display }}</small>
-                <div class="mt-2">
-                    <a href="{% url 'notifications:marquer_lue' notification.pk %}" class="btn btn-sm btn-outline-success">
-                        <i class="bi bi-check"></i> Marquer comme lu
-                    </a>
-                    <a href="{% url 'notifications:supprimer_notification' notification.pk %}" class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i> Supprimer
-                    </a>
+                <div class="mt-2 d-flex flex-wrap gap-1">
+                    <form method="post" action="{% url 'notifications:marquer_lue' notification.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-check"></i> Marquer comme lu
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'notifications:supprimer_notification' notification.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </button>
+                    </form>
                 </div>
             </div>
         {% empty %}
