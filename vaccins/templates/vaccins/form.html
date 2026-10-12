@@ -8,6 +8,10 @@
     {% endif %}
 {% endblock %}
 
+{# Sans JavaScript, htmx ne peut pas révéler le bloc « Dose » : on l'affiche #}
+{# alors en permanence (clean() ignore la dose quand elle n'a pas de sens). #}
+{% block extra_css %}<noscript><style>#blocDose { display: block !important; }</style></noscript>{% endblock %}
+
 {% block content %}
     <h1 class="mb-4">
         <i class="bi bi-clipboard2-pulse"></i>
@@ -54,7 +58,9 @@
             <i class="bi bi-arrow-down-up"></i> Choisis l'un des deux blocs ci-dessous, pas les deux
         </p>
 
-        <div class="row">
+        {# Blocs pilotés par htmx (cf. vaccins/views.py : choix_suivi) : choisir #}
+        {# dans une liste grise l'autre et règle l'affichage du bloc « Dose ». #}
+        <div class="row" id="zoneChoix">
             <!-- Bloc Vaccin(s) -->
             <div class="col-lg-6 mb-3">
                 <div class="card h-100">
@@ -63,16 +69,13 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="{{ form.vaccins.id_for_label }}" class="form-label mb-0">{{ form.vaccins.label }}</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                        data-bs-target="#modalNouveauVaccin" title="Ajouter un vaccin absent du catalogue">
-                                    <i class="bi bi-plus-lg"></i> Nouveau vaccin
-                                </button>
+                            <label for="{{ form.vaccins.id_for_label }}" class="form-label">{{ form.vaccins.label }}</label>
+                            <div id="zone-vaccins" hx-post="{{ url_choix }}" hx-trigger="change" hx-include="#zoneChoix" hx-swap="none">
+                                {% include 'partials/ajout_rapide_champ.html' with ajout=ajout_vaccin %}
                             </div>
-                            {{ form.vaccins }}
-                            <div class="form-text">{{ form.vaccins.help_text }}</div>
+                            <div class="form-text" id="{{ form.vaccins.id_for_label }}_helptext">{{ form.vaccins.help_text }}</div>
                             {% for error in form.vaccins.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            {% include 'partials/ajout_rapide_panneau.html' with ajout=ajout_vaccin %}
                         </div>
 
                         <div class="row">
@@ -99,39 +102,23 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="{{ form.traitement.id_for_label }}" class="form-label mb-0">{{ form.traitement.label }}</label>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                        data-bs-target="#modalNouveauTraitement" title="Ajouter un traitement absent du catalogue">
-                                    <i class="bi bi-plus-lg"></i> Nouveau traitement
-                                </button>
+                            <label for="{{ form.traitement.id_for_label }}" class="form-label">{{ form.traitement.label }}</label>
+                            <div id="zone-traitement" hx-post="{{ url_choix }}" hx-trigger="change" hx-include="#zoneChoix" hx-swap="none">
+                                {% include 'partials/ajout_rapide_champ.html' with ajout=ajout_traitement %}
                             </div>
-                            {{ form.traitement }}
                             <div class="form-text">Catalogue regroupé par forme d'administration.</div>
                             {% for error in form.traitement.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                            {% include 'partials/ajout_rapide_panneau.html' with ajout=ajout_traitement %}
                         </div>
 
                         <div class="row">
                             <div class="col-sm-4 mb-3">
                                 <label for="{{ form.duree_traitement.id_for_label }}" class="form-label">{{ form.duree_traitement.label }}</label>
                                 {{ form.duree_traitement }}
-                                <div class="form-text">{{ form.duree_traitement.help_text }}</div>
+                                <div class="form-text" id="{{ form.duree_traitement.id_for_label }}_helptext">{{ form.duree_traitement.help_text }}</div>
                                 {% for error in form.duree_traitement.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
                             </div>
-                            <div id="blocDose" class="col-sm-8">
-                                <div class="row">
-                                    <div class="col-sm-6 mb-3">
-                                        <label for="{{ form.dose_unite.id_for_label }}" class="form-label">Dose — unité</label>
-                                        {{ form.dose_unite }}
-                                        {% for error in form.dose_unite.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-                                    </div>
-                                    <div class="col-sm-6 mb-3">
-                                        <label for="{{ form.dose_valeur.id_for_label }}" class="form-label">Dose — valeur</label>
-                                        {{ form.dose_valeur }}
-                                        {% for error in form.dose_valeur.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-                                    </div>
-                                </div>
-                            </div>
+                            {% include 'vaccins/partials/bloc_dose.html' %}
                         </div>
 
                         <div class="mb-0">
@@ -176,283 +163,6 @@
         </div>
     </form>
 
-    <!-- Modale d'ajout rapide d'un vaccin absent du catalogue -->
-    <div class="modal fade" id="modalNouveauVaccin" tabindex="-1" aria-labelledby="modalNouveauVaccinLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalNouveauVaccinLabel">
-                        <i class="bi bi-plus-circle"></i> Ajouter un vaccin
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="nouveauVaccinErreurs" class="alert alert-danger d-none"></div>
-                    <div class="mb-3">
-                        <label for="nouveauVaccinNom" class="form-label">Nom du vaccin</label>
-                        <input type="text" id="nouveauVaccinNom" class="form-control" maxlength="100" placeholder="Ex : Vaccin FeLV" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nouveauVaccinDescription" class="form-label">Description</label>
-                        <textarea id="nouveauVaccinDescription" class="form-control" rows="2"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" id="nouveauVaccinValider">
-                        <i class="bi bi-check"></i> Ajouter le vaccin
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modale d'ajout rapide d'un traitement absent du catalogue -->
-    <div class="modal fade" id="modalNouveauTraitement" tabindex="-1" aria-labelledby="modalNouveauTraitementLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalNouveauTraitementLabel">
-                        <i class="bi bi-plus-circle"></i> Ajouter un traitement
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="nouveauTraitementErreurs" class="alert alert-danger d-none"></div>
-                    <div class="mb-3">
-                        <label for="nouveauTraitementNom" class="form-label">Nom du traitement</label>
-                        <input type="text" id="nouveauTraitementNom" class="form-control" maxlength="100" placeholder="Ex : Homéopathie" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nouveauTraitementClasse" class="form-label">Classe (forme galénique)</label>
-                        <select id="nouveauTraitementClasse" class="form-select">
-                            {% for valeur, libelle in traitement_classes %}
-                                <option value="{{ valeur }}">{{ libelle }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nouveauTraitementDescription" class="form-label">Description</label>
-                        <textarea id="nouveauTraitementDescription" class="form-control" rows="2"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" id="nouveauTraitementValider">
-                        <i class="bi bi-check"></i> Ajouter le traitement
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var vaccinsField = document.getElementById('id_vaccins');
-            var traitementField = document.getElementById('id_traitement');
-            var blocDose = document.getElementById('blocDose');
-            if (!vaccinsField || !traitementField) {
-                return;
-            }
-
-            var csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value;
-
-            function optionsRemplies(select) {
-                return Array.from(select.selectedOptions).some(function (option) {
-                    return option.value;
-                });
-            }
-
-            function classeDuTraitementChoisi() {
-                var option = traitementField.options[traitementField.selectedIndex];
-                return option ? (option.getAttribute('data-classe') || '') : '';
-            }
-
-            // Les deux blocs (Vaccin(s) / Traitement) restent visibles, mais dès
-            // qu'une sélection est faite dans l'un, l'autre est grisé pour éviter
-            // une saisie incohérente.
-            function synchroniserBlocs() {
-                var vaccinsChoisis = optionsRemplies(vaccinsField);
-                var traitementChoisi = optionsRemplies(traitementField);
-                traitementField.disabled = vaccinsChoisis;
-                vaccinsField.disabled = traitementChoisi;
-            }
-
-            // Le bloc "Dose" (unité + valeur) n'a de sens que pour un comprimé
-            // ou une solution buvable.
-            function actualiserBlocDose() {
-                if (!blocDose) {
-                    return;
-                }
-                var classe = classeDuTraitementChoisi();
-                var pertinent = classe === 'COMPRIME' || classe === 'SOLUTION_BUVABLE';
-                blocDose.classList.toggle('d-none', !pertinent);
-            }
-
-            function toutActualiser() {
-                synchroniserBlocs();
-                actualiserBlocDose();
-            }
-
-            vaccinsField.addEventListener('change', toutActualiser);
-            traitementField.addEventListener('change', toutActualiser);
-            toutActualiser();
-
-            function afficherErreursModale(div, erreurs) {
-                var messages = [];
-                Object.keys(erreurs || {}).forEach(function (champ) {
-                    erreurs[champ].forEach(function (erreur) {
-                        messages.push(erreur.message || erreur);
-                    });
-                });
-                if (!messages.length) {
-                    messages.push("Impossible d'ajouter cette entrée.");
-                }
-                div.innerHTML = messages.join('<br>');
-                div.classList.remove('d-none');
-            }
-
-            // --- Ajout rapide d'un vaccin absent du catalogue ---------------------
-            var modalVaccinEl = document.getElementById('modalNouveauVaccin');
-            var nomVaccinModalField = document.getElementById('nouveauVaccinNom');
-            var descriptionVaccinModalField = document.getElementById('nouveauVaccinDescription');
-            var erreursVaccinDiv = document.getElementById('nouveauVaccinErreurs');
-            var boutonValiderVaccin = document.getElementById('nouveauVaccinValider');
-
-            modalVaccinEl.addEventListener('show.bs.modal', function () {
-                erreursVaccinDiv.classList.add('d-none');
-                erreursVaccinDiv.innerHTML = '';
-                nomVaccinModalField.value = '';
-                descriptionVaccinModalField.value = '';
-            });
-
-            boutonValiderVaccin.addEventListener('click', function () {
-                var nom = nomVaccinModalField.value.trim();
-                if (!nom) {
-                    afficherErreursModale(erreursVaccinDiv, { nom: [{ message: 'Le nom du vaccin est obligatoire.' }] });
-                    return;
-                }
-
-                var donnees = new URLSearchParams();
-                donnees.set('nom', nom);
-                donnees.set('description', descriptionVaccinModalField.value.trim());
-
-                boutonValiderVaccin.disabled = true;
-                fetch('{% url "vaccins:vaccin_create_ajax" %}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: donnees.toString(),
-                })
-                    .then(function (reponse) {
-                        return reponse.json().then(function (data) {
-                            return { ok: reponse.ok, data: data };
-                        });
-                    })
-                    .then(function (resultat) {
-                        if (!resultat.ok || !resultat.data.success) {
-                            afficherErreursModale(erreursVaccinDiv, resultat.data.errors);
-                            return;
-                        }
-                        var vaccin = resultat.data;
-                        var option = document.createElement('option');
-                        option.value = vaccin.id;
-                        option.text = vaccin.nom;
-                        option.selected = true;
-                        vaccinsField.appendChild(option);
-                        toutActualiser();
-
-                        var modal = bootstrap.Modal.getInstance(modalVaccinEl);
-                        modal.hide();
-                    })
-                    .catch(function () {
-                        afficherErreursModale(erreursVaccinDiv, {});
-                    })
-                    .finally(function () {
-                        boutonValiderVaccin.disabled = false;
-                    });
-            });
-
-            // --- Ajout rapide d'un traitement absent du catalogue -----------------
-            var modalTraitementEl = document.getElementById('modalNouveauTraitement');
-            var nomTraitementModalField = document.getElementById('nouveauTraitementNom');
-            var classeTraitementModalField = document.getElementById('nouveauTraitementClasse');
-            var descriptionTraitementModalField = document.getElementById('nouveauTraitementDescription');
-            var erreursTraitementDiv = document.getElementById('nouveauTraitementErreurs');
-            var boutonValiderTraitement = document.getElementById('nouveauTraitementValider');
-
-            modalTraitementEl.addEventListener('show.bs.modal', function () {
-                erreursTraitementDiv.classList.add('d-none');
-                erreursTraitementDiv.innerHTML = '';
-                nomTraitementModalField.value = '';
-                descriptionTraitementModalField.value = '';
-            });
-
-            boutonValiderTraitement.addEventListener('click', function () {
-                var nom = nomTraitementModalField.value.trim();
-                if (!nom) {
-                    afficherErreursModale(erreursTraitementDiv, { nom: [{ message: 'Le nom du traitement est obligatoire.' }] });
-                    return;
-                }
-
-                var donnees = new URLSearchParams();
-                donnees.set('nom', nom);
-                donnees.set('classe', classeTraitementModalField.value);
-                donnees.set('description', descriptionTraitementModalField.value.trim());
-
-                boutonValiderTraitement.disabled = true;
-                fetch('{% url "vaccins:traitement_create_ajax" %}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: donnees.toString(),
-                })
-                    .then(function (reponse) {
-                        return reponse.json().then(function (data) {
-                            return { ok: reponse.ok, data: data };
-                        });
-                    })
-                    .then(function (resultat) {
-                        if (!resultat.ok || !resultat.data.success) {
-                            afficherErreursModale(erreursTraitementDiv, resultat.data.errors);
-                            return;
-                        }
-                        var traitement = resultat.data;
-
-                        // Retrouve (ou crée) l'optgroup correspondant à la classe du
-                        // nouveau traitement, pour rester cohérent avec le regroupement existant.
-                        var optgroup = Array.from(traitementField.getElementsByTagName('optgroup'))
-                            .find(function (og) { return og.label === traitement.classe_libelle; });
-                        if (!optgroup) {
-                            optgroup = document.createElement('optgroup');
-                            optgroup.label = traitement.classe_libelle;
-                            traitementField.appendChild(optgroup);
-                        }
-
-                        var option = document.createElement('option');
-                        option.value = traitement.id;
-                        option.text = traitement.nom;
-                        option.dataset.classe = traitement.classe;
-                        optgroup.appendChild(option);
-                        traitementField.value = traitement.id;
-                        toutActualiser();
-
-                        var modal = bootstrap.Modal.getInstance(modalTraitementEl);
-                        modal.hide();
-                    })
-                    .catch(function () {
-                        afficherErreursModale(erreursTraitementDiv, {});
-                    })
-                    .finally(function () {
-                        boutonValiderTraitement.disabled = false;
-                    });
-            });
-        });
-    </script>
+    {% include 'partials/ajout_rapide_form.html' with ajout=ajout_vaccin %}
+    {% include 'partials/ajout_rapide_form.html' with ajout=ajout_traitement %}
 {% endblock %}

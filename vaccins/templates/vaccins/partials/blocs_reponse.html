@@ -1,0 +1,10 @@
+{# Réponse htmx aux changements des blocs « Vaccin(s) » / « Traitement » : tout #}
+{# revient en hx-swap-oob (cf. vaccins/views.py), précédé du panneau d'ajout #}
+{# rapide replié quand la réponse fait suite à un ajout au catalogue. La liste #}
+{# dans laquelle on vient de choisir (`source`) n'est pas redessinée : son état #}
+{# ne dépend que de l'autre, et la remplacer ferait perdre sa position de #}
+{# défilement en pleine sélection multiple. #}
+{% if ajout %}{% include 'partials/ajout_rapide_panneau.html' %}{% endif %}
+{% if source != 'zone-vaccins' %}{% include 'partials/ajout_rapide_champ.html' with ajout=ajout_vaccin oob=True %}{% endif %}
+{% if source != 'zone-traitement' %}{% include 'partials/ajout_rapide_champ.html' with ajout=ajout_traitement oob=True %}{% endif %}
+{% include 'vaccins/partials/bloc_dose.html' with oob=True %}

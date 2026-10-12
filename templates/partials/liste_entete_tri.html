@@ -1,0 +1,8 @@
+{# En-tête de colonne triable, cf. le tag `entete_tri` (accueil/templatetags/listes.py). #}
+{% if triable %}
+<th scope="col" aria-sort="{% if sens == 'asc' %}ascending{% elif sens == 'desc' %}descending{% else %}none{% endif %}">
+    <a href="{{ url }}" class="lien-tri" title="Trier par {{ intitule }}">{{ intitule }}<i class="bi {% if sens == 'asc' %}bi-sort-up{% elif sens == 'desc' %}bi-sort-down{% else %}bi-arrow-down-up{% endif %} ms-1" aria-hidden="true"></i></a>
+</th>
+{% else %}
+<th scope="col">{{ intitule }}</th>
+{% endif %}

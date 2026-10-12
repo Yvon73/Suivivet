@@ -3,16 +3,15 @@
 {% comment %}
 Préférences d'accessibilité appliquées directement au rendu (cf.
 Projet_veto.context_processors.preferences_accessibilite_context et
-accueil.models.PreferenceAccessibilite) : contrairement aux pages
-publiques (accueil, connexion), ici l'utilisateur est forcément connecté
-(LoginRequiredMixin), donc ses préférences enregistrées font autorité —
-pas besoin d'un script de préchargement basé sur localStorage.
+accueil/accessibilite.py), sans aucun script.
 {% endcomment %}
 <html lang="fr" class="{{ classes_accessibilite_utilisateur }}"{% if mode_sombre_utilisateur %} data-bs-theme="dark"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Suivi Vétérinaire - {% endblock %}vos animaux de compagnie</title>
+    <!-- htmx : pas d'évaluation de code (la CSP n'autorise pas 'unsafe-eval') -->
+    <meta name="htmx-config" content='{"allowEval": false, "historyCacheSize": 0, "refreshOnHistoryMiss": true}'>
+    <title>{% block title %}Suivi Vétérinaire{% endblock %} - vos animaux de compagnie</title>
 
     <!-- Favicon -->
     <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
@@ -25,13 +24,9 @@ pas besoin d'un script de préchargement basé sur localStorage.
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
 
-    <!-- CSS de bibliothèques propres à une page (ex. FullCalendar dans
-         consultations/calendrier.html) : chargée AVANT style.css, qui en
-         surcharge certaines classes à spécificité égale (.fc-event-*). -->
+    <!-- CSS d'une bibliothèque propre à une page : chargée AVANT style.css,
+         pour que celui-ci puisse en surcharger les classes à spécificité égale. -->
     {% block vendor_css %}{% endblock %}
-
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="{% static 'vendor/datatables/dataTables.bootstrap5.min.css' %}">
 
     <!-- Police accessible (option "Police plus lisible" du panneau accessibilité) -->
     <link rel="stylesheet" href="{% static 'vendor/atkinson-hyperlegible/atkinson-hyperlegible.css' %}">
@@ -41,7 +36,7 @@ pas besoin d'un script de préchargement basé sur localStorage.
 
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <a class="visually-hidden-focusable btn btn-primary position-absolute m-2" href="#contenu-principal">
         Aller au contenu principal
     </a>
@@ -145,9 +140,13 @@ pas besoin d'un script de préchargement basé sur localStorage.
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'notifications:marquer_toutes_lues' %}">
-                                    <i class="bi bi-check-all"></i> Tout marquer comme lu
-                                </a>
+                                {# Action modifiante : en POST (jamais un simple lien GET). #}
+                                <form method="post" action="{% url 'notifications:marquer_toutes_lues' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-check-all"></i> Tout marquer comme lu
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </li>
@@ -257,21 +256,14 @@ pas besoin d'un script de préchargement basé sur localStorage.
     <!-- Bootstrap JS -->
     <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
 
-    <!-- jQuery -->
-    <script src="{% static 'vendor/jquery/jquery-3.7.0.min.js' %}"></script>
+    <!-- htmx : toute l'interactivité de l'application passe par lui (les
+         pages demandent au serveur le HTML à afficher), cf. CLAUDE.md -->
+    <script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
 
-    <!-- DataTables JS -->
-    <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
-    <script src="{% static 'vendor/datatables/dataTables.bootstrap5.min.js' %}"></script>
+    <!-- Lecture à voix haute (panneau accessibilité) : seul script propre à
+         l'application, la synthèse vocale n'existant que dans le navigateur -->
+    <script src="{% static 'js/lecture-voix-haute.js' %}"></script>
 
-    <!-- Panneau accessibilité : bascule + mémorisation (cf. static/css/style.css) -->
-    <script src="{% static 'js/accessibilite.js' %}"></script>
-
-    <!-- Tableaux affichés en cartes sur téléphone : doit précéder extra_js
-         (initialisation DataTables), cf. le commentaire en tête du script -->
-    <script src="{% static 'js/tableaux-responsives.js' %}"></script>
-
-    <!-- Custom JS -->
     {% block extra_js %}{% endblock %}
 </body>
 </html>

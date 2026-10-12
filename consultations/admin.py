@@ -8,6 +8,6 @@ from .models import Veterinaire
 
 @admin.register(Veterinaire)
 class VeterinaireAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'prenom', 'email', 'telephone', 'actif')
-    list_filter = ('actif',)
+    list_display = ('nom', 'prenom', 'email', 'telephone', 'actif', 'utilisateur')
+    list_filter = ('actif', 'utilisateur')
     search_fields = ('nom', 'prenom', 'email')

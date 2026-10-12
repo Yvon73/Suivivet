@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load listes %}
 {% load static %}
 
 {% block title %}Liste des consultations{% endblock %}
@@ -9,15 +10,21 @@
         <i class="bi bi-plus"></i> Ajouter une consultation
     </a>
 
+    {% include 'partials/liste_recherche.html' %}
+
+    {# Zone redessinée par htmx à chaque recherche, tri ou changement de page #}
+    {# (cf. Projet_veto/listes.py) : seuls les liens de l'en-tête et de la #}
+    {# pagination sont « boostés », pas ceux des lignes du tableau. #}
+    <div id="zoneListe" hx-target="#zoneListe" hx-select="#zoneListe" hx-swap="outerHTML">
     <div class="table-responsive">
         <table class="table table-striped" id="consultationsTable">
-            <thead>
+            <thead hx-boost="true">
                 <tr>
-                    <th>Animal</th>
-                    <th>Date</th>
-                    <th>Motif</th>
-                    <th>Vétérinaire</th>
-                    <th>Actions</th>
+                    {% entete_tri 'animal' 'Animal' %}
+                    {% entete_tri 'date' 'Date' %}
+                    {% entete_tri 'motif' 'Motif' %}
+                    {% entete_tri 'veterinaire' 'Vétérinaire' %}
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,38 +42,13 @@
                             <a href="{% url 'consultations:consultation_delete' consultation.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
                         </td>
                     </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted">Aucune consultation.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
 
     </div>
+    {% include 'partials/liste_pagination.html' %}
+    </div>
 {% endblock %}
-
-        {% block extra_js %}
-    {{ block.super }}
-    <script>
-    $(document).ready(function() {
-        $('#consultationsTable').DataTable({
-            language: {
-                url: '{% static "vendor/datatables/fr-FR.json" %}',
-            },
-            responsive: true,
-            dom: '<"row"<"col-md-6"B><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
-            buttons: [
-                {
-                    extend: 'csv',
-                    text: '<i class="bi bi-file-earmark-csv"></i> CSV',
-                    className: 'btn btn-sm btn-outline-secondary',
-                    title: 'Liste des animaux',
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="bi bi-printer"></i> Imprimer',
-                    className: 'btn btn-sm btn-outline-secondary',
-                    title: 'Liste des animaux',
-                },
-            ],
-        });
-    });
-    </script>
-    {% endblock %}

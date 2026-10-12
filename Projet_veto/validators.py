@@ -32,6 +32,11 @@ def validate_file_extension(value):
 
 def validate_file_size(value):
     """Rejette les fichiers dépassant la taille maximale autorisée."""
+    if getattr(value, '_committed', False):
+        # Fichier déjà enregistré (formulaire de modification envoyé sans
+        # nouveau téléversement) : sa taille a été vérifiée à son dépôt, et la
+        # relire lèverait FileNotFoundError s'il n'est plus sur le disque.
+        return
     if value.size > MAX_UPLOAD_SIZE_BYTES:
         raise ValidationError(
             "Le fichier (%(size)s) dépasse la taille maximale autorisée (%(max)s).",

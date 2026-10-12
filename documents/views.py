@@ -5,6 +5,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accueil.utils import comptes_accessibles
+from Projet_veto.listes import ListeTriableMixin, date_texte
 from animaux.models import Animal
 from .models import Document
 from .forms import DocumentForm
@@ -17,14 +18,27 @@ def fichier_document(request, pk):
     document = get_object_or_404(Document, pk=pk, animal__utilisateur__in=comptes_accessibles(request.user))
     if not document.fichier:
         raise Http404
-    return FileResponse(document.fichier.open('rb'))
+    try:
+        return FileResponse(document.fichier.open('rb'))
+    except FileNotFoundError:
+        # Ligne présente en base mais fichier absent du disque (base
+        # restaurée sans son dossier media/, par exemple) : 404, pas 500.
+        raise Http404
 
 
-class DocumentListView(LoginRequiredMixin, ListView):
+class DocumentListView(LoginRequiredMixin, ListeTriableMixin, ListView):
     model = Document
     template_name = 'documents/liste.html'
     context_object_name = 'documents'
-    ordering = ['-date_ajout']
+    # `date_txt` : annotation de get_queryset() (date telle qu'affichée).
+    champs_recherche = ('animal__nom', 'titre', 'type_document__nom', 'description', 'date_txt')
+    colonnes_tri = {
+        'animal': 'animal__nom',
+        'titre': 'titre',
+        'type': 'type_document__nom',
+        'date': 'date_ajout',
+    }
+    tri_defaut = '-date'
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(
@@ -33,7 +47,8 @@ class DocumentListView(LoginRequiredMixin, ListView):
         animal_id = self.kwargs.get('animal_id')
         if animal_id:
             queryset = queryset.filter(animal_id=animal_id)
-        return queryset
+        queryset = queryset.annotate(date_txt=date_texte('date_ajout'))
+        return self.filtrer_et_trier(queryset)
 
 class DocumentDetailView(LoginRequiredMixin, DetailView):
     model = Document

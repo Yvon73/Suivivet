@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load listes %}
 {% load static %}
 
 {% block title %}Liste des factures{% endblock %}
@@ -23,7 +24,7 @@
                         <dd class="col-sm-6">{{ depenses_mensuelles_alimentaires }} €</dd>
                         <dt class="col-sm-6"><strong>Total :</strong></dt>
                         <dd class="col-sm-6">
-                            <strong>{{ depenses_mensuelles_veterinaires|add:depenses_mensuelles_alimentaires }} €</strong>
+                            <strong>{{ depenses_mensuelles_total }} €</strong>
                         </dd>
                     </dl>
                 </div>
@@ -42,7 +43,7 @@
                         <dd class="col-sm-6">{{ depenses_annuelles_alimentaires }} €</dd>
                         <dt class="col-sm-6"><strong>Total :</strong></dt>
                         <dd class="col-sm-6">
-                            <strong>{{ depenses_annuelles_veterinaires|add:depenses_annuelles_alimentaires }} €</strong>
+                            <strong>{{ depenses_annuelles_total }} €</strong>
                         </dd>
                     </dl>
                 </div>
@@ -50,18 +51,24 @@
         </div>
     </div>
 
+    {% include 'partials/liste_recherche.html' %}
+
+    {# Zone redessinée par htmx à chaque recherche, tri ou changement de page #}
+    {# (cf. Projet_veto/listes.py) : seuls les liens de l'en-tête et de la #}
+    {# pagination sont « boostés », pas ceux des lignes du tableau. #}
+    <div id="zoneListe" hx-target="#zoneListe" hx-select="#zoneListe" hx-swap="outerHTML">
     <div class="table-responsive">
         <table class="table table-striped" id="facturesTable">
-            <thead>
+            <thead hx-boost="true">
                 <tr>
-                    <th>N°</th>
-                    <th>Animal</th>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Titre</th>
-                    <th>Montant</th>
-                    <th>Fichier</th>
-                    <th>Actions</th>
+                    {% entete_tri 'numero' 'N°' %}
+                    {% entete_tri 'animal' 'Animal' %}
+                    {% entete_tri 'date' 'Date' %}
+                    {% entete_tri 'type' 'Type' %}
+                    {% entete_tri 'titre' 'Titre' %}
+                    {% entete_tri 'montant' 'Montant' %}
+                    <th scope="col">Fichier</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,37 +103,12 @@
                             <a href="{% url 'factures:facture_delete' facture.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
                         </td>
                     </tr>
+                {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted">Aucune facture.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% include 'partials/liste_pagination.html' %}
+    </div>
 {% endblock %}
-
-        {% block extra_js %}
-    {{ block.super }}
-    <script>
-    $(document).ready(function() {
-        $('#facturesTable').DataTable({
-            language: {
-                url: '{% static "vendor/datatables/fr-FR.json" %}',
-            },
-            responsive: true,
-            dom: '<"row"<"col-md-6"B><"col-md-6"f>><"row"<"col-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
-            buttons: [
-                {
-                    extend: 'csv',
-                    text: '<i class="bi bi-file-earmark-csv"></i> CSV',
-                    className: 'btn btn-sm btn-outline-secondary',
-                    title: 'Liste des animaux',
-                },
-                {
-                    extend: 'print',
-                    text: '<i class="bi bi-printer"></i> Imprimer',
-                    className: 'btn btn-sm btn-outline-secondary',
-                    title: 'Liste des animaux',
-                },
-            ],
-        });
-    });
-    </script>
-    {% endblock %}

@@ -17,7 +17,8 @@
                 La fiche est conservée en base (les animaux déjà enregistrés continueront de
                 l'afficher) mais sera retirée de la liste des propriétaires, des listes
                 déroulantes de sélection pour un nouvel animal, et de la sortie PDF de la fiche
-                animal.
+                animal. Si tu recrées plus tard un propriétaire avec le même email, ce sera une
+                fiche neuve : elle ne reprendra ni ces coordonnées ni ces animaux.
             </p>
             <form method="post">
                 {% csrf_token %}

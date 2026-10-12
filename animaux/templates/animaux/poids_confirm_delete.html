@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer une pesée - {{ animal.nom }}{% endblock %}
+
+{% block content %}
+    <h1>Supprimer une pesée</h1>
+
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <i class="bi bi-exclamation-triangle"></i> Confirmation requise
+        </div>
+        <div class="card-body">
+            <p>
+                Es-tu sûr(e) de vouloir supprimer la pesée de <strong>{{ animal.nom }}</strong>
+                du <strong>{{ object.date|date:"d/m/Y" }}</strong> ({{ object.valeur }} kg) ?
+                Cette action est irréversible.
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmer la suppression
+                </button>
+                <a href="{% url 'animaux:animal_detail' animal.pk %}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

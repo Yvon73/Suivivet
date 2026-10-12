@@ -28,17 +28,22 @@
                             <a href="{% url 'animaux:animal_detail' suivi.animal.pk %}">{{ suivi.animal.nom }}</a>
                         </td>
                         <td>
+                            {# Ni l'un ni l'autre : entrée retirée du catalogue (SET_NULL). #}
                             {% if suivi.vaccin %}
                                 Vaccin
-                            {% else %}
+                            {% elif suivi.traitement %}
                                 Traitement
+                            {% else %}
+                                Suivi
                             {% endif %}
                         </td>
                         <td>
                             {% if suivi.vaccin %}
                                 {{ suivi.vaccin.nom }}
-                            {% else %}
+                            {% elif suivi.traitement %}
                                 {{ suivi.traitement.nom }}
+                            {% else %}
+                                <span class="text-muted">(supprimé du catalogue)</span>
                             {% endif %}
                         </td>
                         <td>{{ suivi.date|date:"d/m/Y" }}</td>

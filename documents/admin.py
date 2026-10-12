@@ -8,6 +8,7 @@ from .models import TypeDocument
 
 @admin.register(TypeDocument)
 class TypeDocumentAdmin(admin.ModelAdmin):
-    list_display = ('nom',)
+    list_display = ('nom', 'utilisateur')
+    list_filter = ('utilisateur',)
     search_fields = ('nom',)
     ordering = ('nom',)

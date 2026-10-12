@@ -41,9 +41,9 @@
             <i class="bi bi-paw"></i> Animaux
         </div>
         <div class="card-body">
-            {% if proprietaire.animaux.all %}
+            {% if animaux %}
                 <ul class="list-group list-group-flush">
-                    {% for animal in proprietaire.animaux.all %}
+                    {% for animal in animaux %}
                         <li class="list-group-item">
                             <a href="{% url 'animaux:animal_detail' animal.pk %}">{{ animal.nom }}</a>
                             — {{ animal.espece }}

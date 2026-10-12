@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+{# Page d'erreur autonome (n'étend pas base.html : elle doit s'afficher aussi #}
+{# pour un visiteur non connecté) et sans script. Les préférences #}
+{# d'accessibilité sont appliquées quand le contexte les fournit. #}
+<html lang="fr" class="{{ classes_accessibilite_utilisateur }}"{% if mode_sombre_utilisateur %} data-bs-theme="dark"{% endif %}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Page introuvable - Suivi Vétérinaire</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+    <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/atkinson-hyperlegible/atkinson-hyperlegible.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="contenu-principal">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="h4 mb-0">Page introuvable</h1>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Cette page n'existe pas, ou l'élément qu'elle affichait a été supprimé depuis
+                        (un lien de notification peut par exemple pointer vers un document effacé).
+                    </p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'animaux:animal_list' %}" class="btn btn-primary">Retour à mes animaux</a>
+                    {% else %}
+                        <a href="{% url 'accueil:accueil' %}" class="btn btn-primary">Retour à l'accueil</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

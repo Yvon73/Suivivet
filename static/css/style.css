@@ -422,46 +422,18 @@ a:hover {
         padding: 0.5rem;
     }
 
-    /* Recherche DataTables : champ sur toute la largeur plutôt qu'un petit
-       champ centré à côté de son libellé */
-    div.dataTables_wrapper div.dataTables_filter {
-        margin-bottom: 1rem; /* sinon collé à la première carte */
-    }
-
-    div.dataTables_wrapper div.dataTables_filter label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        width: 100%;
-    }
-
-    div.dataTables_wrapper div.dataTables_filter input {
-        flex: 1;
-        min-width: 0; /* sinon sa largeur par défaut déborde en texte agrandi */
-        margin-left: 0;
-    }
-
-    div.dataTables_wrapper div.dataTables_info {
-        padding-top: 0.25rem;
-        margin-bottom: 0.5rem;
-    }
-
-    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
-        flex-wrap: wrap;
-    }
-
     /* --- Tableaux en cartes : une carte par ligne, chaque valeur précédée
        de l'intitulé de sa colonne. La classe tableau-empilable et les
-       attributs data-label / la classe cellule-actions sont posés par
-       static/js/tableaux-responsives.js (tableaux d'au moins 4 colonnes ;
-       sans JS, le tableau reste un tableau qui défile horizontalement). --- */
+       attributs data-label / la classe cellule-actions sont posés par le
+       serveur (Projet_veto/tableaux.py, tableaux d'au moins 4 colonnes ; un
+       tableau plus étroit reste un tableau qui défile horizontalement). --- */
     .table.tableau-empilable,
     .tableau-empilable > tbody,
     .tableau-empilable > tbody > tr,
     .tableau-empilable > tbody > tr > td {
         display: block;
         width: 100% !important;
-        box-sizing: border-box; /* DataTables force content-box sur ses cellules */
+        box-sizing: border-box;
     }
 
     .table.tableau-empilable {
@@ -511,7 +483,7 @@ a:hover {
 
     /* Ni rayures ni surbrillance au survol : chaque ligne est déjà une carte
        distincte (!important face aux sélecteurs plus spécifiques de
-       DataTables, cf. dataTables.bootstrap5.min.css). */
+       .table-striped / .table-hover). */
     .table.tableau-empilable > tbody > tr > * {
         box-shadow: none !important;
     }
@@ -573,8 +545,9 @@ a:hover {
 /* =====================================================================
    Panneau accessibilité — plusieurs réglages indépendants, activés depuis
    le bouton "Accessibilité" (cf. templates/partials/panneau_accessibilite.html
-   et static/js/accessibilite.js), mémorisés par navigateur (localStorage) et
-   appliqués via des classes sur <html>. Présent sur toutes les pages
+   et accueil/accessibilite.py), mémorisés sur le compte connecté (ou dans un
+   cookie pour un visiteur) et appliqués par le serveur via des classes sur
+   <html>. Présent sur toutes les pages
    (templates/base.html) y compris avant connexion (accueil/*).
 
    Pour la déficience auditive : l'application n'utilise aucun son ni
@@ -673,7 +646,7 @@ html.a11y-reduire-animations *::after {
 }
 
 /* --- 5. Lecture à voix haute : met en évidence le passage en cours de
-   lecture (cf. static/js/accessibilite.js) --- */
+   lecture (cf. static/js/lecture-voix-haute.js) --- */
 .a11y-lecture-en-cours {
     outline: 3px solid #f39c12;
     outline-offset: 2px;
@@ -681,11 +654,11 @@ html.a11y-reduire-animations *::after {
 }
 
 /* =====================================================================
-   Couleurs des 3 types d'événements du calendrier (cf. consultations/views.py
-   get_consultations_json et calendrier.html) — en classes CSS plutôt qu'en
-   couleur inline, pour pouvoir les remplacer par une palette adaptée au
-   daltonisme (option "Palette adaptée daltonisme" du panneau accessibilité,
-   cf. juste en dessous) sans toucher au code Python/JS.
+   Couleurs des 3 types d'événements du calendrier (cf.
+   consultations/calendrier.py et calendrier.html) — en classes CSS plutôt
+   qu'en couleur inline, pour pouvoir les remplacer par une palette adaptée
+   au daltonisme (option "Palette adaptée daltonisme" du panneau
+   accessibilité, cf. juste en dessous) sans toucher au code Python.
    ===================================================================== */
 .legende-evenement {
     display: inline-block;
@@ -694,22 +667,22 @@ html.a11y-reduire-animations *::after {
     border-radius: 3px;
 }
 
-.fc-event-consultation,
-.legende-evenement.fc-event-consultation {
+.evenement-consultation,
+.legende-evenement.evenement-consultation {
     background-color: #3498db;
     border-color: #3498db;
     color: #fff;
 }
 
-.fc-event-rappel-consultation,
-.legende-evenement.fc-event-rappel-consultation {
+.evenement-rappel-consultation,
+.legende-evenement.evenement-rappel-consultation {
     background-color: #e74c3c;
     border-color: #e74c3c;
     color: #fff;
 }
 
-.fc-event-rappel-vaccin,
-.legende-evenement.fc-event-rappel-vaccin {
+.evenement-rappel-vaccin,
+.legende-evenement.evenement-rappel-vaccin {
     background-color: #2ecc71;
     border-color: #2ecc71;
     color: #fff;
@@ -726,8 +699,8 @@ html.a11y-reduire-animations *::after {
 html.a11y-palette-daltonisme .bg-danger,
 html.a11y-palette-daltonisme .btn-danger,
 html.a11y-palette-daltonisme .alert-danger,
-html.a11y-palette-daltonisme .fc-event-rappel-consultation,
-html.a11y-palette-daltonisme .legende-evenement.fc-event-rappel-consultation {
+html.a11y-palette-daltonisme .evenement-rappel-consultation,
+html.a11y-palette-daltonisme .legende-evenement.evenement-rappel-consultation {
     background-color: #D55E00 !important; /* vermillon */
     border-color: #D55E00 !important;
 }
@@ -739,8 +712,8 @@ html.a11y-palette-daltonisme .text-danger {
 html.a11y-palette-daltonisme .bg-success,
 html.a11y-palette-daltonisme .btn-success,
 html.a11y-palette-daltonisme .alert-success,
-html.a11y-palette-daltonisme .fc-event-rappel-vaccin,
-html.a11y-palette-daltonisme .legende-evenement.fc-event-rappel-vaccin {
+html.a11y-palette-daltonisme .evenement-rappel-vaccin,
+html.a11y-palette-daltonisme .legende-evenement.evenement-rappel-vaccin {
     background-color: #009E73 !important; /* vert bleuté */
     border-color: #009E73 !important;
 }
@@ -763,8 +736,8 @@ html.a11y-palette-daltonisme .text-warning {
 html.a11y-palette-daltonisme .bg-info,
 html.a11y-palette-daltonisme .btn-info,
 html.a11y-palette-daltonisme .alert-info,
-html.a11y-palette-daltonisme .fc-event-consultation,
-html.a11y-palette-daltonisme .legende-evenement.fc-event-consultation {
+html.a11y-palette-daltonisme .evenement-consultation,
+html.a11y-palette-daltonisme .legende-evenement.evenement-consultation {
     background-color: #56B4E9 !important; /* bleu ciel */
     border-color: #56B4E9 !important;
     color: #000 !important;
@@ -808,10 +781,10 @@ p a:not(.btn), li a:not(.btn), .accordion-body a:not(.btn),
 /* =====================================================================
    7. Mode sombre (option « Mode sombre » du panneau accessibilité, pour les
    yeux sensibles à la lumière) — s'appuie sur le thème sombre natif de
-   Bootstrap 5.3 (attribut data-bs-theme="dark" sur <html>, posé par
-   templates/base.html pour un compte connecté ou par le script de
-   préchargement des pages publiques, cf. static/js/accessibilite.js), qui
-   gère déjà cartes, tableaux, formulaires, menus et DataTables. Les règles
+   Bootstrap 5.3 (attribut data-bs-theme="dark" sur <html>, posé au rendu
+   par templates/base.html et par les pages publiques, cf.
+   accueil/accessibilite.py), qui gère déjà cartes, tableaux, formulaires et
+   menus. Les règles
    ci-dessous ne font que corriger les couleurs claires codées en dur plus
    haut dans ce fichier : préfixées par :where() pour garder exactement la
    même spécificité que la règle claire qu'elles remplacent (sans quoi
@@ -823,16 +796,8 @@ p a:not(.btn), li a:not(.btn), .accordion-body a:not(.btn),
     --primary-color: #2874a6;
     --lien-sombre: #6cb4e4;
 
-    /* FullCalendar (variables avec valeur par défaut claire, cf. main.css) */
-    --fc-page-bg-color: var(--bs-body-bg);
-    --fc-border-color: var(--bs-border-color);
-    --fc-neutral-bg-color: rgba(255, 255, 255, 0.06);
-    --fc-neutral-text-color: #adb5bd;
-    --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.06);
-    --fc-today-bg-color: rgba(52, 152, 219, 0.18);
-    --fc-highlight-color: rgba(52, 152, 219, 0.25);
-    --fc-non-business-color: rgba(255, 255, 255, 0.04);
-    --fc-more-link-bg-color: #495057;
+    /* Calendrier (cf. « Calendrier des consultations » plus bas) */
+    --calendrier-aujourdhui: rgba(52, 152, 219, 0.18);
 }
 
 /* Fond de page un cran plus sombre que les cartes, pour qu'elles s'en
@@ -954,7 +919,6 @@ html.a11y-contraste[data-bs-theme="dark"] {
     --bs-body-color: #FFFFFF;
     --bs-border-color: #BBBBBB;
     --bs-border-color-translucent: rgba(255, 255, 255, 0.6);
-    --fc-page-bg-color: #000000;
 }
 
 html.a11y-contraste[data-bs-theme="dark"] body {
@@ -981,48 +945,136 @@ html.a11y-contraste[data-bs-theme="dark"] *:focus-visible {
     outline-color: #FFFFFF !important;
 }
 
+/* Listes triables côté serveur (cf. Projet_veto/listes.py) : l'intitulé d'une
+   colonne triable est un lien, qui garde l'apparence d'un en-tête. */
+.lien-tri {
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.lien-tri:hover,
+.lien-tri:focus {
+    color: inherit;
+    text-decoration: underline;
+}
+
+/* Colonne non triée : icône discrète, pour ne pas concurrencer la colonne triée. */
+th[aria-sort="none"] .lien-tri .bi {
+    opacity: .45;
+}
+
 /* =====================================================================
-   8. Menus saisissables (Tom Select, cf. animaux/form.html : Espèce et Race)
-   — sa feuille de style est chargée après celle-ci, d'où des sélecteurs un
-   peu plus spécifiques que les siens.
+   Calendrier des consultations, rendu par le serveur (cf.
+   consultations/calendrier.py et consultations/partials/calendrier.html) :
+   une grille du mois (tableau de 7 colonnes) et un planning (liste des
+   journées qui ont un événement). Les couleurs des événements viennent des
+   classes .evenement-* ci-dessus.
    ===================================================================== */
-/* Même hauteur et même retrait que les autres champs (cf. .form-select plus
-   haut) : Tom Select remet à zéro le padding du conteneur et en utilise un
-   plus petit sur sa zone de saisie. */
-.ts-wrapper.form-select .ts-control {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    padding-left: 1rem;
+.calendrier-grille {
+    width: 100%;
+    table-layout: fixed; /* 7 colonnes égales, quel que soit leur contenu */
+    border-collapse: collapse;
 }
 
-/* Tom Select insère son conteneur juste après le <select> d'origine (masqué) :
-   dans un .input-group (menu + bouton « + »), Bootstrap le prend alors pour
-   un élément du milieu (coin gauche carré, décalage de 1px). Sa règle
-   enchaîne six :not(), d'où !important plutôt qu'une surenchère de
-   spécificité. */
-.input-group > select.tomselected + .ts-wrapper {
-    margin-left: 0 !important;
-    border-top-left-radius: var(--border-radius) !important;
-    border-bottom-left-radius: var(--border-radius) !important;
+.calendrier-grille th {
+    padding: .4rem .25rem;
+    text-align: center;
+    border: 1px solid var(--bs-border-color);
+    background-color: var(--bs-tertiary-bg);
 }
 
-/* Mode sombre : couleurs claires codées en dur dans le thème Bootstrap 5 de
-   Tom Select (texte tapé et liste presque invisibles sur fond sombre). */
-[data-bs-theme="dark"] .ts-dropdown,
-[data-bs-theme="dark"] .ts-control,
-[data-bs-theme="dark"] .ts-control input {
-    color: var(--bs-body-color);
+.calendrier-grille th abbr {
+    text-decoration: none;
+    cursor: default;
 }
 
-[data-bs-theme="dark"] .ts-dropdown,
-[data-bs-theme="dark"] .ts-dropdown.form-select {
-    border-color: var(--bs-border-color);
+.calendrier-grille td {
+    height: 7rem;
+    padding: .25rem;
+    vertical-align: top;
+    border: 1px solid var(--bs-border-color);
 }
 
-[data-bs-theme="dark"] .ts-dropdown .optgroup-header {
-    color: var(--bs-secondary-color);
+.calendrier-numero {
+    margin-bottom: .15rem;
+    font-size: .85rem;
+    font-weight: 600;
+    text-align: right;
 }
 
-[data-bs-theme="dark"] .ts-dropdown [data-selectable] .highlight {
-    background: rgba(255, 193, 7, 0.35);
+.calendrier-hors-mois .calendrier-numero {
+    font-weight: 400;
+    opacity: .55;
+}
+
+.calendrier-aujourdhui {
+    /* Teinte renforcée en mode sombre, cf. [data-bs-theme="dark"] plus haut. */
+    background-color: var(--calendrier-aujourdhui, rgba(52, 152, 219, 0.12));
+}
+
+td.calendrier-aujourdhui {
+    box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
+.calendrier-evenement {
+    display: block;
+    margin-bottom: .15rem;
+    padding: .1rem .35rem;
+    overflow: hidden;
+    font-size: .8rem;
+    line-height: 1.3;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+.calendrier-evenement:hover,
+.calendrier-evenement:focus {
+    filter: brightness(.9);
+    text-decoration: underline;
+}
+
+.calendrier-heure {
+    font-weight: 700;
+}
+
+/* Planning : une journée par bloc, ses événements les uns sous les autres,
+   texte complet (pas de troncature, contrairement à la grille). */
+.calendrier-journee {
+    margin-bottom: .75rem;
+    padding: .5rem .75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .375rem;
+}
+
+.calendrier-journee-titre {
+    margin-bottom: .4rem;
+}
+
+.calendrier-journee .calendrier-evenement {
+    padding: .35rem .6rem;
+    font-size: .95rem;
+    white-space: normal;
+}
+
+.calendrier-journee .calendrier-heure {
+    margin-right: .35rem;
+}
+
+@media (max-width: 767.98px) {
+    /* Titre du mois sur sa propre ligne, entre les deux groupes de boutons. */
+    .calendrier-barre h2 {
+        order: -1;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Grille choisie malgré tout sur téléphone : cases plus basses. */
+    .calendrier-grille td {
+        height: 4.5rem;
+        padding: .1rem;
+    }
 }

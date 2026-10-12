@@ -1,0 +1,64 @@
+{# Identifications (organisme + n° d'identification) : un animal peut être #}
+{# enregistré auprès de plusieurs organismes, cf. AnimalIdentificationFormSet. #}
+{# Zone pilotée par htmx (cf. animaux/formulaire.py : identifications) : les #}
+{# boutons envoient l'état du formulaire au serveur, qui renvoie la zone #}
+{# redessinée avec une ligne de plus, ou une ligne retirée. Une ligne retirée #}
+{# reste dans la page, masquée et sa case DELETE cochée, pour que celles déjà #}
+{# enregistrées soient bien supprimées en base à l'enregistrement. #}
+<div id="zoneIdentifications" class="col-12"{% if oob %} hx-swap-oob="true"{% endif %}>
+    <hr class="my-2">
+    {{ identifications_formset.management_form }}
+    {% if afficher_erreurs_identifications %}
+        {# Erreurs qui ne portent sur aucun champ précis : un même numéro saisi sur deux lignes, par exemple. #}
+        {% for error in identifications_formset.non_form_errors %}<div class="alert alert-danger py-2" role="alert">{{ error }}</div>{% endfor %}
+    {% endif %}
+    {% for ligne in lignes_identification %}
+        {% with ident_form=ligne.form %}
+            <div class="identification-row row gx-2 align-items-start mb-2{% if ligne.retiree %} d-none{% endif %}">
+                {% for hidden in ident_form.hidden_fields %}{{ hidden }}{% endfor %}
+                <div class="col-md-5">
+                    {% if ligne.premiere %}<label for="{{ ident_form.organisme.id_for_label }}" class="form-label">{{ ident_form.organisme.label }}</label>{% endif %}
+                    {{ ident_form.organisme }}
+                    {# Organisme saisi librement (import CSV), hors catalogue : affiché #}
+                    {# pour mémoire, il n'est remplacé que si l'on choisit un organisme ci-dessus. #}
+                    {% if ident_form.instance.organisme_autre %}<div class="form-text">Organisme importé, hors liste : {{ ident_form.instance.organisme_autre }}</div>{% endif %}
+                    {% if afficher_erreurs_identifications %}
+                        {% for error in ident_form.organisme.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-5">
+                    {% if ligne.premiere %}<label for="{{ ident_form.identification.id_for_label }}" class="form-label">{{ ident_form.identification.label }}</label>{% endif %}
+                    {{ ident_form.identification }}
+                    {% if afficher_erreurs_identifications %}
+                        {% for error in ident_form.identification.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        {% for error in ident_form.non_field_errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-2 d-flex align-items-center {% if ligne.premiere %}pt-4{% endif %}">
+                    {# Une ligne vierge jamais enregistrée n'a rien à retirer quand elle est seule. #}
+                    {% if ligne.retirable %}
+                        <button type="button" class="btn btn-outline-danger"
+                                title="Retirer cette identification" aria-label="Retirer cette identification"
+                                hx-post="{{ url_identifications }}" hx-vals='{"action": "retirer", "ligne": "{{ ligne.index }}"}'
+                                hx-target="#zoneIdentifications" hx-swap="outerHTML" hx-params="not photo">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="d-none">{{ ident_form.DELETE }}</div>
+            </div>
+        {% endwith %}
+    {% endfor %}
+    <div class="d-flex flex-wrap gap-2 mt-1">
+        <button type="button" class="btn btn-outline-primary btn-sm"
+                hx-post="{{ url_identifications }}" hx-vals='{"action": "ajouter"}'
+                hx-target="#zoneIdentifications" hx-swap="outerHTML" hx-params="not photo">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Ajouter un identifiant / organisme supplémentaire
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" title="Ajouter un organisme absent de la liste"
+                data-bs-toggle="collapse" data-bs-target="#ajout-organisme"
+                aria-controls="ajout-organisme" aria-expanded="false">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Nouvel organisme
+        </button>
+    </div>
+</div>

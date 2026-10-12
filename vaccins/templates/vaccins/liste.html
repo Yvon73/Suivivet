@@ -27,7 +27,7 @@
             <tbody>
                 {% for vaccin in vaccins %}
                     <tr>
-                        <td>{{ vaccin.nom }}</td>
+                        <td>{{ vaccin.nom }}{% if not vaccin.est_reference %} <span class="badge bg-info text-dark">Ajouté par ton compte ou ton foyer</span>{% endif %}</td>
                         <td>
                             {% if vaccin.categorie == 'OBLIGATOIRE' %}
                                 <span class="badge bg-danger">{{ vaccin.get_categorie_display }}</span>
@@ -49,6 +49,6 @@
         </table>
     </div>
     <p class="text-muted">
-        <i class="bi bi-info-circle"></i> Pour ajouter un vaccin au catalogue, demandez à l'administrateur.
+        <i class="bi bi-info-circle"></i> Vaccins de référence de l'application, plus ceux que toi ou un membre de ton foyer avez ajoutés : ces derniers ne sont visibles que de ton compte et de ton foyer. Pour en ajouter un, utilise le bouton « Nouveau vaccin » du formulaire de suivi.
     </p>
 {% endblock %}

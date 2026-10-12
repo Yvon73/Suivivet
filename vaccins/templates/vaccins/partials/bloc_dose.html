@@ -1,0 +1,16 @@
+{# Bloc « Dose » : n'a de sens que pour un comprimé ou une solution buvable #}
+{# (cf. SuiviVaccinTraitementForm.preparer_blocs), masqué sinon. #}
+<div id="blocDose" class="col-sm-8{% if not form.afficher_dose %} d-none{% endif %}"{% if oob %} hx-swap-oob="true"{% endif %}>
+    <div class="row">
+        <div class="col-sm-6 mb-3">
+            <label for="{{ form.dose_unite.id_for_label }}" class="form-label">Dose — unité</label>
+            {{ form.dose_unite }}
+            {% for error in form.dose_unite.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-sm-6 mb-3">
+            <label for="{{ form.dose_valeur.id_for_label }}" class="form-label">Dose — valeur</label>
+            {{ form.dose_valeur }}
+            {% for error in form.dose_valeur.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+    </div>
+</div>

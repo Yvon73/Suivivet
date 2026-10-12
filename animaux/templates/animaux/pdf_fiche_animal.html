@@ -165,7 +165,7 @@
                 <tr>
                     <td>{{ traitement.traitement.nom }}</td>
                     <td>{{ traitement.date|date:"d/m/Y" }}</td>
-                    <td>{{ traitement.traitement.dose|default:"-" }}</td>
+                    <td>{% if traitement.dose_valeur %}{{ traitement.dose_valeur }} {{ traitement.get_dose_unite_display }}{% else %}-{% endif %}</td>
                     <td>{{ traitement.notes|default:"-" }}</td>
                 </tr>
                 {% endfor %}

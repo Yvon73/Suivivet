@@ -1,46 +1,132 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_POST
-from accueil.utils import comptes_accessibles
+from accueil.utils import comptes_accessibles, filtre_catalogue
+from Projet_veto import ajout_rapide
 from animaux.models import Animal
 from .models import SuiviVaccinTraitement, Vaccin, Traitement
 from .forms import SuiviVaccinTraitementForm, VaccinForm, TraitementForm
 
 
-@login_required
-@require_POST
-def ajouter_vaccin_ajax(request):
-    """Crée un nouveau vaccin depuis la modale du formulaire de suivi, et le
-    renvoie en JSON pour l'insérer directement dans la liste « Vaccin(s) »
-    côté client (même principe que les modales de l'app animaux)."""
-    form = VaccinForm(request.POST)
-    if form.is_valid():
-        vaccin = form.save()
-        return JsonResponse({'success': True, 'id': vaccin.pk, 'nom': vaccin.nom})
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
+PREFIXE_AJOUT_VACCIN = 'nouveau_vaccin'
+PREFIXE_AJOUT_TRAITEMENT = 'nouveau_traitement'
+
+
+def _contexte_blocs(form, form_vaccin=None, form_traitement=None):
+    """Contexte des blocs « Vaccin(s) » / « Traitement » du formulaire de
+    suivi `form` : état d'affichage (cf. SuiviVaccinTraitementForm.preparer_blocs)
+    et ajouts rapides au catalogue (cf. Projet_veto/ajout_rapide.py).
+
+    En modification, les URL des fragments htmx portent la clé du suivi
+    (comme factures:facture_ventilation) : les listes redessinées doivent
+    garder l'entrée que ce suivi référence déjà (cf. _form_depuis_saisie)."""
+    form.preparer_blocs()
+    args = [form.instance.pk] if form.instance.pk else []
+    return {
+        'form': form,
+        'url_choix': reverse('vaccins:suivi_choix', args=args),
+        'ajout_vaccin': ajout_rapide.contexte(
+            nom='vaccins', titre='Ajouter un vaccin absent du catalogue',
+            url=reverse('vaccins:vaccin_ajout_rapide', args=args),
+            form=form_vaccin or VaccinForm(prefix=PREFIXE_AJOUT_VACCIN),
+            champ=form['vaccins'], ouvert=bool(form_vaccin),
+            bouton='Nouveau vaccin', inclure='#zoneChoix',
+        ),
+        'ajout_traitement': ajout_rapide.contexte(
+            nom='traitement', titre='Ajouter un traitement absent du catalogue',
+            url=reverse('vaccins:traitement_ajout_rapide', args=args),
+            form=form_traitement or TraitementForm(prefix=PREFIXE_AJOUT_TRAITEMENT),
+            champ=form['traitement'], ouvert=bool(form_traitement),
+            bouton='Nouveau traitement', inclure='#zoneChoix',
+        ),
+    }
+
+
+def _suivi_en_cours(request, pk):
+    """Suivi en cours de modification (`pk` de l'URL du fragment), ou None en
+    création. Même contrôle d'accès que SuiviUpdateView : 404 pour le suivi
+    d'un animal que le compte ne voit pas."""
+    if pk is None:
+        return None
+    return get_object_or_404(
+        SuiviVaccinTraitement, pk=pk, animal__utilisateur__in=comptes_accessibles(request.user),
+    )
+
+
+def _form_depuis_saisie(request, suivi=None, **selection):
+    """Formulaire de suivi non lié reprenant la sélection en cours dans les
+    blocs « Vaccin(s) » / « Traitement » (envoyée par htmx), sans validation
+    ni message d'erreur : il ne sert qu'à redessiner ces blocs.
+
+    `suivi` : le suivi en cours de modification. Son vaccin / traitement
+    reste proposé dans les listes redessinées même s'il est sorti du
+    catalogue visible (entrée d'un ancien membre du foyer), exactement comme
+    dans le formulaire complet (`garder=`, cf. SuiviVaccinTraitementForm) —
+    sinon la liste renvoyée en hx-swap-oob le perdrait, et le suivi avec
+    elle à l'enregistrement. La sélection affichée reste celle de la saisie
+    (`initial`, toujours renseigné, l'emporte sur les valeurs du suivi)."""
+    initial = {
+        'vaccins': request.POST.getlist('vaccins'),
+        'traitement': request.POST.get('traitement', ''),
+        'dose_unite': request.POST.get('dose_unite', ''),
+        'dose_valeur': request.POST.get('dose_valeur', ''),
+    }
+    initial.update(selection)
+    return SuiviVaccinTraitementForm(initial=initial, instance=suivi, user=request.user)
 
 
 @login_required
 @require_POST
-def ajouter_traitement_ajax(request):
-    """Crée un nouveau traitement depuis la modale du formulaire de suivi, et
-    le renvoie en JSON pour l'insérer directement dans la liste « Traitement »
-    côté client."""
-    form = TraitementForm(request.POST)
-    if form.is_valid():
-        traitement = form.save()
-        return JsonResponse({
-            'success': True,
-            'id': traitement.pk,
-            'nom': traitement.nom,
-            'classe': traitement.classe,
-            'classe_libelle': traitement.get_classe_display(),
-        })
-    return JsonResponse({'success': False, 'errors': form.errors.get_json_data()}, status=400)
+def choix_suivi(request, pk=None):
+    """Redessine les listes « Vaccin(s) » / « Traitement » et le bloc « Dose »
+    à chaque changement de sélection (htmx) : l'une grise l'autre, et la dose
+    ne s'affiche que pour un comprimé ou une solution buvable. `pk` : suivi
+    en cours de modification (absent en création)."""
+    contexte = _contexte_blocs(_form_depuis_saisie(request, _suivi_en_cours(request, pk)))
+    contexte['source'] = request.headers.get('HX-Trigger', '')
+    return render(request, 'vaccins/partials/blocs_reponse.html', contexte)
+
+
+@login_required
+@require_POST
+def ajouter_vaccin_rapide(request, pk=None):
+    """Crée un vaccin depuis le panneau « Nouveau vaccin » du formulaire de
+    suivi et le sélectionne dans la liste « Vaccin(s) » (htmx). `pk` : suivi
+    en cours de modification (absent en création)."""
+    suivi = _suivi_en_cours(request, pk)
+    form_ajout = VaccinForm(request.POST, prefix=PREFIXE_AJOUT_VACCIN, user=request.user)
+    if not form_ajout.is_valid():
+        contexte = _contexte_blocs(_form_depuis_saisie(request, suivi), form_vaccin=form_ajout)
+        return ajout_rapide.reponse(request, contexte['ajout_vaccin'], succes=False)
+    vaccin = form_ajout.save()
+    vaccins = [valeur for valeur in request.POST.getlist('vaccins') if valeur] + [str(vaccin.pk)]
+    # Le dernier ajout l'emporte : un traitement encore sélectionné est vidé,
+    # sinon vaccin et traitement resteraient choisis en même temps.
+    contexte = _contexte_blocs(_form_depuis_saisie(request, suivi, vaccins=vaccins, traitement=''))
+    contexte['ajout'] = contexte['ajout_vaccin']
+    return render(request, 'vaccins/partials/blocs_reponse.html', contexte)
+
+
+@login_required
+@require_POST
+def ajouter_traitement_rapide(request, pk=None):
+    """Crée un traitement depuis le panneau « Nouveau traitement » du
+    formulaire de suivi et le sélectionne dans la liste « Traitement » (htmx).
+    `pk` : suivi en cours de modification (absent en création)."""
+    suivi = _suivi_en_cours(request, pk)
+    form_ajout = TraitementForm(request.POST, prefix=PREFIXE_AJOUT_TRAITEMENT, user=request.user)
+    if not form_ajout.is_valid():
+        contexte = _contexte_blocs(_form_depuis_saisie(request, suivi), form_traitement=form_ajout)
+        return ajout_rapide.reponse(request, contexte['ajout_traitement'], succes=False)
+    traitement = form_ajout.save()
+    # Même règle que pour l'ajout d'un vaccin : les vaccins sélectionnés sont vidés.
+    contexte = _contexte_blocs(_form_depuis_saisie(request, suivi, traitement=str(traitement.pk), vaccins=[]))
+    contexte['ajout'] = contexte['ajout_traitement']
+    return render(request, 'vaccins/partials/blocs_reponse.html', contexte)
 
 
 def _enregistrer_suivi(form, instance=None):
@@ -115,10 +201,18 @@ class VaccinListView(LoginRequiredMixin, ListView):
     template_name = 'vaccins/liste.html'
     context_object_name = 'vaccins'
 
+    def get_queryset(self):
+        # Entrées de référence + celles du compte et de son foyer.
+        return super().get_queryset().filter(filtre_catalogue(self.request.user, reference=True))
+
 class TraitementListView(LoginRequiredMixin, ListView):
     model = Traitement
     template_name = 'vaccins/traitements_liste.html'
     context_object_name = 'traitements'
+
+    def get_queryset(self):
+        # Entrées de référence + celles du compte et de son foyer.
+        return super().get_queryset().filter(filtre_catalogue(self.request.user, reference=True))
 
 class SuiviListView(LoginRequiredMixin, ListView):
     model = SuiviVaccinTraitement
@@ -134,16 +228,16 @@ class SuiviListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(animal_id=animal_id)
         return queryset.order_by('-date')
 
-class TraitementClasseContextMixin:
-    """Liste des classes de traitement, pour la modale « Ajouter un
-    traitement » du formulaire de suivi (cf. vaccins/form.html)."""
+class BlocsSuiviContextMixin:
+    """Contexte des blocs « Vaccin(s) » / « Traitement » du formulaire de
+    suivi (cf. _contexte_blocs)."""
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['traitement_classes'] = Traitement.Classe.choices
+        context.update(_contexte_blocs(context['form']))
         return context
 
-class SuiviCreateView(LoginRequiredMixin, TraitementClasseContextMixin, SuiviSaveMixin, CreateView):
+class SuiviCreateView(LoginRequiredMixin, BlocsSuiviContextMixin, SuiviSaveMixin, CreateView):
     model = SuiviVaccinTraitement
     form_class = SuiviVaccinTraitementForm
     template_name = 'vaccins/form.html'
@@ -165,7 +259,7 @@ class SuiviCreateView(LoginRequiredMixin, TraitementClasseContextMixin, SuiviSav
     def get_success_url(self):
         return reverse_lazy('animaux:animal_detail', kwargs={'pk': self.object.animal.pk})
 
-class SuiviUpdateView(LoginRequiredMixin, TraitementClasseContextMixin, SuiviSaveMixin, UpdateView):
+class SuiviUpdateView(LoginRequiredMixin, BlocsSuiviContextMixin, SuiviSaveMixin, UpdateView):
     model = SuiviVaccinTraitement
     form_class = SuiviVaccinTraitementForm
     template_name = 'vaccins/form.html'

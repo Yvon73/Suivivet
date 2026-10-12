@@ -1,0 +1,31 @@
+{# Fiche de la race sélectionnée (catalogue de races, cf. static/data/races_*.json), #}
+{# redessinée par le serveur à chaque changement de race (cf. animaux/formulaire.py). #}
+{# Chaque information n'est affichée que si la race la possède : la fiche s'adapte #}
+{# au contenu réel du catalogue plutôt que d'afficher des tirets vides (un chat n'a #}
+{# pas de taille cataloguée, un NAC pas de groupe FCI...). Une race sans aucune #}
+{# information (ajoutée sans fiche détaillée) n'affiche pas de bloc vide. #}
+<div id="ficheRace" class="col-12{% if race_fiche and race_fiche.a_une_fiche_formulaire %} mb-3{% else %} d-none{% endif %}"{% if oob %} hx-swap-oob="true"{% endif %}>
+    {% if race_fiche and race_fiche.a_une_fiche_formulaire %}
+        {% with race=race_fiche %}
+            <div class="border rounded p-3 bg-body-tertiary">
+                {% if race.echelle_dangerosite %}
+                    <div class="alert alert-{{ race.classe_bootstrap_dangerosite }} py-1 px-2 mb-2 small fw-semibold">Dangerosité : {{ race.dangerosite_affichee }}</div>
+                {% endif %}
+                <div class="row small">
+                    {% if race.origine %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Origine :</strong> {{ race.origine }}</div>{% endif %}
+                    {% if race.taille_affichee %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Taille :</strong> {{ race.taille_affichee }}</div>{% endif %}
+                    {% if race.poids_affiche %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Poids :</strong> {{ race.poids_affiche }}</div>{% endif %}
+                    {% if race.esperance_vie %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Espérance de vie :</strong> {{ race.esperance_vie }}</div>{% endif %}
+                    {% if race.groupe_fci %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Groupe FCI :</strong> {{ race.groupe_fci }}</div>{% endif %}
+                    {% if race.categorie or race.sous_categorie %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Catégorie :</strong> {{ race.categorie }}{% if race.categorie and race.sous_categorie %} / {% endif %}{{ race.sous_categorie }}</div>{% endif %}
+                    {% if race.niveau_soin %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Niveau de soin :</strong> {{ race.niveau_soin }}</div>{% endif %}
+                    {% if race.legislation_france %}<div class="col-sm-6 col-lg-3 mb-1"><strong>Législation (France) :</strong> {{ race.legislation_france }}</div>{% endif %}
+                    {% if race.comportement %}<div class="col-12 mb-1"><strong>Comportement :</strong> {{ race.comportement }}</div>{% endif %}
+                    {% if race.certificat_detention_affiche %}<div class="col-12 mb-1"><strong>Certificat de détention :</strong> {{ race.certificat_detention_affiche }}</div>{% endif %}
+                    {% if race.note %}<div class="col-12 mb-1"><strong>Note :</strong> {{ race.note }}</div>{% endif %}
+                </div>
+                {% if race.description %}<p class="small mb-0 mt-1 fst-italic">{{ race.description }}</p>{% endif %}
+            </div>
+        {% endwith %}
+    {% endif %}
+</div>

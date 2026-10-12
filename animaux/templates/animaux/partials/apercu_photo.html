@@ -1,0 +1,16 @@
+{# Aperçu de la photo de l'animal : la photo enregistrée, ou la vignette de #}
+{# celle qui vient d'être choisie (`apercu_source`, renvoyée par #}
+{# animaux/formulaire.py : apercu_photo), ou à défaut un emplacement vide. #}
+<div id="apercuPhoto">
+    {% if apercu_source %}
+        <img src="{{ apercu_source }}" alt="Aperçu de la photo choisie" class="img-fluid rounded mb-2 border"
+             style="max-height: 160px; object-fit: cover;">
+    {% elif object.photo %}
+        <img src="{% url 'animaux:animal_photo' object.pk %}" alt="Photo de l'animal" class="img-fluid rounded mb-2 border"
+             style="max-height: 160px; object-fit: cover;">
+    {% else %}
+        <div class="border rounded d-flex align-items-center justify-content-center text-muted mb-2" style="height: 160px;">
+            <i class="bi bi-camera fs-1" aria-hidden="true"></i>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,10 @@
+{# Filtre du menu « Race » : quelques lettres suffisent à ne garder que les #}
+{# races correspondantes (sans tenir compte des accents ni des majuscules), le #}
+{# tri étant fait par le serveur (cf. AnimalForm._choix_races). Le champ est #}
+{# rattaché à #formRechercheRace, hors du formulaire animal : Entrée y relance #}
+{# le filtre au lieu d'enregistrer la fiche. #}
+<input type="search" id="recherche_race" name="recherche_race" form="formRechercheRace"
+       class="form-control form-control-sm mb-1" value="{{ recherche_race }}" autocomplete="off"
+       placeholder="Filtrer les races : tape quelques lettres" aria-label="Filtrer la liste des races"
+       hx-post="{{ url_choix_race }}" hx-trigger="input changed delay:300ms, search"
+       hx-include="#id_espece, #id_race" hx-swap="none" hx-sync="#zone-race:replace">

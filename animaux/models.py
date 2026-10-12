@@ -256,34 +256,16 @@ class Race(models.Model):
             return [str(v) for v in valeur]
         return [str(valeur)]
 
-    def donnees_json(self):
-        """Représentation compacte de la fiche de race, utilisée pour peupler
-        le panneau d'aperçu en JavaScript du formulaire animal (cf. form.html)
-        sans dupliquer cette liste de champs côté template."""
-        return {
-            'id': self.pk,
-            'nom': self.nom,
-            'espece_id': self.espece_id,
-            'classe_dangerosite': self.classe_bootstrap_dangerosite(),
-            'dangerosite_affichee': self.dangerosite_affichee(),
-            'echelle_dangerosite': self.echelle_dangerosite,
-            'certificat_detention': self.certificat_detention,
-            'certificat_detention_affiche': self.certificat_detention_affiche(),
-            'comportement': self.comportement,
-            'note': self.note,
-            'origine': self.origine,
-            'taille': self.taille_affichee(),
-            'poids': self.poids_affiche(),
-            'esperance_vie': self.esperance_vie,
-            'groupe_fci': self.groupe_fci,
-            'categorie': self.categorie,
-            'sous_categorie': self.sous_categorie,
-            'nom_scientifique': self.nom_scientifique,
-            'niveau_soin': self.niveau_soin,
-            'legislation_france': self.legislation_france,
-            'prix_moyen': self.prix_moyen,
-            'description': self.description,
-        }
+    def a_une_fiche_formulaire(self):
+        """Vrai si la race a au moins une des informations affichées dans la
+        fiche du formulaire animal (cf. animaux/partials/fiche_race.html) :
+        sinon le bloc n'est pas affiché du tout plutôt que vide."""
+        return bool(
+            self.echelle_dangerosite or self.origine or self.taille_affichee() or self.poids_affiche()
+            or self.esperance_vie or self.groupe_fci or self.categorie or self.sous_categorie
+            or self.niveau_soin or self.legislation_france or self.comportement
+            or self.certificat_detention is not None or self.note or self.description
+        )
 
     class Meta:
         verbose_name = "Race"
@@ -349,7 +331,13 @@ class Proprietaire(models.Model):
     — deux comptes qui ne partagent pas de foyer ne voient en revanche jamais
     les fiches l'un de l'autre. `ProprietaireForm.clean_email` empêche la
     création d'un doublon (même email) au sein d'un même foyer, mais ne
-    fusionne jamais deux fiches déjà existantes."""
+    fusionne jamais deux fiches déjà existantes.
+
+    Une fiche « supprimée » (`actif=False`) reste en base pour les animaux qui
+    la référencent, mais ne compte plus pour l'unicité de l'email : recréer un
+    propriétaire avec le même email donne une fiche NEUVE, qui ne reprend rien
+    de l'ancienne (ni coordonnées, ni animaux) — décision produit, d'où la
+    contrainte d'unicité limitée aux fiches actives."""
 
     utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='proprietaires',
@@ -367,7 +355,8 @@ class Proprietaire(models.Model):
         help_text=(
             "Décoché lors d'une « suppression » : la fiche reste en base (les animaux déjà "
             "enregistrés continuent de l'afficher) mais n'est plus proposée pour de nouvelles "
-            "saisies, ni affichée sur la fiche animal en PDF."
+            "saisies, ni affichée sur la fiche animal en PDF. Elle n'est jamais réactivée : "
+            "recréer ce propriétaire donne une nouvelle fiche."
         ),
     )
 
@@ -382,7 +371,12 @@ class Proprietaire(models.Model):
         verbose_name_plural = "Propriétaires"
         ordering = ['nom', 'prenom']
         constraints = [
-            models.UniqueConstraint(fields=['utilisateur', 'email'], name='proprietaire_unique_email_par_compte')
+            # Parmi les fiches actives seulement : l'email d'une fiche
+            # « supprimée » redevient libre pour une fiche neuve.
+            models.UniqueConstraint(
+                fields=['utilisateur', 'email'], condition=models.Q(actif=True),
+                name='proprietaire_unique_email_actif_par_compte',
+            )
         ]
 
 
@@ -401,8 +395,11 @@ class Animal(models.Model):
     date_naissance = models.DateField(verbose_name="Date de naissance")
     date_deces = models.DateField(null=True, blank=True, verbose_name="Date de décès")
     robe = models.ForeignKey(Robe, on_delete=models.PROTECT, related_name='animaux', verbose_name="Robe (couleur)")
+    # RESTRICT et non PROTECT : une fiche propriétaire qui a des animaux reste
+    # impossible à supprimer seule, mais pas quand ses animaux partent dans la
+    # même suppression (compte supprimé avec tout ce qu'il possède).
     proprietaire = models.ForeignKey(
-        Proprietaire, on_delete=models.PROTECT, related_name='animaux', verbose_name="Propriétaire",
+        Proprietaire, on_delete=models.RESTRICT, related_name='animaux', verbose_name="Propriétaire",
     )
     photo = models.ImageField(
         upload_to='animaux/photos/',

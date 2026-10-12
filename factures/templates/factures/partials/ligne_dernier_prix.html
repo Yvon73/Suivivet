@@ -1,0 +1,12 @@
+<small class="text-muted dernier-prix-info d-block" id="dernierPrix-{{ ligne.index }}"{% if oob %} hx-swap-oob="true"{% endif %}>
+    {% if ligne.dernier_prix is not None %}
+        Prix précédent : {{ ligne.dernier_prix|floatformat:2 }} €
+        {% if ligne.comparaison == 'plus' %}
+            <span class="text-danger">▲ plus élevé</span>
+        {% elif ligne.comparaison == 'moins' %}
+            <span class="text-success">▼ moins élevé</span>
+        {% elif ligne.comparaison == 'identique' %}
+            <span class="text-muted">= identique</span>
+        {% endif %}
+    {% endif %}
+</small>

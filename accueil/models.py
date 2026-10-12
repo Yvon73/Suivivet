@@ -36,8 +36,8 @@ class PreferenceAccessibilite(models.Model):
     plus tard depuis le panneau accessibilité (cf.
     templates/partials/panneau_accessibilite.html) — dans les deux cas
     enregistrées ici pour être réappliquées automatiquement à chaque
-    connexion, sur n'importe quel navigateur (contrairement au panneau seul,
-    qui ne mémorisait que dans le navigateur courant via localStorage)."""
+    connexion, sur n'importe quel navigateur (un visiteur non connecté n'a,
+    lui, qu'un cookie propre à son navigateur — cf. accueil/accessibilite.py)."""
 
     class Taille(models.TextChoices):
         NORMAL = 'normal', 'Normal'
@@ -107,6 +107,20 @@ class Foyer(models.Model):
     nom = models.CharField(max_length=100, blank=True, verbose_name="Nom du foyer")
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
 
+    def membre_fondateur(self):
+        """Membre fondateur du foyer : le plus ancien de ses membres (date
+        d'adhésion, puis clé primaire). C'est le compte qui a créé le foyer
+        tant qu'il en fait partie — son adhésion est créée avec le foyer,
+        avant toute invitation (cf. accueil.views._foyer_ou_creation) — puis,
+        s'il le quitte, le plus ancien membre restant : la succession est
+        automatique, sans rien à mettre à jour. Lui seul peut retirer un
+        membre (cf. accueil.views.retirer_membre_foyer).
+
+        `MembreFoyer.invite_par` vide ne suffit pas à l'identifier : la clé
+        est aussi vidée (SET_NULL) quand le compte de l'inviteur est supprimé,
+        et plus personne ne la porterait vide après le départ du fondateur."""
+        return self.membres.order_by('date_adhesion', 'pk').first()
+
     def __str__(self):
         return self.nom or f"Foyer #{self.pk}"
 
@@ -130,12 +144,17 @@ class MembreFoyer(models.Model):
         related_name='membres_invites', verbose_name="Invité par",
         help_text=(
             "Compte à l'origine de l'invitation ayant fait entrer ce membre dans le foyer — "
-            "vide pour le membre fondateur (n'a été invité par personne). Seul ce compte peut "
-            "retirer ce membre du foyer (cf. accueil.views.retirer_membre_foyer) ; le membre "
-            "peut toujours se retirer lui-même (cf. accueil.views.quitter_foyer), sans condition."
+            "vide pour le membre qui a créé le foyer (n'a été invité par personne). Purement "
+            "informatif : seul le fondateur du foyer (cf. Foyer.membre_fondateur) peut retirer un "
+            "membre, qu'il l'ait invité ou non."
         ),
     )
     date_adhesion = models.DateTimeField(auto_now_add=True, verbose_name="Date d'adhésion")
+
+    def est_fondateur(self):
+        """Vrai pour le membre fondateur du foyer (cf. Foyer.membre_fondateur)."""
+        fondateur = self.foyer.membre_fondateur()
+        return fondateur is not None and fondateur.pk == self.pk
 
     def __str__(self):
         return f"{self.utilisateur} dans {self.foyer}"
@@ -162,6 +181,15 @@ class InvitationFoyer(models.Model):
         verbose_name="Invité par",
     )
     email_invite = models.EmailField(verbose_name="Email de l'invité")
+    invite = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
+        related_name='invitations_recues', verbose_name="Compte invité",
+        help_text=(
+            "Compte auquel l'invitation a été adressée, résolu à l'envoi (cf. InvitationFoyerForm). "
+            "Lui seul peut y répondre : l'email, ni vérifié ni garanti unique sur les comptes déjà "
+            "existants, ne suffit pas à identifier l'invité."
+        ),
+    )
     statut = models.CharField(
         max_length=20, choices=Statut.choices, default=Statut.EN_ATTENTE, verbose_name="Statut",
     )

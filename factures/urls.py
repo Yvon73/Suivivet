@@ -5,9 +5,8 @@ from .views import (
     FactureCreateView,
     FactureUpdateView,
     FactureDeleteView,
-    ajouter_designation_ajax,
-    dernier_prix_designation_ajax,
     fichier_facture,
+    ventilation_facture,
 )
 
 app_name = 'factures'
@@ -21,6 +20,6 @@ urlpatterns = [
     path('ajouter/<int:animal_id>/', FactureCreateView.as_view(), name='facture_create'),
     path('<int:pk>/modifier/', FactureUpdateView.as_view(), name='facture_update'),
     path('<int:pk>/supprimer/', FactureDeleteView.as_view(), name='facture_delete'),
-    path('designations/ajouter-ajax/', ajouter_designation_ajax, name='designation_create_ajax'),
-    path('designations/<int:pk>/dernier-prix/', dernier_prix_designation_ajax, name='designation_dernier_prix'),
+    path('ventilation/', ventilation_facture, name='facture_ventilation'),
+    path('<int:pk>/ventilation/', ventilation_facture, name='facture_ventilation'),
 ]

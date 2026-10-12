@@ -6,13 +6,12 @@ from .views import (
     ConsultationUpdateView,
     ConsultationDeleteView,
     CalendrierView,
-    get_consultations_json,
     VeterinaireListView,
     VeterinaireDetailView,
     VeterinaireCreateView,
     VeterinaireUpdateView,
     VeterinaireDeleteView,
-    ajouter_veterinaire_ajax,
+    ajouter_veterinaire_rapide,
 )
 
 app_name = 'consultations'
@@ -26,10 +25,9 @@ urlpatterns = [
     path('<int:pk>/modifier/', ConsultationUpdateView.as_view(), name='consultation_update'),
     path('<int:pk>/supprimer/', ConsultationDeleteView.as_view(), name='consultation_delete'),
     path('calendrier/', CalendrierView.as_view(), name='calendrier'),
-    path('calendrier/json/', get_consultations_json, name='calendrier_json'),
     path('veterinaires/', VeterinaireListView.as_view(), name='veterinaire_list'),
     path('veterinaires/ajouter/', VeterinaireCreateView.as_view(), name='veterinaire_create'),
-    path('veterinaires/ajouter-ajax/', ajouter_veterinaire_ajax, name='veterinaire_create_ajax'),
+    path('veterinaires/ajout-rapide/', ajouter_veterinaire_rapide, name='veterinaire_ajout_rapide'),
     path('veterinaires/<int:pk>/', VeterinaireDetailView.as_view(), name='veterinaire_detail'),
     path('veterinaires/<int:pk>/modifier/', VeterinaireUpdateView.as_view(), name='veterinaire_update'),
     path('veterinaires/<int:pk>/supprimer/', VeterinaireDeleteView.as_view(), name='veterinaire_delete'),

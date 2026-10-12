@@ -1,0 +1,21 @@
+{# Champ de recherche d'une liste (cf. Projet_veto/listes.py). Formulaire GET #}
+{# ordinaire ; avec htmx, la recherche part d'elle-même pendant la frappe et #}
+{# seule la zone #zoneListe est remplacée. Le tri en cours voyage avec elle : #}
+{# ses champs cachés sont dans la zone (cf. partials/liste_pagination.html), #}
+{# rattachés à ce formulaire. `inclure` : autre formulaire de filtres à joindre. #}
+{# Pendant la frappe, l'URL est remplacée (hx-replace-url) et non empilée : #}
+{# sinon chaque pause de frappe ajouterait une entrée à l'historique. #}
+<form method="get" id="formRechercheListe" class="mb-3" role="search"
+      hx-boost="true" hx-target="#zoneListe" hx-select="#zoneListe" hx-swap="outerHTML"
+      {% if inclure %}hx-include="{{ inclure }}"{% endif %}>
+    <label class="visually-hidden" for="rechercheListe">Rechercher dans la liste</label>
+    <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <input type="search" id="rechercheListe" name="q" value="{{ q }}" class="form-control" autocomplete="off"
+               placeholder="{{ placeholder|default:'Rechercher…' }}"
+               hx-get="{{ request.path }}" hx-trigger="input changed delay:300ms, search"
+               hx-include="#formRechercheListe{% if inclure %}, {{ inclure }}{% endif %}"
+               hx-target="#zoneListe" hx-select="#zoneListe" hx-swap="outerHTML"
+               hx-replace-url="true" hx-sync="this:replace">
+    </div>
+</form>
